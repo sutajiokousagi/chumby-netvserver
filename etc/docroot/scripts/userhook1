@@ -1,0 +1,117 @@
+#!/bin/sh
+
+# Please put this script in /mnt/storage/ap_NeTV or /mnt/usb/ap_NeTV
+
+# Absolute path to this script. /home/user/bin/foo.sh
+SCRIPT=$(readlink -f $0)
+# Absolute path this script is in. /home/user/bin
+SCRIPTPATH=`dirname $SCRIPT`
+
+# export this PATH
+export PATH=${PATH}:/${SCRIPTPATH}
+
+# Check if we have neccessary binaries (first time on silvermoon)
+if [ ! -e /sbin/hostap ];
+then
+	mount -o remount,rw /
+	cp -r ${SCRIPTPATH}/sbin/* /sbin
+	mount -o remount,ro /
+fi
+
+killall chumbyflashplayer.x
+killall chumbalarmd
+/usr/chumby/scripts/stop_control_panel
+
+# Clear framebuffer
+#${SCRIPTPATH}/clearscreen.sh
+fbwrite --pos=0,0 --color=255,255,255 "Starting NeTV"
+echo "**** Starting NeTV ****"
+
+# Start SSH
+fbwrite --pos=0,1 --color=128,128,128 "Starting SSH..."
+echo "Starting SSH..."
+/usr/chumby/scripts/start_sshd.sh
+
+
+# To be removed on actual product
+################################################################
+# Disable built-in wireless interface (sd8xxx)
+ifconfig wlan0 down
+rmmod sd8xxx
+
+# Start DHCP on eth0 (convenient bebug line for now)
+fbwrite --pos=0,2 --color=128,128,128 "Starting DHCP on eth0..."
+echo "Starting DHCP on eth0"
+mount -o remount,rw /
+dhclient eth0
+mount -o remount,ro /
+
+# Extract IP address of eth0
+IP=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
+echo "eth0: "${IP}
+fbwrite --pos=0,3 --color=0,255,0 "eth0: "${IP}
+
+################################################################
+
+#TODO:
+# - export HAS_REMOTE environment variable
+
+# Start user-interface
+echo 0 > ${SCRIPTPATH}/flash_status
+(${SCRIPTPATH}/activation_swf.sh) &
+
+# Start BusyBox httpd web server
+# .htaccess is not implemented so we use 404 redirection instead. yay! :)
+httpd -h ${SCRIPTPATH}/www -c ${SCRIPTPATH}/httpd.conf
+
+# Publish services
+/usr/sbin/mDNSResponder
+sleep 1
+(/usr/sbin/mDNSPublish $(hostname) _http._tcp. 80) &
+(/usr/sbin/mDNSPublish $(hostname) _ssh._tcp. 22) &
+
+
+#
+# TODO:
+# - Check if certain file exist indicating 'activated' mode
+# - Check that all parameters are ok. (How?)
+# - Start NeTV in activated/normal mode if all ok
+#
+
+if [ -e ${SCRIPTPATH}/activated_parameters ];
+then
+	fbwrite --pos=0,4 --color=0,255,0 "NeTV is activated"
+	fbwrite --pos=0,5 --color=0,255,0 "Starting NeTV in activated mode"
+	echo "I'm activated. Get me out of here."
+	
+	
+	# Start the network if we have a network config script.
+	fbwrite --pos=0,6 --color=255,255,255 "Starting network..."
+	[ -e /mnt/usb/network_config ] && cp /mnt/usb/network_config /psp
+	[ -e /psp/network_config ] && start_network
+	
+	# Wait for start_network to complete.
+	WAIT_COUNTER=0
+	while [ $(ps | grep start_network | grep -v grep | wc -l) -gt 0 -a ${WAIT_COUNTER} -lt 10 ]
+	do
+	    WAIT_COUNTER=$(expr ${WAIT_COUNTER} + 1)
+	    sleep 1
+	done
+	
+	exit
+fi
+
+
+killall rcS.background
+
+# Reset flash UI
+${SCRIPTPATH}/activation_cancel.sh
+
+# Start NeTV in Access Point Mode
+fbwrite --pos=0,4 --color=255,0,0 "NeTV is unactivated."
+fbwrite --pos=0,5 --color=255,0,0 "Download NeTV app to activate it."
+fbwrite --pos=0,6 --color=128,128,128 "Buy a smartphone if you don't have one."
+echo "NeTV is unactivated. Download NeTV app to activate it."
+
+${SCRIPTPATH}/start_ap.sh
+
