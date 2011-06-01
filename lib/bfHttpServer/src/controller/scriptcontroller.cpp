@@ -109,9 +109,19 @@ void ScriptController::service(HttpRequest& request, HttpResponse& response)
     }
 #endif
 
+    //Construct the parameters for shell script
+    //Example full request "/scripts/somescriptname.sh?param1=abc&param2=def"
+    QMultiMap<QByteArray,QByteArray> params = request.getParameterMap();
+    QMapIterator<QByteArray, QByteArray> i(params);
+    QStringList arguments;
+    while (i.hasNext()) {
+         i.next();
+         arguments.push_front(i.value());
+    }
+
     // Execute the file
     QProcess *newProc = new QProcess();
-    newProc->start(docroot+path);
+    newProc->start(docroot+path, arguments);
     newProc->waitForFinished();
 
     // Print the output to HTML response
@@ -119,6 +129,7 @@ void ScriptController::service(HttpRequest& request, HttpResponse& response)
     newProc->close();
     delete newProc;
     newProc = NULL;
+    arguments.clear();
 }
 
 void ScriptController::setContentType(QString fileName, HttpResponse& response) const
