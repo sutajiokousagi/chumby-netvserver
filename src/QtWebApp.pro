@@ -66,6 +66,9 @@ CONFIG( release, debug|release ) {
     BUILD_NAME = release
 }
 
+# Recommended for Bitbake
+target.path = /usr/bin
+INSTALLS += target
 
 # Temporary folders for the auxiliar files
 INCLUDEPATH += $$PWD/tmp/$$BUILD_NAME $$PWD/tmp
