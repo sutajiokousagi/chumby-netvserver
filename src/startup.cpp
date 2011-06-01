@@ -15,7 +15,7 @@
 #include <QDir>
 
 /** Name of this application */
-#define APPNAME "NeTVWebServer"
+#define APPNAME "NeTVServer"
 
 /** Publisher of this application */
 #define ORGANISATION "Chumby Industries"
