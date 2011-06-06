@@ -5,5 +5,5 @@ SCRIPT=$(readlink -f $0)
 # Absolute path this script is in. /home/user/bin
 SCRIPTPATH=`dirname $SCRIPT`
 
-# Process GET/POST variables and export to environment
-${SCRIPTPATH}/NeTVServer -qws
+# Start in the background so we don't hog the console
+${SCRIPTPATH}/NeTVServer -qws &
