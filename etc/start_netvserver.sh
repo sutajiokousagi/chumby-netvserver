@@ -6,4 +6,6 @@ SCRIPT=$(readlink -f $0)
 SCRIPTPATH=`dirname $SCRIPT`
 
 # Start in the background so we don't hog the console
-${SCRIPTPATH}/NeTVServer -qws &
+# This app uses QtGui hence requires -qws option,
+# but does not render anything to the framebuffer
+${SCRIPTPATH}/NeTVServer -qws -nomouse &
