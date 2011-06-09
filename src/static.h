@@ -1,4 +1,4 @@
-/**
+#/**
   @file
   @author Stefan Frings
   @version $Id: static.h 938 2010-12-05 14:29:58Z stefan $
@@ -12,7 +12,11 @@
 #include "httpsessionstore.h"
 #include "controller/staticfilecontroller.h"
 #include "controller/scriptcontroller.h"
-#include "controller/cursorcontroller.h"
+#include "controller/bridgecontroller.h"
+
+#if defined Q_OS_UNIX && !defined Q_OS_MAC
+    #include "controller/cursorcontroller.h"
+#endif
 
 /**
   This class contains some static resources that are used by the application.
@@ -57,8 +61,13 @@ public:
     /** Controller for script files */
     static ScriptController* scriptController;
 
+    /** Controller for hardware bridge */
+    static BridgeController* bridgeController;
+
     /** Controller for input device */
+#if defined Q_OS_UNIX && !defined Q_OS_MAC
     static CursorController* cursorController;
+#endif
 
     /** Controller for static files */
     static StaticFileController* staticFileController;

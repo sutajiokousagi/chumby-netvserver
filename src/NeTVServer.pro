@@ -33,6 +33,8 @@ SOURCES = main.cpp \
 
 OTHER_FILES += \
     ../etc/NeTVServer.ini \
+    ../etc/flashpolicy.xml \
+    ../etc/start_netvserver.sh \
     ../etc/docroot/index.html \
     ../etc/docroot/xmlbridge.html \
     ../etc/docroot/favicon.ico \
@@ -51,9 +53,13 @@ OTHER_FILES += \
     ../doc/example-request-form-get.txt \
     ../doc/example-request-file-upload.txt
 
-include(../lib/qtservice-2.6_1/src/qtservice.pri)
+# Singleton & command line argument passing
+include(../lib/qtsingleapplication-2.6_1-opensource/src/qtsingleapplication.pri)
+
 include(../lib/bfLogging/src/bfLogging.pri)
 include(../lib/bfHttpServer/src/bfHttpServer.pri)
+include(../lib/bfFlashPolicyServer/src/bfFlashpolicyserver.pri)
+include(../lib/bfXmlSocketServer/src/bfXmlsocketserver.pri)
 include(../lib/bfTemplateEngine/src/bfTemplateEngine.pri)
 
 # Changes the name of the target, when is debug mode

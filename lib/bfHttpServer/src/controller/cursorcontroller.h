@@ -1,9 +1,3 @@
-/**
-  @file
-  @author Stefan Frings
-  @version $Id: staticfilecontroller.h 938 2010-12-05 14:29:58Z stefan $
-*/
-
 #ifndef CURSORCONTROLLER_H
 #define CURSORCONTROLLER_H
 

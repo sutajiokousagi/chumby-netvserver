@@ -15,21 +15,25 @@
 
 #include "controller/staticfilecontroller.h"
 #include "controller/scriptcontroller.h"
-#include "controller/cursorcontroller.h"
+#include "controller/bridgecontroller.h"
 
-RequestMapper::RequestMapper(QObject* parent)
-    :HttpRequestHandler(parent) {}
+#if defined Q_OS_UNIX && !defined Q_OS_MAC
+    #include "controller/cursorcontroller.h"
+#endif
 
+//Constructor
+RequestMapper::RequestMapper(QObject* parent) : HttpRequestHandler(parent)
+{
+
+}
+
+//Dispatch different type of request to different controller
 void RequestMapper::service(HttpRequest& request, HttpResponse& response)
 {
     QByteArray path = request.getPath();
     qDebug("RequestMapper: path=%s", path.data());
 
-    if (path.startsWith("/cursor")) {
-        Static::cursorController->service(request, response);
-    }
-
-    else if (path.startsWith("/dump")) {
+    if (path.startsWith("/dump")) {
         DumpController().service(request, response);
     }
 
@@ -56,6 +60,17 @@ void RequestMapper::service(HttpRequest& request, HttpResponse& response)
     else if (path.startsWith("/scripts/")) {
         Static::scriptController->service(request, response);
     }
+
+    else if (path.startsWith("/bridge")) {
+        Static::bridgeController->service(request, response);
+    }
+
+//Only available on Linux system
+#if defined Q_OS_UNIX && !defined Q_OS_MAC
+    else if (path.startsWith("/cursor")) {
+        Static::cursorController->service(request, response);
+    }
+#endif
 
     // All other pathes are mapped to the static file controller
     else {

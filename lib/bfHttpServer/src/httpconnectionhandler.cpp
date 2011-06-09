@@ -16,7 +16,9 @@ HttpConnectionHandler::HttpConnectionHandler(QSettings* settings, HttpRequestHan
     Q_ASSERT(requestHandler!=0);
     this->settings=settings;
     this->requestHandler=requestHandler;
+    this->socket.close();
     currentRequest=0;
+
     // execute signals in my own thread
     moveToThread(this);
     socket.moveToThread(this);
@@ -24,18 +26,21 @@ HttpConnectionHandler::HttpConnectionHandler(QSettings* settings, HttpRequestHan
     connect(&socket, SIGNAL(readyRead()), SLOT(read()));
     connect(&socket, SIGNAL(disconnected()), SLOT(disconnected()));
     connect(&readTimer, SIGNAL(timeout()), SLOT(readTimeout()));
+
     readTimer.setSingleShot(true);
     qDebug("HttpConnectionHandler (%x): constructed",(unsigned int) this);
     this->start();
 }
 
 
-HttpConnectionHandler::~HttpConnectionHandler() {
+HttpConnectionHandler::~HttpConnectionHandler()
+{
     qDebug("HttpConnectionHandler (%x): destroyed",(unsigned int) this);
 }
 
 
-void HttpConnectionHandler::run() {
+void HttpConnectionHandler::run()
+{
     qDebug("HttpConnectionHandler (%x): thread started",(unsigned int) this);
     try {
         exec();
@@ -49,10 +54,19 @@ void HttpConnectionHandler::run() {
 }
 
 
-void HttpConnectionHandler::handleConnection(int socketDescriptor) {
+void HttpConnectionHandler::handleConnection(int socketDescriptor)
+{
     qDebug("HttpConnectionHandler (%x): handle new connection",(unsigned int) this);
-    Q_ASSERT(socket.isOpen()==false); // if not, then the handler is already busy
-    if (!socket.setSocketDescriptor(socketDescriptor)) {
+
+    //For some reason it fails here, although HttpConnectionHandlerPool already check the same condition
+    //Q_ASSERT(socket.isBusy()==false);                     // if not, then the handler is already busy
+
+    //So we just kill it if busy
+    if (this->isBusy())
+        socket.close();
+
+    if (!socket.setSocketDescriptor(socketDescriptor))
+    {
         qCritical("HttpConnectionHandler (%x): cannot initialize socket: %s",(unsigned int) this,qPrintable(socket.errorString()));
         return;
     }
@@ -63,12 +77,14 @@ void HttpConnectionHandler::handleConnection(int socketDescriptor) {
 }
 
 
-bool HttpConnectionHandler::isBusy() {
+bool HttpConnectionHandler::isBusy()
+{
     return socket.isOpen();
 }
 
 
-void HttpConnectionHandler::readTimeout() {
+void HttpConnectionHandler::readTimeout()
+{
     qDebug("HttpConnectionHandler (%x): read timeout occured",(unsigned int) this);
     socket.write("HTTP/1.1 408 request timeout\r\nConnection: close\r\n\r\n408 request timeout\r\n");
     socket.disconnectFromHost();
@@ -77,7 +93,8 @@ void HttpConnectionHandler::readTimeout() {
 }
 
 
-void HttpConnectionHandler::disconnected() {
+void HttpConnectionHandler::disconnected()
+{
     qDebug("HttpConnectionHandler (%x): disconnected",(unsigned int) this);
     socket.close();
     delete currentRequest;
@@ -85,7 +102,8 @@ void HttpConnectionHandler::disconnected() {
     readTimer.stop();
 }
 
-void HttpConnectionHandler::read() {
+void HttpConnectionHandler::read()
+{
 #ifdef SUPERVERBOSE
     qDebug("HttpConnectionHandler (%x): read input",(unsigned int) this);
 #endif

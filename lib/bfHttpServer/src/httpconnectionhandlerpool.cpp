@@ -18,13 +18,17 @@ HttpConnectionHandlerPool::~HttpConnectionHandlerPool() {
 }
 
 
-HttpConnectionHandler* HttpConnectionHandlerPool::getConnectionHandler() {
+HttpConnectionHandler* HttpConnectionHandlerPool::getConnectionHandler()
+{
+    //Get an existing free handler
     HttpConnectionHandler* freeHandler=0;
     foreach(HttpConnectionHandler* handler, pool) {
         if (!handler->isBusy()) {
             freeHandler=handler;
         }
     }
+
+    //Create new handler on-the-fly
     if (!freeHandler) {
         int maxConnectionHandlers=settings->value("maxThreads",10).toInt();
         if (pool.count()<maxConnectionHandlers) {

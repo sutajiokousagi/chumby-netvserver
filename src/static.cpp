@@ -13,12 +13,14 @@
 QString Static::configDir=0;
 
 TemplateLoader* Static::templateLoader=0;
-
 HttpSessionStore* Static::sessionStore=0;
-
 StaticFileController* Static::staticFileController=0;
 ScriptController* Static::scriptController=0;
-CursorController* Static::cursorController=0;
+BridgeController* Static::bridgeController=0;
+
+#if defined Q_OS_UNIX && !defined Q_OS_MAC
+    CursorController* Static::cursorController=0;
+#endif
 
 QString Static::getConfigFileName()
 {

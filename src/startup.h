@@ -7,22 +7,25 @@
 #ifndef STARTUP_H
 #define STARTUP_H
 
-#include <QApplication>
-#include "qtservice.h"
+#include <qtsingleapplication.h>
 
 /**
-  Helper class to install and run the application
+  The main class of the application
 */
-class Startup : public QApplication
+class Startup : public QtSingleApplication
 {
+    Q_OBJECT
+
 public:
 
-    /** Constructor */
     Startup(int argc, char *argv[]);
+
+private slots:
+
+    void receiveArgs(const QString &argsString);
 
 protected:
 
-    /** Start the service */
     void start();
 };
 

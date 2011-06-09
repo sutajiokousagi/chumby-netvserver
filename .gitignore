@@ -12,5 +12,9 @@ NeTVServer-build-desktop/*
 src/Makefile
 src/*.user
 src/make-arm.sh
+src/tmp
+src/tmp/*
+src/bin
+src/bin/*
 logs
 logs/*

@@ -1,6 +1,0 @@
-18.05.2011 15:14:37.941 3 FATAL 2288 ASSERT failure in QWidget: "Widgets must be created in the GUI thread.", file c:\ndk_buildrepos\qt-desktop\src\gui\kernel\qwidget.cpp, line 1264
-18.05.2011 15:15:14.855 3 FATAL 3560 ASSERT failure in QWidget: "Widgets must be created in the GUI thread.", file c:\ndk_buildrepos\qt-desktop\src\gui\kernel\qwidget.cpp, line 1264
-18.05.2011 15:19:34.586 3 FATAL 5648 ASSERT failure in QWidget: "Widgets must be created in the GUI thread.", file c:\ndk_buildrepos\qt-desktop\src\gui\kernel\qwidget.cpp, line 1264
-18.05.2011 15:20:07.909 3 FATAL 6640 ASSERT failure in QWidget: "Widgets must be created in the GUI thread.", file c:\ndk_buildrepos\qt-desktop\src\gui\kernel\qwidget.cpp, line 1264
-18.05.2011 15:20:54.601 3 FATAL 4168 ASSERT failure in QWidget: "Widgets must be created in the GUI thread.", file c:\ndk_buildrepos\qt-desktop\src\gui\kernel\qwidget.cpp, line 1264
-18.05.2011 15:40:14.216 3 FATAL 6960 ASSERT failure in QWidget: "Widgets must be created in the GUI thread.", file c:\ndk_buildrepos\qt-desktop\src\gui\kernel\qwidget.cpp, line 1264
