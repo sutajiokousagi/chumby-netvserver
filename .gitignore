@@ -7,3 +7,10 @@ tmp
 debug
 release
 bin
+NeTVServer-build-desktop
+NeTVServer-build-desktop/*
+src/Makefile
+src/*.user
+src/make-arm.sh
+logs
+logs/*
