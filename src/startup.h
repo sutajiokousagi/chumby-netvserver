@@ -1,9 +1,3 @@
-/**
-  @file
-  @author Stefan Frings
-  @version $Id: startup.h 883 2010-10-14 18:51:33Z stefan $
-*/
-
 #ifndef STARTUP_H
 #define STARTUP_H
 

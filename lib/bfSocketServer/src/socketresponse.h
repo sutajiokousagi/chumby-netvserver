@@ -22,6 +22,7 @@ public:
 
     void setStatus(QByteArray statusName);
     void setStatus(int statusCode);
+    void setCommand(QByteArray commandName);
 
     void setParameter(QByteArray paramName, int paramValue);
     void setParameter(QByteArray paramName, float paramValue);
@@ -37,6 +38,7 @@ private:
     QAbstractSocket* socket;
 
     QByteArray statusText;
+    QByteArray commandText;
     QByteArray address;
     quint16 port;
 

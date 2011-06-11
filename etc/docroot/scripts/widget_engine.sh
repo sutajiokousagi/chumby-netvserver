@@ -14,7 +14,7 @@ SCRIPT=$(readlink -f $0)
 # Absolute path this script is in. /home/user/bin
 SCRIPTPATH=`dirname $SCRIPT`
 
-process_name='chumbyflashplayer.x'
+process_name='/usr/bin/chumbyflashplayer.x'
 widget_engine_swf="${SCRIPTPATH}/../widget_engine.swf"
 
 cmd=$(echo $1 | tr '[A-Z]' '[a-z]')
@@ -73,7 +73,8 @@ fi
 if [ "$cmd" == "quit" -o "$cmd" == "exit" -o "$cmd" == "terminate" -o "$cmd" == "stop" ]; then
 	if ps ax | grep -v grep | grep $process_name > /dev/null
 	then
-		killall $process_name
+		echo "stopping..."
+		kill -9 $(pidof $process_name)
 	else
 		echo "Already stopped"
 	fi
@@ -84,7 +85,9 @@ fi
 if [ "$cmd" == "restart" ]; then
 	if ps ax | grep -v grep | grep $process_name > /dev/null
 	then
-		killall $process_name
+		echo "stopping previous instance..."
+		kill -9 $(pidof $process_name)
+		sleep 1
 	fi
 	${process_name} -i ${widget_engine_swf} &
 	exit;

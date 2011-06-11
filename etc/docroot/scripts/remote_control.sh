@@ -8,5 +8,22 @@
 
 cmd=$(echo $1 | tr '[A-Z]' '[a-z]')
 
+# Start
+if [ "$cmd" == "reset" ];
+then
+	# Hide the flash player
+	setplayer 0 0 1 1 
+	
+	# Reset the browser
+	start_netvbrowser.sh
+
+	# Print out the command received
+	echo $cmd
+	exit;
+fi
+
 # Forward the button name to JavaScript Control Panel
-/usr/bin/NeTVBrowser -qws JavaScript "fButtonPress('$cmd')"
+/usr/bin/NeTVBrowser -qws -nomouse JavaScript "fButtonPress('$cmd')"
+
+# Print out the command received
+echo $cmd

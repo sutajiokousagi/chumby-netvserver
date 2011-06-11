@@ -20,3 +20,4 @@ CPanel
 etc/*.log
 etc/docroot/css/reset.css
 etc/docroot/widget_engine.swf
+etc/docroot/widgets

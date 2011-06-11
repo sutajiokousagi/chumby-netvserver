@@ -1,12 +1,16 @@
 #include "socketrequest.h"
 #include <QXmlStreamReader>
 #include <QString>
+#include <QHostAddress>
+#include <QNetworkInterface>
+#include <QHostInfo>
 
-SocketRequest::SocketRequest(QByteArray data, QByteArray address)
+SocketRequest::SocketRequest(QByteArray data, QByteArray address, quint16 port)
 {
     this->commandText = "no-no-no-no-command";
     this->containsError = false;
     this->address = address;
+    this->port = port;
 
     //Parse the XML string
     this->ParseMessageXML( data );
@@ -37,6 +41,22 @@ QByteArray SocketRequest::getCommand()
 QByteArray SocketRequest::getAddress()
 {
     return this->address;
+}
+
+QByteArray SocketRequest::getLocalAddress()
+{
+    QList<QHostAddress> list = QNetworkInterface::allAddresses();
+
+    //Get own IP addresses
+    for (int i = 0; i < list.size(); i++)
+        if (list[i].protocol() == QAbstractSocket::IPv4Protocol && !list[i].toString().startsWith("127") && !list[i].toString().startsWith("169"))
+            return list[i].toString().toLatin1();
+    return "";
+}
+
+quint16 SocketRequest::getPort()
+{
+    return this->port;
 }
 
 QByteArray SocketRequest::getParameter(QByteArray paramName)
