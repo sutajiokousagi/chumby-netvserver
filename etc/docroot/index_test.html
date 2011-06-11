@@ -1,25 +1,77 @@
 <html>
 <head>
 <title>NeTVServer HTTP Interface Test</title>
-<link type="text/css" rel="stylesheet" href="./css/test.css" />
 <script type='text/javascript' src='./js/browser_detect.js'></script>
 <script type='text/javascript' src='./js/jquery-1.6.1.min.js'></script>
 <script type='text/javascript' src='./js/test.js'></script>
 <script language="javascript">
 	function onLoad()
 	{
-		var web_address = "192.168.1.35";
-		document.form_Target.input_target.value = web_address;
 		document.all.browserDetect_browser.innerHTML = "Browser: " + BrowserDetect.browser;
 		document.all.browserDetect_version.innerHTML = "Version: " + BrowserDetect.version;
 		document.all.browserDetect_os.innerHTML = "OS: " + BrowserDetect.OS;
 	}
-	
-	function enableTargetInput()
-	{
-		document.frmwebservices.input_target.disabled = document.frmwebservices.input_target_checkbox.checked;
-	}
 </script>
+<style>
+	body {
+		font-family: Verdana;
+		margin: 0px;
+		background-color: #444444;
+		color: #EEEEEE;
+	}
+
+	.service_header_row {
+		background-color: #000000;
+		border: 1px solid #00BBFF;
+	}
+
+	.service_row {
+		background-color: #0077DD;
+		border-top: 1px dotted #0033DD;
+	}
+
+	.service_done {
+		text-align: center;
+		background-color: #00CC00;
+		color: #000000;
+		font-size: 12px;
+	}
+	.service_in_progress {
+		text-align: center;
+		background-color: #CCAA00;
+		font-size: 12px;
+	}
+	.service_pending {
+		text-align: center;
+		background-color: #CC0000;
+		font-size: 12px;
+	}
+
+	#title {
+		color: #FFFFFF;
+		font-size: 25px;
+		padding: 25px;
+	}
+
+	input {
+		font-size: 13px;
+		margin-bottom: 5px;
+		display: block;
+		padding: 4px;
+		width: 200px;
+		border: 1px solid #0044AA;
+	}
+
+	button { 
+		background: #0044AA;
+		padding: 5px;
+		border: 0px;
+		color: #444444;
+	}
+
+	input:hover {
+		background: orange;
+	}
 </style>
 </head>
 
@@ -35,29 +87,6 @@
 <td width="80%" height="100%" valign="top">
 
 	<table width="100%" border="0" cellspacing="0px" cellpadding="5px" >
-		
-		<!-- Settings header row -->
-		<tr class="service_header_row">
-			<td colspan="4" align="Left">
-				<b>Settings</b>
-			</td>
-		</tr>
-		
-		<!-- Target device -->
-		<form name="form_Target" method="POST" action="">
-		<tr class="service_row">
-			<td>
-				
-			</td>
-			<td>
-				Target device
-			</td>
-			<td colspan="2">
-				<input type="text" size="32" name="input_target" />
-				<input type="checkbox" name="input_target_checkbox" onclick="enableTargetInput()" />Use localhost
-			</td>
-		</tr>
-		</form>
 
 		<!-- Service header row -->
 		<tr class="service_header_row">
@@ -91,6 +120,24 @@
 			</td>
 			<td class="td_button">
 				<input type="button" value="GO!" onclick="GetXML()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- GetBase64 -->
+		<form name="form_GetBase64" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				GetBase64
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="http://s3movies.chumby.com/cdn/xmlthumbnail/86976CD4-C50E-11DF-91A6-001B24E044BE" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="GetBase64()">
 			</td>
 		</tr>
 		</form>
@@ -145,6 +192,114 @@
 			</td>
 			<td class="td_button">
 				<input type="button" value="GO!" onclick="PlaySWF()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- SetWidgetSize -->
+		<form name="form_SetWidgetSize" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_in_progress">
+				In Testing
+			</td>
+			<td>
+				SetWidgetSize
+			</td>
+			<td>
+				<input type="text" size="128" name="inputField" value="400 300 160 120" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="SetWidgetSize()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- SetBox -->
+		<form name="form_SetBox" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				Done
+			</td>
+			<td>
+				SetBox
+			</td>
+			<td>
+				<input type="text" size="128" name="inputField" value="400 300 160 120" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="SetBox()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- SetChromaKey -->
+		<form name="form_SetChromaKeyOnOff" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_in_progress">
+				In Testing
+			</td>
+			<td>
+				SetChromaKey
+			</td>
+			<td>
+				<input type="text" size="3" name="inputField" value="off" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="SetChromaKeyOnOff()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- SetChromaKey -->
+		<form name="form_SetChromaKeyColor" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_in_progress">
+				In Testing
+			</td>
+			<td>
+				SetChromaKey
+			</td>
+			<td>
+				<input type="text" size="11" name="inputField" value="0,7,0" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="SetChromaKeyColor()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- ControlPanel -->
+		<form name="form_ControlPanel" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				Done
+			</td>
+			<td>
+				ControlPanel
+			</td>
+			<td>
+				<input type="text" size="128" name="inputField" value="Maximize" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="ControlPanel()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- WidgetEngine -->
+		<form name="form_WidgetEngine" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_in_progress">
+				In Testing
+			</td>
+			<td>
+				WidgetEngine
+			</td>
+			<td>
+				<input type="text" size="128" name="inputField" value="TBD" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="WidgetEngine()">
 			</td>
 		</tr>
 		</form>

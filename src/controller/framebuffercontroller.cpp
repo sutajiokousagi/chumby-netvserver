@@ -1,9 +1,3 @@
-/**
-  @file
-  @author Stefan Frings
-  @version $Id: fileuploadcontroller.cpp 894 2010-10-18 20:54:32Z stefan $
-*/
-
 #include "framebuffercontroller.h"
 #include <QtGui>
 #include <QApplication>

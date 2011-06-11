@@ -7,8 +7,6 @@
 #ifndef SESSIONCONTROLLER_H
 #define SESSIONCONTROLLER_H
 
-#include "httprequest.h"
-#include "httpresponse.h"
 #include "httprequesthandler.h"
 
 /**

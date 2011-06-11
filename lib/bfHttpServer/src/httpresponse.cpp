@@ -69,9 +69,12 @@ void HttpResponse::writeToSocket(QByteArray data) {
 
 void HttpResponse::write(QByteArray data, bool lastPart) {
     Q_ASSERT(sentLastPart==false);
-    if (sentHeaders==false) {
+
+    if (sentHeaders==false)
+    {
         QByteArray connectionMode=headers.value("Connection");
-        if (!headers.contains("Content-Length") && !headers.contains("Transfer-Encoding") && connectionMode!="close" && connectionMode!="Close") {
+        if (!headers.contains("Content-Length") && !headers.contains("Transfer-Encoding") && connectionMode!="close" && connectionMode!="Close")
+        {
             if (!lastPart) {
                 headers.insert("Transfer-Encoding","chunked");
             }

@@ -7,8 +7,6 @@
 #ifndef FILEUPLOADCONTROLLER_H
 #define FILEUPLOADCONTROLLER_H
 
-#include "httprequest.h"
-#include "httpresponse.h"
 #include "httprequesthandler.h"
 
 /**

@@ -22,7 +22,8 @@
    @see StaticFileController which delivers static local files.
 */
 
-class HttpRequestHandler : public QObject {
+class HttpRequestHandler : public QObject
+{
     Q_OBJECT
     Q_DISABLE_COPY(HttpRequestHandler)
 public:

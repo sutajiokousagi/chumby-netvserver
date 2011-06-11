@@ -12,13 +12,15 @@
 
 QString Static::configDir=0;
 
+StaticFileController* Static::staticFileController=0;
 TemplateLoader* Static::templateLoader=0;
 HttpSessionStore* Static::sessionStore=0;
-StaticFileController* Static::staticFileController=0;
 ScriptController* Static::scriptController=0;
+TcpSocketServer* Static::tcpSocketServer=0;
+UdpSocketServer* Static::udpSocketServer=0;
 BridgeController* Static::bridgeController=0;
 
-#if defined Q_OS_UNIX && !defined Q_OS_MAC
+#if defined (CURSOR_CONTROLLER)
     CursorController* Static::cursorController=0;
 #endif
 

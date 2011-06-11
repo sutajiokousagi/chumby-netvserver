@@ -1,11 +1,7 @@
 function sendSingleValueCommand(cmd, dataString)
 {
 	//Which address to submit to
-	var web_address = "http://192.168.1.35:8080/bridge";
-	if (document.form_Target.input_target_checkbox.checked)
-		web_address = "http://localhost:8080/bridge";
-	else if (document.form_Target.input_target.value != "")
-		web_address = "http://" + document.form_Target.input_target.value + ":8080/bridge";
+	var web_address = "./bridge";
 
 	//Convert data string to XML format
 	var xmlDataString = '<value>' +  dataString + '</value>';
@@ -34,12 +30,8 @@ function sendSingleValueCommand(cmd, dataString)
 function sendMultiValueCommand(cmd, dataArray)
 {
 	//Which address to submit to
-	var web_address = "http://192.168.1.35:8080/bridge";
-	if (document.form_Target.input_target_checkbox.checked)
-		web_address = "http://localhost:8080/bridge";
-	else if (document.form_Target.input_target.value != "")
-		web_address = "http://" + document.form_Target.input_target.value + ":8080/bridge";
-
+	var web_address = "./bridge";
+	
 	//Convert data array to XML format
 	var xmlDataString = '';
 	for (var key in dataArray)
@@ -81,6 +73,21 @@ function GetXML()
 	}
 }
 
+function GetBase64()
+{
+	var dataString = document.form_GetBase64.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('GetBase64', dataString);
+	}
+}
+
 function HasFlashPlugin()
 {
 	sendSingleValueCommand('HasFlashPlugin', '');
@@ -116,6 +123,96 @@ function PlaySWF()
 	}
 }
 
+function SetWidgetSize()
+{
+	var dataString = document.form_SetWidgetSize.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendMultiValueCommand('SetWidgetSize', dataArray);
+	}
+}
+
+function SetBox()
+{
+	var dataString = document.form_SetBox.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('SetBox', dataString);
+	}
+}
+
+function SetChromaKeyOnOff()
+{
+	var dataString = document.form_SetChromaKeyOnOff.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('SetChromaKey', dataString);
+	}
+}
+
+function SetChromaKeyColor()
+{
+	var dataString = document.form_SetChromaKeyColor.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('SetChromaKey', dataString);
+	}
+}
+
+function ControlPanel()
+{
+	var dataString = document.form_ControlPanel.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('ControlPanel', dataString);
+	}
+}
+
+function WidgetEngine()
+{
+	var dataString = document.form_WidgetEngine.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('WidgetEngine', dataString);
+	}
+}
+
 function GetAllParams()
 {
 	sendSingleValueCommand('GetAllParams', '');
@@ -138,7 +235,6 @@ function GetParam()
 
 function SetParam()
 {
-	/*
 	var dataString1 = document.form_GetXML.inputField.value;
 	var dataString2 = document.form_GetXML.inputField2.value;
 	var dataArray = { myKey1:dataString1, myKey2:dataString2 };
@@ -152,7 +248,6 @@ function SetParam()
 	{
 		sendMultiValueCommand('SetParam', dataArray);
 	}
-	*/
 }
 
 function GetFileContents()
