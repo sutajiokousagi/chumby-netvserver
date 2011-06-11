@@ -16,6 +16,10 @@ case "$1" in
 		# This app uses QtGui hence requires -qws option,
 		# but does not render anything to the framebuffer
 		NeTVServer -qws -nomouse 2>&1 2> /dev/null&
+
+		# fullscreen
+		setbox 0 0 1279 719
+
 		;;
 
 	stop)
