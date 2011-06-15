@@ -93,6 +93,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         //Forward to widget rendering engine
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>");
 
+        //Set the window size
+        this->Execute(docroot + "/scripts/setbox.sh", QStringList(dataString));
+
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to widget rendering engine</value></data>");

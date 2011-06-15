@@ -133,16 +133,12 @@ function PlaySWF()
 
 function SetWidgetSize()
 {
-	var dataString1 = document.form_SetWidgetSize.inputField.value;
-	var dataString2 = document.form_SetWidgetSize.inputField2.value;
-	var dataString3 = document.form_SetWidgetSize.inputField3.value;
-	var dataString4 = document.form_SetWidgetSize.inputField4.value;
-	var dataArray = { x:dataString1, y:dataString2, w:dataString3, h:dataString4 };
+	var dataString = document.form_SetWidgetSize.inputField.value;
 	
-	if (dataString1 == '' || dataString2 == '' || dataString3 == '' || dataString4 == '') 
+	if (dataString == '') 
 	{
-		alert('Input field(s) are required');
-		console.log('Input field(s) are empty');
+		alert('Input field is required');
+		console.log('Input field is empty');
 	}
 	else
 	{
