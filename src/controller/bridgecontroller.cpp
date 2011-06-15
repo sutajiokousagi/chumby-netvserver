@@ -47,7 +47,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     if (cmdString == "GetXML")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/wget.sh", QStringList(dataString));
-        response.write(buffer);
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>");
         buffer = QByteArray();
     }
 
@@ -55,7 +55,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/wget.sh", QStringList(dataString));
         buffer = buffer.toBase64();
-        response.write(buffer);
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>");
         buffer = QByteArray();
     }
 
@@ -98,6 +98,13 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to widget rendering engine</value></data>");
         else
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data>");
+    }
+
+    else if (cmdString == "SetBox")
+    {
+        QByteArray buffer = this->Execute("setbox", QStringList(dataString));
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>");
+        buffer = QByteArray();
     }
 
     //-----------
