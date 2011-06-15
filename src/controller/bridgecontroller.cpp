@@ -183,9 +183,9 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     QByteArray cmdString = request.getCommand();
     QByteArray dataString = request.getParameter("data");
 
-
-    //This is just dumb socket right now
-    //socket->write("<xml><cmd>play_widget</cmd><data>http://s3movies.chumby.com/cdn/xmlmovie/F3A86472-05F6-11DF-A1F8-001B24E044BE</data></xml>\n\n");
+    response.setStatus(0);                          //unimplemented
+    response.setParameter("value", "dummy");
+    response.write();
 }
 
 
