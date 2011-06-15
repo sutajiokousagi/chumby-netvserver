@@ -1,11 +1,11 @@
 function sendSingleValueCommand(cmd, dataString)
 {
 	//Which address to submit to
-	var web_address = "http://192.168.1.35:8080/bridge";
+	var web_address = "http://192.168.1.48/bridge";
 	if (document.form_Target.input_target_checkbox.checked)
-		web_address = "http://localhost:8080/bridge";
+		web_address = "http://localhost/bridge";
 	else if (document.form_Target.input_target.value != "")
-		web_address = "http://" + document.form_Target.input_target.value + ":8080/bridge";
+		web_address = "http://" + document.form_Target.input_target.value + "/bridge";
 
 	//Convert data string to XML format
 	var xmlDataString = '<value>' +  dataString + '</value>';
@@ -34,11 +34,11 @@ function sendSingleValueCommand(cmd, dataString)
 function sendMultiValueCommand(cmd, dataArray)
 {
 	//Which address to submit to
-	var web_address = "http://192.168.1.35:8080/bridge";
+	var web_address = "http://192.168.1.48/bridge";
 	if (document.form_Target.input_target_checkbox.checked)
-		web_address = "http://localhost:8080/bridge";
+		web_address = "http://localhost/bridge";
 	else if (document.form_Target.input_target.value != "")
-		web_address = "http://" + document.form_Target.input_target.value + ":8080/bridge";
+		web_address = "http://" + document.form_Target.input_target.value + "/bridge";
 
 	//Convert data array to XML format
 	var xmlDataString = '';

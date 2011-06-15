@@ -102,7 +102,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "SetBox")
     {
-        QByteArray buffer = this->Execute("setbox", QStringList(dataString));
+        QByteArray buffer = this->Execute(docroot + "/scripts/setbox.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>");
         buffer = QByteArray();
     }
