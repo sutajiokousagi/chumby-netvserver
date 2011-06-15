@@ -79,7 +79,7 @@ void HttpResponse::write(QByteArray data, bool lastPart) {
                 headers.insert("Transfer-Encoding","chunked");
             }
             else {
-                headers.insert("Content-Length",QByteArray::number(data.size());
+                headers.insert("Content-Length",QByteArray::number(data.size()));
             }
         }
         writeHeaders();
