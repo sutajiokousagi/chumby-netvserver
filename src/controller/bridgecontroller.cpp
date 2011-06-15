@@ -47,16 +47,14 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     if (cmdString == "GetXML")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/wget.sh", QStringList(dataString));
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>");
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>", true);
         buffer = QByteArray();
     }
 
-    else if (cmdString == "GetBase64")
+    else if (cmdString == "GetJPG" || cmdString == "GetJPEG")
     {
-        QByteArray buffer = this->Execute(docroot + "/scripts/wget.sh", QStringList(dataString));
-        buffer = buffer.toBase64();
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>");
-        buffer = QByteArray();
+        QByteArray buffer = QByteArray("tmp/") + this->Execute(docroot + "/scripts/tmp_download.sh", QStringList(dataString));
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>", true);
     }
 
     else if (cmdString == "HasFlashPlugin")

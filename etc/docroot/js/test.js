@@ -3,7 +3,7 @@ function sendSingleValueCommand(cmd, dataString)
 	//Which address to submit to
 	var web_address = "http://192.168.1.48/bridge";
 	if (document.form_Target.input_target_checkbox.checked)
-		web_address = "http://localhost/bridge";
+		web_address = "/bridge";
 	else if (document.form_Target.input_target.value != "")
 		web_address = "http://" + document.form_Target.input_target.value + "/bridge";
 
@@ -36,7 +36,7 @@ function sendMultiValueCommand(cmd, dataArray)
 	//Which address to submit to
 	var web_address = "http://192.168.1.48/bridge";
 	if (document.form_Target.input_target_checkbox.checked)
-		web_address = "http://localhost/bridge";
+		web_address = "/bridge";
 	else if (document.form_Target.input_target.value != "")
 		web_address = "http://" + document.form_Target.input_target.value + "/bridge";
 
