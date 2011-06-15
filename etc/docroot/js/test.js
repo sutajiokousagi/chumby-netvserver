@@ -150,6 +150,21 @@ function SetWidgetSize()
 	}
 }
 
+function SetBox()
+{
+	var dataString = document.form_SetBox.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('SetBox', dataString);
+	}
+}
+
 function GetAllParams()
 {
 	sendSingleValueCommand('GetAllParams', '');
