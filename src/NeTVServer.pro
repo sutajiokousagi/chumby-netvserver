@@ -1,3 +1,8 @@
+#
+# This project extends the functionality of a simple web service
+# by adding 'controllers' classes
+#
+
 QT = core network gui
 TARGET = NeTVServer
 TEMPLATE = app
@@ -17,8 +22,7 @@ HEADERS = \
     controller/templatecontroller.h \
     controller/formcontroller.h \
     controller/fileuploadcontroller.h \
-    controller/sessioncontroller.h \
-    controller/framebuffercontroller.h
+    controller/sessioncontroller.h
 
 SOURCES = main.cpp \
     static.cpp \
@@ -28,8 +32,28 @@ SOURCES = main.cpp \
     controller/templatecontroller.cpp \
     controller/formcontroller.cpp \
     controller/fileuploadcontroller.cpp \
-    controller/sessioncontroller.cpp \
-    controller/framebuffercontroller.cpp
+    controller/sessioncontroller.cpp
+
+# Shell script execution (cgi-like)
+HEADERS += $$PWD/controller/scriptcontroller.h
+SOURCES += $$PWD/controller/scriptcontroller.cpp
+
+# Framebuffer capture
+HEADERS += $$PWD/controller/framebuffercontroller.h
+SOURCES += $$PWD/controller/framebuffercontroller.cpp
+
+# Hardware bridge
+HEADERS += $$PWD/controller/bridgecontroller.h
+SOURCES += $$PWD/controller/bridgecontroller.cpp
+
+# UDP cursor from Android/iOS
+unix:!mac:DEFINES += CURSOR_CONTROLLER
+unix:!mac:CONFIG += CURSOR_CONTROLLER
+contains(DEFINES, CURSOR_CONTROLLER)
+{
+    HEADERS += $$PWD/controller/cursorcontroller.h
+    SOURCES += $$PWD/controller/cursorcontroller.cpp
+}
 
 OTHER_FILES += \
     ../etc/NeTVServer.ini \
@@ -53,13 +77,14 @@ OTHER_FILES += \
     ../doc/example-request-form-get.txt \
     ../doc/example-request-file-upload.txt
 
+
 # Singleton & command line argument passing
 include(../lib/qtsingleapplication-2.6_1-opensource/src/qtsingleapplication.pri)
 
 include(../lib/bfLogging/src/bfLogging.pri)
 include(../lib/bfHttpServer/src/bfHttpServer.pri)
 include(../lib/bfFlashPolicyServer/src/bfFlashpolicyserver.pri)
-include(../lib/bfXmlSocketServer/src/bfXmlsocketserver.pri)
+include(../lib/bfSocketServer/src/bfSocketserver.pri)
 include(../lib/bfTemplateEngine/src/bfTemplateEngine.pri)
 
 # Changes the name of the target, when is debug mode

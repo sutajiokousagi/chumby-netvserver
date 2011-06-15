@@ -81,6 +81,21 @@ function GetXML()
 	}
 }
 
+function GetBase64()
+{
+	var dataString = document.form_GetBase64.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('GetBase64', dataString);
+	}
+}
+
 function HasFlashPlugin()
 {
 	sendSingleValueCommand('HasFlashPlugin', '');
@@ -113,6 +128,25 @@ function PlaySWF()
 	else
 	{
 		sendSingleValueCommand('PlaySWF', dataString);
+	}
+}
+
+function SetWidgetSize()
+{
+	var dataString1 = document.form_SetWidgetSize.inputField.value;
+	var dataString2 = document.form_SetWidgetSize.inputField2.value;
+	var dataString3 = document.form_SetWidgetSize.inputField3.value;
+	var dataString4 = document.form_SetWidgetSize.inputField4.value;
+	var dataArray = { x:dataString1, y:dataString2, w:dataString3, h:dataString4 };
+	
+	if (dataString1 == '' || dataString2 == '' || dataString3 == '' || dataString4 == '') 
+	{
+		alert('Input field(s) are required');
+		console.log('Input field(s) are empty');
+	}
+	else
+	{
+		sendMultiValueCommand('SetWidgetSize', dataArray);
 	}
 }
 

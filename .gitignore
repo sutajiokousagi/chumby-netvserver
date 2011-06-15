@@ -18,3 +18,4 @@ src/bin
 src/bin/*
 logs
 logs/*
+etc/*.log

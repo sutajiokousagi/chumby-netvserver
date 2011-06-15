@@ -8,7 +8,7 @@
 <script language="javascript">
 	function onLoad()
 	{
-		var web_address = "192.168.1.35";
+		var web_address = "192.168.1.34";
 		document.form_Target.input_target.value = web_address;
 		document.all.browserDetect_browser.innerHTML = "Browser: " + BrowserDetect.browser;
 		document.all.browserDetect_version.innerHTML = "Version: " + BrowserDetect.version;
@@ -95,6 +95,24 @@
 		</tr>
 		</form>
 		
+		<!-- GetBase64 -->
+		<form name="form_GetBase64" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				GetBase64
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="http://s3movies.chumby.com/cdn/xmlthumbnail/86976CD4-C50E-11DF-91A6-001B24E044BE" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="GetBase64()">
+			</td>
+		</tr>
+		</form>
+		
 		<!-- HasFlashPlugin -->
 		<form name="form_HasFlashPlugin" method="POST" action="">
 		<tr class="service_row">
@@ -145,6 +163,27 @@
 			</td>
 			<td class="td_button">
 				<input type="button" value="GO!" onclick="PlaySWF()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- SetWidgetSize -->
+		<form name="form_SetWidgetSize" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_in_progress">
+				In Testing
+			</td>
+			<td>
+				SetWidgetSize
+			</td>
+			<td>
+				<input type="text" size="4" name="inputField" value="400" >
+				<input type="text" size="4" name="inputField2" value="300" >
+				<input type="text" size="4" name="inputField3" value="160" >
+				<input type="text" size="4" name="inputField4" value="120" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="SetWidgetSize()">
 			</td>
 		</tr>
 		</form>

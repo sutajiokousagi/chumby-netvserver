@@ -10,11 +10,13 @@
 #include <QString>
 #include "templatecache.h"
 #include "httpsessionstore.h"
+#include "tcpsocketserver.h"
+#include "udpsocketserver.h"
 #include "controller/staticfilecontroller.h"
 #include "controller/scriptcontroller.h"
 #include "controller/bridgecontroller.h"
 
-#if defined Q_OS_UNIX && !defined Q_OS_MAC
+#if defined (CURSOR_CONTROLLER)
     #include "controller/cursorcontroller.h"
 #endif
 
@@ -57,6 +59,12 @@ public:
 
     /** Storage for session cookies */
     static HttpSessionStore* sessionStore;
+
+    /** TCP Socket server for Flash player */
+    static TcpSocketServer* tcpSocketServer;
+
+    /** UDP Socket server for mobile device */
+    static UdpSocketServer* udpSocketServer;
 
     /** Controller for script files */
     static ScriptController* scriptController;

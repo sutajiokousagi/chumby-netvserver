@@ -12,22 +12,22 @@
 #include "controller/fileuploadcontroller.h"
 #include "controller/framebuffercontroller.h"
 #include "controller/sessioncontroller.h"
-
 #include "controller/staticfilecontroller.h"
-#include "controller/scriptcontroller.h"
 #include "controller/bridgecontroller.h"
+#include "controller/scriptcontroller.h"
 
-#if defined Q_OS_UNIX && !defined Q_OS_MAC
+
+#if defined CURSOR_CONTROLLER
     #include "controller/cursorcontroller.h"
 #endif
 
 //Constructor
-RequestMapper::RequestMapper(QObject* parent) : HttpRequestHandler(parent)
+RequestMapper::RequestMapper(QObject* parent) : HttpRequestHandler(parent), SocketRequestHandler(parent)
 {
 
 }
 
-//Dispatch different type of request to different controller
+//Dispatch different type of HTTP request to different controller
 void RequestMapper::service(HttpRequest& request, HttpResponse& response)
 {
     QByteArray path = request.getPath();
@@ -76,4 +76,13 @@ void RequestMapper::service(HttpRequest& request, HttpResponse& response)
     else {
         Static::staticFileController->service(request, response);
     }
+}
+
+//Dispatch different type of Socket request to different controller
+void RequestMapper::service(SocketRequest& request, SocketResponse& response)
+{
+    if (request.hasError())
+        return;
+
+    Static::bridgeController->service(request, response);
 }

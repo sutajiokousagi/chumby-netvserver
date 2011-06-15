@@ -5,19 +5,14 @@
 */
 
 #include <QDir>
-#include "static.h"
 #include "startup.h"
+#include "static.h"
 #include "dualfilelogger.h"
 #include "httplistener.h"
 #include "flashpolicyserver.h"
-#include "xmlsocketserver.h"
+#include "tcpsocketserver.h"
+#include "udpsocketserver.h"
 #include "requestmapper.h"
-#include "controller/staticfilecontroller.h"
-#include "controller/scriptcontroller.h"
-
-#if defined Q_OS_UNIX && !defined Q_OS_MAC
-    #include "controller/cursorcontroller.h"
-#endif
 
 /** Name of this application */
 #define APPNAME "NeTVServer"
@@ -85,29 +80,36 @@ void Startup::start()
     // Configure script controller
     Static::scriptController=new ScriptController(fileSettings,app);
 
-    // Configure bridge controller
-    Static::bridgeController=new BridgeController(fileSettings,app);
-
     // Configure cursor controller
-#if defined Q_OS_UNIX && !defined Q_OS_MAC
+#if defined (CURSOR_CONTROLLER)
     Static::cursorController=new CursorController(fileSettings,app);
 #endif
+
+    // Configure bridge controller
+    Static::bridgeController=new BridgeController(fileSettings,app);
 
     // Configure Flash policy server
     QSettings* flashpolicySettings=new QSettings(configFileName,QSettings::IniFormat,app);
     flashpolicySettings->beginGroup("flash-policy-server");
     new FlashPolicyServer(flashpolicySettings, app);
 
-    // Configure XML socket server
-    QSettings* xmlserverSettings=new QSettings(configFileName,QSettings::IniFormat,app);
-    xmlserverSettings->beginGroup("xml-socket-server");
-    new XmlSocketServer(xmlserverSettings, app);
+    RequestMapper *requestMapper = new RequestMapper(app);
 
     // Configure and start the TCP listener
     qDebug("ServiceHelper: Starting service");
     QSettings* listenerSettings=new QSettings(configFileName,QSettings::IniFormat,app);
     listenerSettings->beginGroup("listener");
-    new HttpListener(listenerSettings,new RequestMapper(app),app);
+    new HttpListener(listenerSettings, requestMapper, app);
+
+    // Configure TCP socket server
+    QSettings* tcpServerSettings=new QSettings(configFileName,QSettings::IniFormat,app);
+    tcpServerSettings->beginGroup("tcp-socket-server");
+    Static::tcpSocketServer=new TcpSocketServer(tcpServerSettings, requestMapper, app);
+
+    // Configure UDP socket server
+    QSettings* udpServerSettings=new QSettings(configFileName,QSettings::IniFormat,app);
+    udpServerSettings->beginGroup("udp-socket-server");
+    Static::udpSocketServer=new UdpSocketServer(udpServerSettings, requestMapper, app);
 
     qDebug("ServiceHelper: Application has started");
 }

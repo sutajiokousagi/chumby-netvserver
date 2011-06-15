@@ -46,8 +46,17 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     if (cmdString == "GetXML")
     {
-        QByteArray buffer = this->Execute(docroot + "/scripts/xmlbridge.sh", QStringList(dataString));
+        QByteArray buffer = this->Execute(docroot + "/scripts/wget.sh", QStringList(dataString));
         response.write(buffer);
+        buffer = QByteArray();
+    }
+
+    else if (cmdString == "GetBase64")
+    {
+        QByteArray buffer = this->Execute(docroot + "/scripts/wget.sh", QStringList(dataString));
+        buffer = buffer.toBase64();
+        response.write(buffer);
+        buffer = QByteArray();
     }
 
     else if (cmdString == "HasFlashPlugin")
