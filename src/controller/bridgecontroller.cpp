@@ -3,6 +3,8 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QProcess>
+#include <QApplication>
+#include <QDesktopWidget>
 
 #define BRIDGE_RETURN_STATUS_UNIMPLEMENTED  "0"
 #define BRIDGE_RETURN_STATUS_SUCCESS        "1"
@@ -108,6 +110,20 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         buffer = QByteArray();
     }
 
+    else if (cmdString == "ControlPanel")
+    {
+        QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>");
+        buffer = QByteArray();
+    }
+
+    else if (cmdString == "WidgetEngine")
+    {
+        QByteArray buffer = this->Execute(docroot + "/scripts/widget_engine.sh", QStringList(dataString));
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>");
+        buffer = QByteArray();
+    }
+
     //-----------
 
     else if (cmdString == "GetAllParams")
@@ -182,11 +198,95 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 void BridgeController::service(SocketRequest& request, SocketResponse& response)
 {
     QByteArray cmdString = request.getCommand();
-    QByteArray dataString = request.getParameter("data");
+    QByteArray dataXmlString = request.getParameter("data");
+    QByteArray dataString = "";
 
-    response.setStatus(0);                          //unimplemented
-    response.setParameter("value", "dummy");
-    response.write();
+    //Strip the XML tag if it is a simple value
+    bool singleValueArg = dataXmlString.startsWith("<value>") && dataXmlString.endsWith("</value>");
+    if (singleValueArg)
+        dataString = dataXmlString.mid(7, dataXmlString.length() - 15);
+
+    //-----------
+
+    if (cmdString == "CurDown")
+    {
+        bool isXOK = true;
+        bool isYOK = true;
+        float xf = request.getParameter("x").toFloat(&isXOK);
+        float yf = request.getParameter("y").toFloat(&isYOK);
+        if (isXOK && isYOK)
+        {
+            QRect screenRect = QApplication::desktop()->screenGeometry();
+            int xi = screenRect.width() * xf;
+            int yi = screenRect.height() * yf;
+            Static::cursorController->send_mouse_move_abs(xi,yi);
+            Static::cursorController->send_mouse_down(BTN_LEFT);
+
+            //No response
+        }
+        else
+        {
+            response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_ERROR));
+            response.setParameter("value", "Error in XY value");
+            response.write();
+        }
+    }
+
+    else if (cmdString == "CurMove")
+    {
+        bool isXOK = true;
+        bool isYOK = true;
+        float xf = request.getParameter("x").toFloat(&isXOK);
+        float yf = request.getParameter("y").toFloat(&isYOK);
+        if (isXOK && isYOK)
+        {
+            QRect screenRect = QApplication::desktop()->screenGeometry();
+            int xi = screenRect.width() * xf;
+            int yi = screenRect.height() * yf;
+            Static::cursorController->send_mouse_move_abs(xi,yi);
+
+            //No response
+        }
+        else
+        {
+            response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_ERROR));
+            response.setParameter("value", "Error in XY value");
+            response.write();
+        }
+    }
+
+    else if (cmdString == "CurUp")
+    {
+        bool isXOK = true;
+        bool isYOK = true;
+        float xf = request.getParameter("x").toFloat(&isXOK);
+        float yf = request.getParameter("y").toFloat(&isYOK);
+        if (isXOK && isYOK)
+        {
+            QRect screenRect = QApplication::desktop()->screenGeometry();
+            int xi = screenRect.width() * xf;
+            int yi = screenRect.height() * yf;
+            Static::cursorController->send_mouse_move_abs(xi,yi);
+            Static::cursorController->send_mouse_up(BTN_LEFT);
+
+            //No response
+        }
+        else
+        {
+            response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_ERROR));
+            response.setParameter("value", "Error in XY value");
+            response.write();
+        }
+    }
+
+    //-----------
+
+    else
+    {
+        response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_ERROR));
+        response.setParameter("value", "Unimplemented command");
+        response.write();
+    }
 }
 
 

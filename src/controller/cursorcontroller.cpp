@@ -22,8 +22,9 @@ CursorController::CursorController(QSettings* /* settings */, QObject* parent)
 {
     this->resX = QApplication::desktop()->screenGeometry().width();
     this->resY = QApplication::desktop()->screenGeometry().height();
+    isRelative = true;
 
-    setup_uinput_device(this->resX, this->resY);
+    setup_uinput_device(this->resX, this->resY, this->isRelative, NULL);
 }
 
 void CursorController::service(HttpRequest& request, HttpResponse& response)
@@ -85,6 +86,7 @@ void CursorController::service(HttpRequest& request, HttpResponse& response)
     }
 }
 
+
 //-------------------------------------------------------------------------------------
 // Shortcuts
 //-------------------------------------------------------------------------------------
@@ -113,74 +115,10 @@ void CursorController::send_mouse_click_middle(int x /*= -1*/, int y /*= -1*/)
     send_mouse_up(BTN_MIDDLE);
 }
 
+
 //-------------------------------------------------------------------------------------
 // Raw sending functions
 //-------------------------------------------------------------------------------------
-
-int CursorController::setup_uinput_device(int maxX, int maxY)
-{
-    // Temporary variable
-    int i=0;
-
-    // Open the input device
-    uinp_fd = open(INPUT_DEV_PATH, O_WRONLY | O_NDELAY);
-    if (uinp_fd == NULL)
-    {
-        qDebug("CursorController: unable to open %s", INPUT_DEV_PATH);
-        return -1;
-    }
-
-#if !defined (Q_WS_QWS)
-
-    memset(&uinp,0,sizeof(uinp));
-    strncpy(uinp.name, "NeTV UDP Input Device", UINPUT_MAX_NAME_SIZE);
-    uinp.id.version = 4;
-    uinp.id.bustype = BUS_USB;
-    uinp.id.vendor  = 0x1;
-    uinp.id.product = 0x1;
-
-    uinp.absmin[ABS_X]=0;
-    uinp.absmax[ABS_X]=maxX;
-    uinp.absfuzz[ABS_X]=0;
-    uinp.absflat[ABS_X ]=0;
-    uinp.absmin[ABS_Y]=0;
-    uinp.absmax[ABS_Y]=maxY;
-    uinp.absfuzz[ABS_Y]=0;
-    uinp.absflat[ABS_Y]=0;
-
-    // Setup the uinput device
-    ioctl(uinp_fd, UI_SET_EVBIT, EV_KEY);
-    ioctl(uinp_fd, UI_SET_EVBIT, EV_ABS);
-    ioctl(uinp_fd, UI_SET_ABSBIT, ABS_X);
-    ioctl(uinp_fd, UI_SET_ABSBIT, ABS_Y);
-    ioctl(uinp_fd, UI_SET_EVBIT, EV_REL);
-    ioctl(uinp_fd, UI_SET_RELBIT, REL_X);
-    ioctl(uinp_fd, UI_SET_RELBIT, REL_Y);
-
-    for (i=0; i < 256; i++)
-        ioctl(uinp_fd, UI_SET_KEYBIT, i);
-
-    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_MOUSE);
-    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_TOUCH);
-    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_MOUSE);
-    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_LEFT);
-    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_MIDDLE);
-    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_RIGHT);
-    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_FORWARD);
-    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_BACK);
-
-    // Create input device into input sub-system
-    write(uinp_fd, &uinp, sizeof(uinp));
-
-    if ( ioctl(uinp_fd, UI_DEV_CREATE) )
-    {
-        qDebug("Unable to create UINPUT device.");
-        return -1;
-    }
-#endif
-
-    return 1;
-}
 
 void CursorController::send_mouse_move_abs(int x, int y)
 {
@@ -298,4 +236,80 @@ void CursorController::send_key_up(int keyCode)
     event.code = SYN_REPORT;
     event.value = 0;
     write(uinp_fd, &event, sizeof(event));
+}
+
+int CursorController::setup_uinput_device(int maxX, int maxY, bool isRelative, const char * device /* = NULL */)
+{
+    // Temporary variable
+    int i=0;
+
+    printf("Setup input device with resolution [ %d , %d ]", maxX, maxY);
+
+    // Auto select which device to inject to
+    if (device == NULL)
+        device = isRelative ? INPUT_DEV_REL_PATH : INPUT_DEV_ABS_PATH;
+    this->device_path = device;
+
+    // Open the input device
+    uinp_fd = open(device, O_WRONLY | O_NDELAY);
+    if (uinp_fd == NULL)
+    {
+        qDebug("CursorController: unable to open %s", device);
+        return -1;
+    }
+
+#if !defined (Q_WS_QWS)
+
+    //This will be used on actual NeTV device which has no input to inject to.
+    //We will need to recompile a new kernel that has 'uinput' module for this.
+
+    memset(&uinp,0,sizeof(uinp));
+    strncpy(uinp.name, "NeTV UDP Input Device", UINPUT_MAX_NAME_SIZE);
+    uinp.id.version = 4;
+    uinp.id.bustype = BUS_USB;
+    uinp.id.vendor  = 0x1;
+    uinp.id.product = 0x1;
+
+    uinp.absmin[ABS_X]=0;
+    uinp.absmax[ABS_X]=maxX;
+    uinp.absfuzz[ABS_X]=0;
+    uinp.absflat[ABS_X ]=0;
+    uinp.absmin[ABS_Y]=0;
+    uinp.absmax[ABS_Y]=maxY;
+    uinp.absfuzz[ABS_Y]=0;
+    uinp.absflat[ABS_Y]=0;
+
+    // Setup the uinput device
+    ioctl(uinp_fd, UI_SET_EVBIT, EV_KEY);
+    ioctl(uinp_fd, UI_SET_EVBIT, EV_ABS);
+    ioctl(uinp_fd, UI_SET_ABSBIT, ABS_X);
+    ioctl(uinp_fd, UI_SET_ABSBIT, ABS_Y);
+    ioctl(uinp_fd, UI_SET_EVBIT, EV_REL);
+    ioctl(uinp_fd, UI_SET_RELBIT, REL_X);
+    ioctl(uinp_fd, UI_SET_RELBIT, REL_Y);
+
+    for (i=0; i < 256; i++)
+        ioctl(uinp_fd, UI_SET_KEYBIT, i);
+
+    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_MOUSE);
+    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_TOUCH);
+    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_MOUSE);
+    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_LEFT);
+    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_MIDDLE);
+    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_RIGHT);
+    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_FORWARD);
+    ioctl(uinp_fd, UI_SET_KEYBIT, BTN_BACK);
+
+    // Create input device into input sub-system
+    write(uinp_fd, &uinp, sizeof(uinp));
+
+    if ( ioctl(uinp_fd, UI_DEV_CREATE) )
+    {
+        qDebug("Unable to create UINPUT device.");
+        return -1;
+    }
+
+#endif  //Q_WS_QWS
+
+    return 1;
 }

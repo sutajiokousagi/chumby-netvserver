@@ -84,5 +84,6 @@ void RequestMapper::service(SocketRequest& request, SocketResponse& response)
     if (request.hasError())
         return;
 
+    //We only have the bridge controller as SocketHandler at the moment
     Static::bridgeController->service(request, response);
 }

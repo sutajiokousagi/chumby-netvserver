@@ -131,11 +131,10 @@ void UdpSocketServer::run()
             if (!isLoopback)
             {
                 SocketRequest *request = new SocketRequest(QByteArray(buf), host.toString().toLatin1());
-                if (!request->hasError() && this->requestHandler == NULL)
+                if (!request->hasError() && this->requestHandler != NULL)
                 {
                     SocketResponse response(&sock);
                     this->requestHandler->service(*request, response);
-
                 }
                 delete request;
             }
