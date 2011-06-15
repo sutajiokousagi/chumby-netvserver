@@ -7,8 +7,6 @@
 #ifndef FRAMEBUFFERCONTROLLER_H
 #define FRAMEBUFFERCONTROLLER_H
 
-#include "httprequest.h"
-#include "httpresponse.h"
 #include "httprequesthandler.h"
 
 /**

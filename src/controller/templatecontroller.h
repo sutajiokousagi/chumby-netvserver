@@ -7,8 +7,6 @@
 #ifndef TEMPLATECONTROLLER_H
 #define TEMPLATECONTROLLER_H
 
-#include "httprequest.h"
-#include "httpresponse.h"
 #include "httprequesthandler.h"
 
 /**
