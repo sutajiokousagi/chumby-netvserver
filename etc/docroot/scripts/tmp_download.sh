@@ -5,9 +5,14 @@ SCRIPT=$(readlink -f $0)
 # Absolute path this script is in. /home/user/bin
 SCRIPTPATH=`dirname $SCRIPT`
 
+# Construct cache filename from the full Url
 newfilename=$(echo $1 | sed -e "s/\//\|\|/g")
-
 newpath="${SCRIPTPATH}/../tmp/${newfilename}.jpg"
-wget $1 -q -O $newpath
 
+# Download only if it doesn't exist in cache
+if [ ! -e $newpath ]; then
+    wget $1 -q -O $newpath
+fi;
+
+# Return just the filename to the hardware bridge
 echo "${newfilename}.jpg"
