@@ -42,7 +42,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     //Strip the XML tag if it is a simple value
     bool singleValueArg = dataXmlString.startsWith("<value>") && dataXmlString.endsWith("</value>");
     if (singleValueArg)
-        dataString = dataXmlString.mid(7, dataXmlString.length() - 15);
+        dataString = dataXmlString.mid(7, dataXmlString.length() - 15).trimmed();
 
     //-----------
 
@@ -55,7 +55,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "GetJPG" || cmdString == "GetJPEG")
     {
-        QByteArray buffer = QByteArray("tmp/") + this->Execute(docroot + "/scripts/tmp_download.sh", QStringList(dataString));
+        QByteArray buffer = this->Execute(docroot + "/scripts/tmp_download.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>", true);
     }
 
@@ -103,11 +103,46 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data>");
     }
 
+    //-----------
+
     else if (cmdString == "SetBox")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/setbox.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>");
         buffer = QByteArray();
+    }
+
+    else if (cmdString == "SetChromaKey")
+    {
+        //Contruct arguments
+        dataString = dataString.toLower();
+        QStringList argList;
+
+        if (dataString == "on" || dataString == "true" || dataString == "yes")                argList.append(QString("on"));
+        else if (dataString == "off" || dataString == "false" || dataString == "no")          argList.append(QString("off"));
+        else if (dataString.count(",") == 2 && dataString.length() <= 11 && dataString.length() >= 5)
+        {
+            //Do 8-bit to 6-bit conversion
+            QList<QByteArray> rgb = dataString.split(',');
+            int r = rgb[0].toInt();
+            int g = rgb[1].toInt();
+            int b = rgb[2].toInt();
+            argList.append(QString("%1").arg(r));
+            argList.append(QString("%1").arg(g));
+            argList.append(QString("%1").arg(b));
+        }
+
+        //Execute the script
+        if (argList.size() <= 0)
+        {
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>Invalid arguments</value></data>");
+        }
+        else
+        {
+            QByteArray buffer = this->Execute(docroot + "/scripts/chromakey.sh", argList);
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>");
+            buffer = QByteArray();
+        }
     }
 
     else if (cmdString == "ControlPanel")

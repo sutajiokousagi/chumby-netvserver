@@ -1,11 +1,7 @@
 function sendSingleValueCommand(cmd, dataString)
 {
 	//Which address to submit to
-	var web_address = "http://192.168.1.48/bridge";
-	if (document.form_Target.input_target_checkbox.checked)
-		web_address = "/bridge";
-	else if (document.form_Target.input_target.value != "")
-		web_address = "http://" + document.form_Target.input_target.value + "/bridge";
+	var web_address = "./bridge";
 
 	//Convert data string to XML format
 	var xmlDataString = '<value>' +  dataString + '</value>';
@@ -34,12 +30,8 @@ function sendSingleValueCommand(cmd, dataString)
 function sendMultiValueCommand(cmd, dataArray)
 {
 	//Which address to submit to
-	var web_address = "http://192.168.1.48/bridge";
-	if (document.form_Target.input_target_checkbox.checked)
-		web_address = "/bridge";
-	else if (document.form_Target.input_target.value != "")
-		web_address = "http://" + document.form_Target.input_target.value + "/bridge";
-
+	var web_address = "./bridge";
+	
 	//Convert data array to XML format
 	var xmlDataString = '';
 	for (var key in dataArray)
@@ -158,6 +150,66 @@ function SetBox()
 	else
 	{
 		sendSingleValueCommand('SetBox', dataString);
+	}
+}
+
+function SetChromaKeyOnOff()
+{
+	var dataString = document.form_SetChromaKeyOnOff.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('SetChromaKey', dataString);
+	}
+}
+
+function SetChromaKeyColor()
+{
+	var dataString = document.form_SetChromaKeyColor.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('SetChromaKey', dataString);
+	}
+}
+
+function ControlPanel()
+{
+	var dataString = document.form_ControlPanel.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('ControlPanel', dataString);
+	}
+}
+
+function WidgetEngine()
+{
+	var dataString = document.form_WidgetEngine.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('WidgetEngine', dataString);
 	}
 }
 

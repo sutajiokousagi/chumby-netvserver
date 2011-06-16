@@ -8,16 +8,9 @@
 <script language="javascript">
 	function onLoad()
 	{
-		var web_address = "192.168.1.48";
-		document.form_Target.input_target.value = web_address;
 		document.all.browserDetect_browser.innerHTML = "Browser: " + BrowserDetect.browser;
 		document.all.browserDetect_version.innerHTML = "Version: " + BrowserDetect.version;
 		document.all.browserDetect_os.innerHTML = "OS: " + BrowserDetect.OS;
-	}
-	
-	function enableTargetInput()
-	{
-		document.frmwebservices.input_target.disabled = document.frmwebservices.input_target_checkbox.checked;
 	}
 </script>
 </style>
@@ -35,29 +28,6 @@
 <td width="80%" height="100%" valign="top">
 
 	<table width="100%" border="0" cellspacing="0px" cellpadding="5px" >
-		
-		<!-- Settings header row -->
-		<tr class="service_header_row">
-			<td colspan="4" align="Left">
-				<b>Settings</b>
-			</td>
-		</tr>
-		
-		<!-- Target device -->
-		<form name="form_Target" method="POST" action="">
-		<tr class="service_row">
-			<td>
-				
-			</td>
-			<td>
-				Target device
-			</td>
-			<td colspan="2">
-				<input type="text" size="32" name="input_target" />
-				<input type="checkbox" name="input_target_checkbox" onclick="enableTargetInput()" />Use localhost
-			</td>
-		</tr>
-		</form>
 
 		<!-- Service header row -->
 		<tr class="service_header_row">
@@ -188,8 +158,8 @@
 		<!-- SetBox -->
 		<form name="form_SetBox" method="POST" action="">
 		<tr class="service_row">
-			<td class="service_in_progress">
-				In Testing
+			<td class="service_done">
+				Done
 			</td>
 			<td>
 				SetBox
@@ -199,6 +169,78 @@
 			</td>
 			<td class="td_button">
 				<input type="button" value="GO!" onclick="SetBox()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- SetChromaKey -->
+		<form name="form_SetChromaKeyOnOff" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_in_progress">
+				In Testing
+			</td>
+			<td>
+				SetChromaKey
+			</td>
+			<td>
+				<input type="text" size="3" name="inputField" value="on" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="SetChromaKeyOnOff()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- SetChromaKey -->
+		<form name="form_SetChromaKeyColor" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_in_progress">
+				In Testing
+			</td>
+			<td>
+				SetChromaKey
+			</td>
+			<td>
+				<input type="text" size="11" name="inputField" value="0,7,0" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="SetChromaKeyColor()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- ControlPanel -->
+		<form name="form_ControlPanel" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				Done
+			</td>
+			<td>
+				ControlPanel
+			</td>
+			<td>
+				<input type="text" size="128" name="inputField" value="Maximize" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="ControlPanel()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- WidgetEngine -->
+		<form name="form_WidgetEngine" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_in_progress">
+				In Testing
+			</td>
+			<td>
+				WidgetEngine
+			</td>
+			<td>
+				<input type="text" size="128" name="inputField" value="TBD" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="WidgetEngine()">
 			</td>
 		</tr>
 		</form>
