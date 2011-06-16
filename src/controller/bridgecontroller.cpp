@@ -243,6 +243,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
     //-----------
 
+#if defined (CURSOR_CONTROLLER)
     if (cmdString == "CurDown")
     {
         bool isXOK = true;
@@ -313,6 +314,14 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
             response.write();
         }
     }
+
+    else if (cmdString == "CursorMode")
+    {
+        bool isRelative = request.getParameter("value") == "relative";
+        if (isRelative)         Static::cursorController->setRelativeMode();
+        else                    Static::cursorController->setAbsoluteMode();
+    }
+#endif
 
     //-----------
 

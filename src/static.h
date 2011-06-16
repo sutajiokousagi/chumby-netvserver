@@ -73,7 +73,7 @@ public:
     static BridgeController* bridgeController;
 
     /** Controller for input device */
-#if defined Q_OS_UNIX && !defined Q_OS_MAC
+#if defined (CURSOR_CONTROLLER)
     static CursorController* cursorController;
 #endif
 

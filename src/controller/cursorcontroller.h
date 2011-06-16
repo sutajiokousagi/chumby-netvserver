@@ -14,7 +14,7 @@
 
 #if defined (Q_WS_QWS)
     #define INPUT_DEV_ABS_PATH "/dev/input/by-id/soc-noserial-event-ts"
-    #define INPUT_DEV_REL_PATH "/dev/input/event0"
+    #define INPUT_DEV_REL_PATH "/dev/input/mice"
 #else
     #define INPUT_DEV_ABS_PATH "/dev/uinput"
     #define INPUT_DEV_REL_PATH "/dev/uinput"

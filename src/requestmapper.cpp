@@ -66,7 +66,7 @@ void RequestMapper::service(HttpRequest& request, HttpResponse& response)
     }
 
 //Only available on Linux system
-#if defined Q_OS_UNIX && !defined Q_OS_MAC
+#if defined (CURSOR_CONTROLLER)
     else if (path.startsWith("/cursor")) {
         Static::cursorController->service(request, response);
     }

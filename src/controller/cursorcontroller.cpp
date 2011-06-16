@@ -1,21 +1,9 @@
-/**
-  @file
-  @author Stefan Frings
-  @version $Id: CursorController.cpp 938 2010-12-05 14:29:58Z stefan $
-*/
-
 #include "cursorcontroller.h"
 #include <QFileInfo>
 #include <QDir>
 #include <QProcess>
 #include <QApplication>
 #include <QDesktopWidget>
-
-#if defined (Q_WS_QWS)
-    #define INPUT_DEV_PATH "/dev/input/by-id/soc-noserial-event-ts"
-#else
-    #define INPUT_DEV_PATH "/dev/uinput"
-#endif
 
 CursorController::CursorController(QSettings* /* settings */, QObject* parent)
     :HttpRequestHandler(parent)
@@ -24,7 +12,7 @@ CursorController::CursorController(QSettings* /* settings */, QObject* parent)
     this->resY = QApplication::desktop()->screenGeometry().height();
     isRelative = true;
 
-    setup_uinput_device(this->resX, this->resY, this->isRelative, NULL);
+    setup_uinput_device(this->resX, this->resY, this->isRelative);
 }
 
 void CursorController::service(HttpRequest& request, HttpResponse& response)
@@ -259,7 +247,7 @@ int CursorController::setup_uinput_device(int maxX, int maxY, bool isRelative, c
     }
 
 #if !defined (Q_WS_QWS)
-
+/*
     //This will be used on actual NeTV device which has no input to inject to.
     //We will need to recompile a new kernel that has 'uinput' module for this.
 
@@ -308,8 +296,52 @@ int CursorController::setup_uinput_device(int maxX, int maxY, bool isRelative, c
         qDebug("Unable to create UINPUT device.");
         return -1;
     }
-
-#endif  //Q_WS_QWS
+*/
+#endif  //!Q_WS_QWS
 
     return 1;
+}
+
+void CursorController::setRelativeMode()
+{
+    //Set the flag
+    if (isRelative)
+        return;
+    isRelative = true;
+
+    //Reinitialize the device
+    if (uinp_fd != NULL)
+    {
+        ioctl(uinp_fd, UI_DEV_DESTROY);
+        close(uinp_fd);
+        uinp_fd = NULL;
+    }
+    setup_uinput_device(this->resX, this->resY, this->isRelative);
+}
+
+void CursorController::setAbsoluteMode()
+{
+    //Set the flag
+    if (!isRelative)
+        return;
+    isRelative = false;
+
+    //Reinitialize the device
+    if (uinp_fd != NULL)
+    {
+        ioctl(uinp_fd, UI_DEV_DESTROY);
+        close(uinp_fd);
+        uinp_fd = NULL;
+    }
+    setup_uinput_device(this->resX, this->resY, this->isRelative);
+}
+
+bool CursorController::isRelativeMode()
+{
+    return isRelative;
+}
+
+bool CursorController::isAbsoluteMode()
+{
+    return !isRelative;
 }
