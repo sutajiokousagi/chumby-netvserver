@@ -8,7 +8,5 @@
 
 cmd=$(echo $1 | tr '[A-Z]' '[a-z]')
 
-echo $cmd
-
 # Forward the button name to JavaScript Control Panel
-#/usr/bin/NeTVBrowser -qws JavaScript "mCPanel.fButtonPress('$cmd')"
+/usr/bin/NeTVBrowser -qws JavaScript "fButtonPress('$cmd')"
