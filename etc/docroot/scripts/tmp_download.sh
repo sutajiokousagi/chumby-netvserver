@@ -5,6 +5,11 @@ SCRIPT=$(readlink -f $0)
 # Absolute path this script is in. /home/user/bin
 SCRIPTPATH=`dirname $SCRIPT`
 
+# Create a neat folder in /tmp for us
+if [ ! -e ${SCRIPTPATH}/../tmp/netvserver ]; then
+	mkdir ${SCRIPTPATH}/../tmp/netvserver;
+fi
+
 # Construct cache filename from the full Url
 newfilename=$(echo $1 | sed -e "s/\//\|\|/g")
 newpath="${SCRIPTPATH}/../tmp/netvserver/${newfilename}.jpg"

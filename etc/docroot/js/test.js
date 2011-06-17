@@ -235,7 +235,6 @@ function GetParam()
 
 function SetParam()
 {
-	/*
 	var dataString1 = document.form_GetXML.inputField.value;
 	var dataString2 = document.form_GetXML.inputField2.value;
 	var dataArray = { myKey1:dataString1, myKey2:dataString2 };
@@ -249,7 +248,6 @@ function SetParam()
 	{
 		sendMultiValueCommand('SetParam', dataArray);
 	}
-	*/
 }
 
 function GetFileContents()
