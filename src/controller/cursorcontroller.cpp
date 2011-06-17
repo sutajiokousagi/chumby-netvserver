@@ -228,9 +228,6 @@ void CursorController::send_key_up(int keyCode)
 
 int CursorController::setup_uinput_device(int maxX, int maxY, bool isRelative, const char * device /* = NULL */)
 {
-    // Temporary variable
-    int i=0;
-
     printf("Setup input device with resolution [ %d , %d ]", maxX, maxY);
 
     // Auto select which device to inject to
@@ -276,6 +273,7 @@ int CursorController::setup_uinput_device(int maxX, int maxY, bool isRelative, c
     ioctl(uinp_fd, UI_SET_RELBIT, REL_X);
     ioctl(uinp_fd, UI_SET_RELBIT, REL_Y);
 
+    int i=0;
     for (i=0; i < 256; i++)
         ioctl(uinp_fd, UI_SET_KEYBIT, i);
 

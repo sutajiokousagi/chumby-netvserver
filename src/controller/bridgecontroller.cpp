@@ -159,6 +159,13 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         buffer = QByteArray();
     }
 
+    else if (cmdString == "RemoteControl")
+    {
+        QByteArray buffer = this->Execute(docroot + "/scripts/remote_control.sh", QStringList(dataString));
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>");
+        buffer = QByteArray();
+    }
+
     //-----------
 
     else if (cmdString == "GetAllParams")
@@ -233,13 +240,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 void BridgeController::service(SocketRequest& request, SocketResponse& response)
 {
     QByteArray cmdString = request.getCommand();
-    QByteArray dataXmlString = request.getParameter("data");
-    QByteArray dataString = "";
-
-    //Strip the XML tag if it is a simple value
-    bool singleValueArg = dataXmlString.startsWith("<value>") && dataXmlString.endsWith("</value>");
-    if (singleValueArg)
-        dataString = dataXmlString.mid(7, dataXmlString.length() - 15);
+    QByteArray dataString = request.getParameter("value").trimmed();
 
     //-----------
 
@@ -324,6 +325,33 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 #endif
 
     //-----------
+
+    else if (cmdString == "ControlPanel")
+    {
+        QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
+        response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_SUCCESS));
+        response.setParameter("value", buffer);
+        response.write();
+        buffer = QByteArray();
+    }
+
+    else if (cmdString == "WidgetEngine")
+    {
+        QByteArray buffer = this->Execute(docroot + "/scripts/widget_engine.sh", QStringList(dataString));
+        response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_SUCCESS));
+        response.setParameter("value", buffer);
+        response.write();
+        buffer = QByteArray();
+    }
+
+    else if (cmdString == "RemoteControl")
+    {
+        QByteArray buffer = this->Execute(docroot + "/scripts/remote_control.sh", QStringList(dataString));
+        response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_SUCCESS));
+        response.setParameter("value", buffer);
+        response.write();
+        buffer = QByteArray();
+    }
 
     else
     {
