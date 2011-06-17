@@ -113,50 +113,30 @@ void UdpSocketServer::run()
     {
         msleep(SERVICE_INTERVAL);
 
-        //Receive
         while(sock.hasPendingDatagrams())
         {
             char buf[MAX_MSG_LENGTH];
-            QHostAddress host;
+            QHostAddress peerAddress;
             memset(buf, 0, sizeof(buf));
-            sock.readDatagram(buf, MAX_MSG_LENGTH, &host);
+            sock.readDatagram(buf, MAX_MSG_LENGTH, &peerAddress);
 
             //Check loopback
             bool isLoopback = false;
             for (int i = 0; i < list.size(); i++)
-                if (host.toString() == list.at(i).toString())
+                if (peerAddress.toString() == list.at(i).toString())
                     isLoopback = true;
 
             //This interface is mainly used for external mobile device only
             if (!isLoopback)
             {
-                SocketRequest *request = new SocketRequest(QByteArray(buf), host.toString().toLatin1());
+                SocketRequest *request = new SocketRequest(QByteArray(buf), peerAddress.toString().toLatin1());
                 if (!request->hasError() && this->requestHandler != NULL)
                 {
-                    SocketResponse response(&sock);
+                    SocketResponse response(&sock, peerAddress.toString().toLatin1() , port);
                     this->requestHandler->service(*request, response);
                 }
                 delete request;
             }
-        }
-
-        //Transmit queue (broadcast)
-        while (!messageQueue.empty())
-        {
-            QMap<QString,QString> msg = messageQueue.first();
-            messageQueue.pop_front();
-
-            /*
-            //Send a unicast datagram if 'address' is specified
-            if (msg.value("address") == NULL)
-            {
-                sock.writeDatagram(getSerializedInfoXML( msg ), QHostAddress(QHostAddress::Broadcast), port);
-            }
-            else
-            {
-                sock.writeDatagram(getSerializedInfoXML( msg ), QHostAddress(msg.value("address")), port);
-            }
-            */
         }
     }
 

@@ -1,9 +1,3 @@
-/**
-  @file
-  @author Stefan Frings
-  @version $Id: ScriptController.cpp 938 2010-12-05 14:29:58Z stefan $
-*/
-
 #include "scriptcontroller.h"
 #include <QFileInfo>
 #include <QDir>

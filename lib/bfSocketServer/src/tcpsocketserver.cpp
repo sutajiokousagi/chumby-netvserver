@@ -79,7 +79,7 @@ void TcpSocketServer::read()
         return;
     }
 
-    SocketResponse response(socket);
+    SocketResponse response(socket, socket->peerAddress().toString().toLatin1(), socket->peerPort());
     this->requestHandler->service(*request, response);
     buffer = QByteArray();
     delete request;

@@ -1,9 +1,3 @@
-/**
-  @file
-  @author Stefan Frings
-  @version $Id: fileuploadcontroller.h 938 2010-12-05 14:29:58Z stefan $
-*/
-
 #ifndef FRAMEBUFFERCONTROLLER_H
 #define FRAMEBUFFERCONTROLLER_H
 

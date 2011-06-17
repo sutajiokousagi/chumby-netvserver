@@ -1,11 +1,15 @@
 #include "socketresponse.h"
 #include <QXmlStreamWriter>
 #include <QBuffer>
+#include <QTcpSocket>
+#include <QUdpSocket>
 
-SocketResponse::SocketResponse(QAbstractSocket* socket)
+SocketResponse::SocketResponse(QAbstractSocket* socket, QByteArray address, quint16 port)
 {
     this->socket=socket;
     this->statusText = "0";     //0:unimplemented, 1:success, 2:general error
+    this->address = address;
+    this->port = port;
 }
 
 SocketResponse::~SocketResponse()
@@ -13,6 +17,11 @@ SocketResponse::~SocketResponse()
     this->socket = NULL;
     this->statusText = "";
     this->parameters.clear();
+}
+
+void SocketResponse::setBroadcast()
+{
+    this->address = "";
 }
 
 void SocketResponse::setStatus(QByteArray commandName)
@@ -98,10 +107,25 @@ void SocketResponse::writeToSocket(QByteArray data)
 {
     int remaining = data.size();
     char* ptr=data.data();
-    while (socket->isOpen() && remaining>0)
+
+    QTcpSocket *tcpsocket = qobject_cast<QTcpSocket*>(socket);
+    QUdpSocket *udpsocket = qobject_cast<QUdpSocket*>(socket);
+
+    if (tcpsocket)
     {
-        int written = socket->write(data);
-        ptr += written;
-        remaining -= written;
+        while (socket->isOpen() && remaining>0)
+        {
+            int written = socket->write(data);
+            ptr += written;
+            remaining -= written;
+        }
+    }
+    else if (udpsocket)
+    {
+
+        if (address == "")
+            udpsocket->writeDatagram(data, QHostAddress(QHostAddress::Broadcast), port);
+        else
+            udpsocket->writeDatagram(data, QHostAddress(QString(address)), port);
     }
 }

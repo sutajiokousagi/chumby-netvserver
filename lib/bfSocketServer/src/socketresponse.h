@@ -15,8 +15,10 @@ public:
       Constructor.
       @param socket used to write the response
     */
-    SocketResponse(QAbstractSocket* socket);
+    SocketResponse(QAbstractSocket* socket, QByteArray address, quint16 port);
     ~SocketResponse();
+
+    void setBroadcast();
 
     void setStatus(QByteArray statusName);
     void setStatus(int statusCode);
@@ -35,6 +37,8 @@ private:
     QAbstractSocket* socket;
 
     QByteArray statusText;
+    QByteArray address;
+    quint16 port;
 
     QMap<QByteArray,QByteArray> parameters;
 

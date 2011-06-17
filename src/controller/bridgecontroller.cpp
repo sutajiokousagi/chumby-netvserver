@@ -263,7 +263,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         }
         else
         {
-            response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_ERROR));
+            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
             response.setParameter("value", "Error in XY value");
             response.write();
         }
@@ -286,7 +286,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         }
         else
         {
-            response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_ERROR));
+            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
             response.setParameter("value", "Error in XY value");
             response.write();
         }
@@ -310,7 +310,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         }
         else
         {
-            response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_ERROR));
+            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
             response.setParameter("value", "Error in XY value");
             response.write();
         }
@@ -329,7 +329,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     else if (cmdString == "ControlPanel")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
-        response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_SUCCESS));
+        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setParameter("value", buffer);
         response.write();
         buffer = QByteArray();
@@ -338,7 +338,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     else if (cmdString == "WidgetEngine")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/widget_engine.sh", QStringList(dataString));
-        response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_SUCCESS));
+        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setParameter("value", buffer);
         response.write();
         buffer = QByteArray();
@@ -347,15 +347,38 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     else if (cmdString == "RemoteControl")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/remote_control.sh", QStringList(dataString));
-        response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_SUCCESS));
+        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setParameter("value", buffer);
         response.write();
         buffer = QByteArray();
     }
 
+    else if (cmdString == "MobileApp")
+    {
+        if (dataString.length() > 0)
+        {
+            if (dataString == "SetScreenshotRes")
+            {
+
+            }
+            else if (dataString == "GetScreenshotPath")
+            {
+
+            }
+        }
+        else
+        {
+            QByteArray buffer = this->Execute(docroot + "/scripts/mobile_app.sh", QStringList(dataString));
+            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+            response.setParameter("value", buffer);
+            response.write();
+            buffer = QByteArray();
+        }
+    }
+
     else
     {
-        response.setParameter("status", QByteArray().setNum((int)BRIDGE_RETURN_STATUS_ERROR));
+        response.setStatus(BRIDGE_RETURN_STATUS_UNIMPLEMENTED);
         response.setParameter("value", "Unimplemented command");
         response.write();
     }
