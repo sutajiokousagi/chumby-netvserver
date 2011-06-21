@@ -1,8 +1,8 @@
-/**
-  @file
-  @author Stefan Frings
-  @version $Id: startup.cpp 938 2010-12-05 14:29:58Z stefan $
-*/
+#ifdef Q_WS_QWS
+    #include <QWSServer>
+    #include <QBrush>
+    #include <QColor>
+#endif
 
 #include <QDir>
 #include "startup.h"
@@ -26,8 +26,7 @@
 /** The special string used to split & join arguements */
 #define ARGS_SPLIT_TOKEN    "|~|"
 
-Startup::Startup(int argc, char *argv[])
-    : QtSingleApplication(argc, argv)
+Startup::Startup(int argc, char *argv[]) : QtSingleApplication(argc, argv, QApplication::GuiServer)
 {
     //Check if another instance is already running by sending a message to it
     QStringList argsList = this->arguments();
@@ -38,6 +37,11 @@ Startup::Startup(int argc, char *argv[])
         printf("Sending '%s' to running NeTVServer instance\n", argsString.toLatin1().constData());
         exit(0);
     }
+
+#ifdef Q_WS_QWS
+    //QWSServer::setCursorVisible(false);
+    //QWSServer::setBackground(QBrush(QColor(0,7,0)));
+#endif
 
     printf("Starting new NeTVServer with args: %s\n", argsString.toLatin1().constData());
 
