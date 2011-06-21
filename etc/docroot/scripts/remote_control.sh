@@ -16,8 +16,14 @@ then
 	
 	# Reset the browser
 	start_netvbrowser.sh
+
+	# Print out the command received
+	echo $cmd
 	exit;
 fi
 
 # Forward the button name to JavaScript Control Panel
 /usr/bin/NeTVBrowser -qws -nomouse JavaScript "fButtonPress('$cmd')"
+
+# Print out the command received
+echo $cmd
