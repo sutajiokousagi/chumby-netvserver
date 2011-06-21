@@ -353,27 +353,27 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         buffer = QByteArray();
     }
 
-    else if (cmdString == "MobileApp")
+    else if (cmdString == "Hello")
     {
-        if (dataString.length() > 0)
-        {
-            if (dataString == "SetScreenshotRes")
-            {
+        //We should be returning more useful info here
+        response.setCommand(cmdString);
+        response.setParameter("value", "Hello back! This is NeTV");
+        response.write();
+    }
 
-            }
-            else if (dataString == "GetScreenshotPath")
-            {
+    else if (cmdString == "GetScreenshotPath")
+    {
+        QByteArray tmpString = QByteArray("http://" +  request.getLocalAddress() + "/framebuffer");
+        response.setCommand(cmdString);
+        response.setParameter("value", tmpString);
+        response.write();
+    }
 
-            }
-        }
-        else
-        {
-            QByteArray buffer = this->Execute(docroot + "/scripts/mobile_app.sh", QStringList(dataString));
-            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
-            response.setParameter("value", buffer);
-            response.write();
-            buffer = QByteArray();
-        }
+    else if (cmdString == "SetScreenshotRes")
+    {
+        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setParameter("value", "Screenshot resolution changed");
+        response.write();
     }
 
     else
