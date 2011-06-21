@@ -18,13 +18,15 @@ public:
       Constructor.
       @param socket used to write the response
     */
-    SocketRequest(QByteArray data, QByteArray address);
+    SocketRequest(QByteArray data, QByteArray address, quint16 port);
     ~SocketRequest();
 
     bool hasError();
 
     QByteArray getCommand();
     QByteArray getAddress();
+    QByteArray getLocalAddress();
+    quint16 getPort();
 
     QMap<QByteArray,QByteArray>& getParameters();
     QByteArray getParameter(QByteArray paramName);
@@ -36,6 +38,7 @@ private:
 
     QByteArray commandText;
     QByteArray address;
+    quint16 port;
 
     QMap<QByteArray,QByteArray> parameters;
 

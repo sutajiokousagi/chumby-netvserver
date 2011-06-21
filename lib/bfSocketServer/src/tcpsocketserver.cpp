@@ -71,7 +71,7 @@ void TcpSocketServer::read()
     while (socket->bytesAvailable() > 0)
         buffer.append( socket->read(socket->bytesAvailable()) );
 
-    SocketRequest *request = new SocketRequest(buffer, socket->peerAddress().toString().toLatin1());
+    SocketRequest *request = new SocketRequest(buffer, socket->peerAddress().toString().toLatin1(), socket->peerPort());
     if (request->hasError() || this->requestHandler == NULL)
     {
         buffer = QByteArray();

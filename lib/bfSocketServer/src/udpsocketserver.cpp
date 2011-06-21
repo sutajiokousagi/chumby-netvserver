@@ -129,7 +129,7 @@ void UdpSocketServer::run()
             //This interface is mainly used for external mobile device only
             if (!isLoopback)
             {
-                SocketRequest *request = new SocketRequest(QByteArray(buf), peerAddress.toString().toLatin1());
+                SocketRequest *request = new SocketRequest(QByteArray(buf), peerAddress.toString().toLatin1(), port);
                 if (!request->hasError() && this->requestHandler != NULL)
                 {
                     SocketResponse response(&sock, peerAddress.toString().toLatin1() , port);

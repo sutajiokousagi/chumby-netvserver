@@ -16,6 +16,7 @@ SocketResponse::~SocketResponse()
 {
     this->socket = NULL;
     this->statusText = "";
+    this->commandText = "";
     this->parameters.clear();
 }
 
@@ -24,14 +25,19 @@ void SocketResponse::setBroadcast()
     this->address = "";
 }
 
-void SocketResponse::setStatus(QByteArray commandName)
+void SocketResponse::setStatus(QByteArray statusName)
 {
-    this->statusText = commandName;
+    this->statusText = statusName;
 }
 
 void SocketResponse::setStatus(int statusCode)
 {
     this->statusText = QByteArray::number(statusCode);
+}
+
+void SocketResponse::setCommand(QByteArray commandName)
+{
+    this->commandText = commandName;
 }
 
 void SocketResponse::setParameter(QByteArray paramName, int paramValue)
@@ -70,7 +76,9 @@ void SocketResponse::write()
     QXmlStreamWriter *xmlfile = new QXmlStreamWriter();
     xmlfile->setDevice(&buffer);
 
-    xmlfile->writeTextElement("status", statusText);
+    xmlfile->writeStartElement("xml");
+    if (commandText != "")          xmlfile->writeTextElement("cmd", commandText);
+    else if (statusText != "")      xmlfile->writeTextElement("status", statusText);
 
     if (parameters.count() == 1)
     {
@@ -94,6 +102,7 @@ void SocketResponse::write()
         }
         xmlfile->writeEndElement();
     }
+    xmlfile->writeEndElement();
 
     delete xmlfile;
 
