@@ -356,9 +356,10 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
     else if (cmdString == "RemoteControl")
     {
-        //QByteArray buffer = this->Execute(docroot + "/scripts/remote_control.sh", QStringList(dataString));
+        QByteArray buffer = this->Execute(docroot + "/scripts/remote_control.sh", QStringList(dataString));
 
         //Response to all pending long polling HTTP requests
+        /*
         while (!longPollResponses.isEmpty())
         {
              HttpResponse* httpresponse = longPollResponses.takeFirst();
@@ -367,8 +368,9 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
              httpresponse->write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + dataString + "</value></data>", true);
              httpresponse->disconnectFromHost();
         }
-
         QByteArray buffer = dataString;
+        */
+
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setParameter("value", buffer);
         response.write();
