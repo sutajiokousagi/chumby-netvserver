@@ -21,6 +21,9 @@ public:
 
 private:
 
+    /** Long polling HTTP response */
+    QList<HttpResponse*> longPollResponses;
+
     /** Encoding of text files */
     QString encoding;
 

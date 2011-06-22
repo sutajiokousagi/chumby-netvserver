@@ -12,6 +12,7 @@ HttpResponse::HttpResponse(QTcpSocket* socket) {
     statusText="OK";
     sentHeaders=false;
     sentLastPart=false;
+    longPoll=false;
 }
 
 void HttpResponse::setHeader(QByteArray name, QByteArray value) {
@@ -123,4 +124,24 @@ void HttpResponse::setCookie(const HttpCookie& cookie) {
 
 QMap<QByteArray,HttpCookie>& HttpResponse::getCookies() {
     return cookies;
+}
+
+bool HttpResponse::isOpen() const
+{
+    return this->socket != NULL && this->socket->isOpen();
+}
+
+bool HttpResponse::isLongPoll() const
+{
+    return longPoll;
+}
+
+void HttpResponse::setLongPollMode(bool isLongPoll)
+{
+    longPoll = isLongPoll;
+}
+
+void HttpResponse::disconnectFromHost()
+{
+    this->socket->disconnectFromHost();
 }

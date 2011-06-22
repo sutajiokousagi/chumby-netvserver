@@ -13,6 +13,8 @@
 BridgeController::BridgeController(QSettings* settings, QObject* parent)
     :HttpRequestHandler(parent)
 {
+    longPollResponses.clear();
+
     encoding=settings->value("encoding","UTF-8").toString();
     docroot=settings->value("path",".").toString();
 
@@ -164,6 +166,14 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         QByteArray buffer = this->Execute(docroot + "/scripts/remote_control.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer + "</value></data>");
         buffer = QByteArray();
+    }
+
+    else if (cmdString == "LongPoll")
+    {
+        longPollResponses.append(&response);
+
+        //Prevent the connection handler (httpconnectionhandler.cpp) to disconnect & delete the current response
+        response.setLongPollMode(true);
     }
 
     //-----------
@@ -346,7 +356,19 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
     else if (cmdString == "RemoteControl")
     {
-        QByteArray buffer = this->Execute(docroot + "/scripts/remote_control.sh", QStringList(dataString));
+        //QByteArray buffer = this->Execute(docroot + "/scripts/remote_control.sh", QStringList(dataString));
+
+        //Response to all pending long polling HTTP requests
+        while (!longPollResponses.isEmpty())
+        {
+             HttpResponse* httpresponse = longPollResponses.takeFirst();
+             if (!httpresponse->isOpen())
+                 continue;
+             httpresponse->write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + dataString + "</value></data>", true);
+             httpresponse->disconnectFromHost();
+        }
+
+        QByteArray buffer = dataString;
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setParameter("value", buffer);
         response.write();
@@ -364,9 +386,12 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     else if (cmdString == "GetScreenshotPath")
     {
         QByteArray tmpString = QByteArray("http://" +  request.getLocalAddress() + "/framebuffer");
-        response.setCommand(cmdString);
-        response.setParameter("value", tmpString);
-        response.write();
+        if (tmpString != "")
+        {
+            response.setCommand(cmdString);
+            response.setParameter("value", tmpString);
+            response.write();
+        }
     }
 
     else if (cmdString == "SetScreenshotRes")

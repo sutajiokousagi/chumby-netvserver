@@ -97,6 +97,27 @@ public:
     */
     void setCookie(const HttpCookie& cookie);
 
+    /**
+      Indicates whether the socket connection is still active
+    */
+    bool isOpen() const;
+
+    /**
+      Indicates whether this is a long polling HTTP response
+    */
+    bool isLongPoll() const;
+
+    /**
+      Set/Unset long polling mode
+    */
+    void setLongPollMode(bool isLongPoll);
+
+    /**
+      Disconnect the socket. Normally this is done automatically by the connection handler,
+      but we have to manually do it for long polling requests.
+    */
+    void disconnectFromHost();
+
 private:
 
     /** Request headers */
@@ -116,6 +137,9 @@ private:
 
     /** Indicator whether the body has been sent completely */
     bool sentLastPart;
+
+    /** Indicator whether the this is a long polling response */
+    bool longPoll;
 
     /** Cookies */
     QMap<QByteArray,HttpCookie> cookies;

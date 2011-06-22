@@ -144,6 +144,14 @@ void HttpConnectionHandler::read()
             qCritical("HttpConnectionHandler (%x): An uncatched exception occured in the request handler",(unsigned int) this);
         }
 
+        // If the request/reponse is long poll type
+        // We can delete the request, but not the response
+        if (response.isLongPoll()) {
+            delete currentRequest;
+            currentRequest=0;
+            return;
+        }
+
         // Finalize sending the response if not already done
         if (!response.hasSentLastPart()) {
             response.write(QByteArray(),true);
@@ -152,7 +160,8 @@ void HttpConnectionHandler::read()
         if (QString::compare(currentRequest->getHeader("Connection"),"close",Qt::CaseInsensitive)==0) {
             socket.disconnectFromHost();
         }
-        else {
+        else
+        {
             // Start timer for next request
             int readTimeout=settings->value("readTimeout",10000).toInt();
             readTimer.start(readTimeout);
