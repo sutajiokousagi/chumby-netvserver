@@ -19,8 +19,6 @@ HEADERS = \
     startup.h \
     requestmapper.h \
     controller/dumpcontroller.h \
-    controller/templatecontroller.h \
-    controller/formcontroller.h \
     controller/fileuploadcontroller.h \
     controller/sessioncontroller.h
 
@@ -29,8 +27,6 @@ SOURCES = main.cpp \
     startup.cpp \
     requestmapper.cpp \
     controller/dumpcontroller.cpp \
-    controller/templatecontroller.cpp \
-    controller/formcontroller.cpp \
     controller/fileuploadcontroller.cpp \
     controller/sessioncontroller.cpp
 
@@ -66,15 +62,12 @@ OTHER_FILES += \
     ../etc/docroot/scripts/hello.sh \
     ../etc/docroot/scripts/test_param.sh \
     ../etc/docroot/scripts/xmlbridge.sh \
-    ../etc/templates/demo.tpl \
     ../Doxyfile \
     ../doc/license.txt \
     ../doc/releasenotes.txt \
     ../doc/example-response-normal.txt \
     ../doc/example-response-chunked.txt \
     ../doc/example-request-get.txt \
-    ../doc/example-request-form-post.txt \
-    ../doc/example-request-form-get.txt \
     ../doc/example-request-file-upload.txt
 
 
@@ -85,9 +78,8 @@ include(../lib/bfLogging/src/bfLogging.pri)
 include(../lib/bfHttpServer/src/bfHttpServer.pri)
 include(../lib/bfFlashPolicyServer/src/bfFlashpolicyserver.pri)
 include(../lib/bfSocketServer/src/bfSocketserver.pri)
-include(../lib/bfTemplateEngine/src/bfTemplateEngine.pri)
 
-# Changes the name of the target, when is debug mode
+# Change the name of the target, when is debug mode
 CONFIG( debug, debug|release ) {
     TARGET = $${TARGET}_debug
     BUILD_NAME = debug
