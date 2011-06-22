@@ -1,17 +1,17 @@
 #!/bin/sh
 
 # Turn on
-if [ "x$1" -eq "xon" ]; then
+if [ "$1" == "on" ]; then
 	fpga_ctl w 0xc 2
 	echo "on"
-	exit;
+	exit 0
 fi
 
 # Turn off
-if [ "x$1" -eq "xoff" ]; then
+if [ "$1" == "xoff" ]; then
 	fpga_ctl w 0xc 0
 	echo "off"
-	exit;
+	exit 0
 fi
 
 # Setting color $1 $2 $3
