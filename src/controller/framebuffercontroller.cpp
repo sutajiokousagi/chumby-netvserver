@@ -11,8 +11,10 @@ FramebufferController::FramebufferController(QSettings* settings, QObject* paren
     width=settings->value("width","400").toInt();
     height=settings->value("height","240").toInt();
     quality=settings->value("quality","70").toInt();
-    format=settings->value("format","JPG").toString();
+    format=settings->value("format","JPG").toByteArray();
     smooth=settings->value("smooth","false").toString() == "true" ? true : false;
+
+    printf("FramebufferController:: %d %d %d %s", width, height, quality, format.constData());
 }
 
 void FramebufferController::service(HttpRequest& request, HttpResponse& response)
@@ -57,9 +59,9 @@ void FramebufferController::service(HttpRequest& request, HttpResponse& response
     QByteArray bytes;
     QBuffer buffer(&bytes);
     buffer.open(QIODevice::WriteOnly);
-    image.save(&buffer, this->format.toLatin1().constData(), this->quality);
+    image.save(&buffer, this->format.constData(), this->quality);
 
     //Write directly to HTTP response
-    response.setHeader("Content-Type", QByteArray("image/") + this->format.toLower().toLatin1());
+    response.setHeader("Content-Type", QByteArray("image/") + this->format.toLower());
     response.write(bytes, true);
 }

@@ -79,15 +79,15 @@ void Startup::start()
     // Configure script controller
     Static::scriptController=new ScriptController(fileSettings,app);
 
-    // Configure framebuffer controller
-    QSettings* fbSettings=new QSettings(configFileName,QSettings::IniFormat,app);
-    fbSettings->beginGroup("framebuffer-controller");
-    Static::framebufferController=new FramebufferController(fbSettings, app);
-
     // Configure cursor controller
 #if defined (CURSOR_CONTROLLER)
     Static::cursorController=new CursorController(fileSettings,app);
 #endif
+
+    // Configure framebuffer controller
+    QSettings* fbSettings=new QSettings(configFileName,QSettings::IniFormat,app);
+    fbSettings->beginGroup("framebuffer-controller");
+    Static::framebufferController=new FramebufferController(fbSettings, app);
 
     // Configure bridge controller
     Static::bridgeController=new BridgeController(fileSettings,app);
@@ -115,7 +115,8 @@ void Startup::start()
     udpServerSettings->beginGroup("udp-socket-server");
     Static::udpSocketServer=new UdpSocketServer(udpServerSettings, requestMapper, app);
 
-    qDebug("ServiceHelper: Application has started");
+    printf("NeTVServer has started");
+    qDebug("Startup: Application has started");
 }
 
 void Startup::receiveArgs(const QString &argsString)
@@ -132,30 +133,4 @@ void Startup::receiveArgs(const QString &argsString)
     argCount = argsList.count();
 
     printf("Received argument: %s", command.toLatin1().constData());
-
-    /*
-    if (command == "SetUrl" && argCount >= 1)
-    {
-        QString param = argsList[0];
-        //myWebView->load( QUrl(param) );
-    }
-
-    else if (command == "SetHtml" && argCount >= 1)
-    {
-        QString param = argsList[0];
-        //myWebView->setHtml(param, QUrl("http://localhost"));
-    }
-
-    else if (command == "Javascript" && argCount >= 1)
-    {
-        QString param = argsList.join(" ");
-        //myWebView->page()->mainFrame()->evaluateJavaScript(param);
-    }
-
-    else if (command == "InvertColor" && argCount >= 1)
-    {
-        QString param = argsList[0].toUpper();
-        //myWebView->setInvertColor( param == "TRUE" || param == "YES" );
-    }
-    */
 }

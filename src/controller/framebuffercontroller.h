@@ -29,7 +29,7 @@ private:
     int quality;
 
     /** Default format of ouput image */
-    QString format;
+    QByteArray format;
 
     /** Default smooth/fast transformation used in scaling */
     bool smooth;
