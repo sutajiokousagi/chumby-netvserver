@@ -66,11 +66,6 @@ void Startup::start()
     Logger* logger=new DualFileLogger(mainLogSettings,debugLogSettings,10000,app);
     logger->installMsgHandler();
 
-    // Configure template loader and cache
-    QSettings* templateSettings=new QSettings(configFileName,QSettings::IniFormat,app);
-    templateSettings->beginGroup("templates");
-    Static::templateLoader=new TemplateCache(templateSettings,app);
-
     // Configure session store
     QSettings* sessionSettings=new QSettings(configFileName,QSettings::IniFormat,app);
     sessionSettings->beginGroup("sessions");
@@ -83,6 +78,11 @@ void Startup::start()
 
     // Configure script controller
     Static::scriptController=new ScriptController(fileSettings,app);
+
+    // Configure framebuffer controller
+    QSettings* fbSettings=new QSettings(configFileName,QSettings::IniFormat,app);
+    fbSettings->beginGroup("framebuffer-controller");
+    Static::framebufferController=new FramebufferController(fbSettings, app);
 
     // Configure cursor controller
 #if defined (CURSOR_CONTROLLER)

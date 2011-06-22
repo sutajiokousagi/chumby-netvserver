@@ -8,13 +8,13 @@
 #define STATIC_H
 
 #include <QString>
-#include "templatecache.h"
 #include "httpsessionstore.h"
 #include "tcpsocketserver.h"
 #include "udpsocketserver.h"
 #include "controller/staticfilecontroller.h"
 #include "controller/scriptcontroller.h"
 #include "controller/bridgecontroller.h"
+#include "controller/framebuffercontroller.h"
 
 #if defined (CURSOR_CONTROLLER)
     #include "controller/cursorcontroller.h"
@@ -54,9 +54,6 @@ public:
      */
     static QString getConfigDir();
 
-    /** Cache for template files */
-    static TemplateLoader* templateLoader;
-
     /** Storage for session cookies */
     static HttpSessionStore* sessionStore;
 
@@ -71,6 +68,9 @@ public:
 
     /** Controller for hardware bridge */
     static BridgeController* bridgeController;
+
+    /** Controller for framebuffer */
+    static FramebufferController* framebufferController;
 
     /** Controller for input device */
 #if defined (CURSOR_CONTROLLER)

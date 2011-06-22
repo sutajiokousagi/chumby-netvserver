@@ -1,20 +1,9 @@
-/**
-  @file
-  @author Stefan Frings
-  @version $Id: requestmapper.cpp 938 2010-12-05 14:29:58Z stefan $
-*/
-
 #include "requestmapper.h"
 #include "static.h"
 #include "controller/dumpcontroller.h"
 #include "controller/templatecontroller.h"
-#include "controller/formcontroller.h"
 #include "controller/fileuploadcontroller.h"
-#include "controller/framebuffercontroller.h"
 #include "controller/sessioncontroller.h"
-#include "controller/staticfilecontroller.h"
-#include "controller/bridgecontroller.h"
-#include "controller/scriptcontroller.h"
 
 
 #if defined CURSOR_CONTROLLER
@@ -37,14 +26,6 @@ void RequestMapper::service(HttpRequest& request, HttpResponse& response)
         DumpController().service(request, response);
     }
 
-    else if (path.startsWith("/template")) {
-        TemplateController().service(request, response);
-    }
-
-    else if (path.startsWith("/form")) {
-        FormController().service(request, response);
-    }
-
     else if (path.startsWith("/file")) {
         FileUploadController().service(request, response);
     }
@@ -54,7 +35,7 @@ void RequestMapper::service(HttpRequest& request, HttpResponse& response)
     }
 
     else if (path.startsWith("/framebuffer")) {
-        FramebufferController().service(request, response);
+        Static::framebufferController->service(request, response);
     }
 
     else if (path.startsWith("/scripts/")) {
