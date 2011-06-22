@@ -213,6 +213,11 @@ function WidgetEngine()
 	}
 }
 
+function LongPoll()
+{
+	sendSingleValueCommand('LongPoll', '');
+}
+
 function GetAllParams()
 {
 	sendSingleValueCommand('GetAllParams', '');
