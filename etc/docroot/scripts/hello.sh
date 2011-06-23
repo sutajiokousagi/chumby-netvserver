@@ -1,20 +1,10 @@
 #!/bin/sh
 #
-# NeTVWebServer will execute this script in blocking manner.
-# Do no perform any long waiting processes.
-# Create a new process if you have to.
+# Returning identification information of this hardware
 #
 
-netinfo=$(ifconfig)
-netinfo=$(echo ${netinfo} | tr '\n' '<br/>')
-
-echo "<html>"
-echo "	<head>"
-echo "		<title>Hello script</title>"
-echo "	</head>"
-echo "	<body>"
-echo "		Current time: <b>$(date)</b><br/>"
-echo "		Kernel: <b>$(uname) $(uname -r)</b><br/>"
-echo "		Network: <br/>${netinfo}<br/>"
-echo "	</body>"
-echo "</html>"
+echo "<guid>A620123B-1F0E-B7CB-0E11-921ADB7BE22A</guid>"
+echo "<dcid>a long string of 1024 bytes</dcid>"
+echo "<hwver>10.1</hwver>"
+echo "<fwver>1.0</fwver>"
+echo "<flashplugin>0</flashplugin>"
