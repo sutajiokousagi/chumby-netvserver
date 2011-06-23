@@ -58,6 +58,11 @@ function sendMultiValueCommand(cmd, dataArray)
 	document.body.removeChild(myForm) ;
 }
 
+function Hello()
+{
+	sendSingleValueCommand('Hello', '');
+}
+
 function GetXML()
 {
 	var dataString = document.form_GetXML.inputField.value;
