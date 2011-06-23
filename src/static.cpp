@@ -40,12 +40,12 @@ QString Static::getConfigDir()
     QString configFileName=QCoreApplication::applicationName()+".ini";
 
     QStringList searchList;
-    searchList.append(QDir::cleanPath(binDir));
-    searchList.append(QDir::cleanPath(binDir+"/../etc"));
-    searchList.append(QDir::cleanPath(binDir+"/../../etc")); // for development under windows
     searchList.append(QDir::rootPath()+"etc/xdg/"+organization);
     searchList.append(QDir::rootPath()+"etc/opt");
     searchList.append(QDir::rootPath()+"etc");
+    searchList.append(QDir::cleanPath(binDir));
+    searchList.append(QDir::cleanPath(binDir+"/../etc"));
+    searchList.append(QDir::cleanPath(binDir+"/../../etc")); // for development under windows
 
     foreach (QString dir, searchList)
     {
