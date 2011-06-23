@@ -15,7 +15,7 @@ then
 	setplayer 0 0 1 1 
 	
 	# Reset the browser
-	start_netvbrowser.sh
+	/etc/init.d/chumby-netvbrowser start
 
 	# Print out the command received
 	echo $cmd
@@ -23,7 +23,7 @@ then
 fi
 
 # Forward the button name to JavaScript Control Panel
-/usr/bin/NeTVBrowser -qws -nomouse JavaScript "fButtonPress('$cmd')"
+NeTVBrowser -qws -nomouse JavaScript "fButtonPress('$cmd')"
 
 # Print out the command received
 echo $cmd
