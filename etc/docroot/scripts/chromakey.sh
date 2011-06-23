@@ -8,7 +8,7 @@ if [ "$1" == "on" ]; then
 fi
 
 # Turn off
-if [ "$1" == "xoff" ]; then
+if [ "$1" == "off" ]; then
 	fpga_ctl w 0xc 0
 	echo "off"
 	exit 0
