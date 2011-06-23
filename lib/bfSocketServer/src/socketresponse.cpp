@@ -82,14 +82,29 @@ void SocketResponse::write()
 
     if (parameters.count() == 1)
     {
-        xmlfile->writeStartElement( "data" );
-        QMapIterator<QByteArray, QByteArray> i(parameters);
-        while (i.hasNext())
+        //this allow printing multiple key/value pairs from external scripts
+        if (parameters.contains("data"))
         {
-             i.next();
-             xmlfile->writeTextElement("value", i.value());
+            buffer.write("<data>");
+            buffer.write(parameters.value("data"));
+            buffer.write("</data>");
+
+            //Don't want this. This will escape any XML syntax already in data
+            //xmlfile->writeTextElement("data", parameters.value("data"));
         }
-        xmlfile->writeEndElement();
+
+        //this standardize printing 1 single parameter of any name
+        else
+        {
+            xmlfile->writeStartElement( "data" );
+            QMapIterator<QByteArray, QByteArray> i(parameters);
+            while (i.hasNext())
+            {
+                 i.next();
+                 xmlfile->writeTextElement("value", i.value());
+            }
+            xmlfile->writeEndElement();
+        }
     }
     else if (parameters.count() > 1)
     {
