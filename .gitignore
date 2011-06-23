@@ -18,6 +18,9 @@ JSCore
 tmp
 CPanel
 etc/*.log
-etc/docroot/css/reset.css
 etc/docroot/widget_engine.swf
+etc/docroot/css
 etc/docroot/widgets
+etc/docroot/CPanel
+etc/docroot/JSCore
+etc/docroot/tmp/*
