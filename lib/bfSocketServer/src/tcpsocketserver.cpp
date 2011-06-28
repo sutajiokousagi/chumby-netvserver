@@ -40,19 +40,23 @@ void TcpSocketServer::incomingConnection(int socketDescriptor)
     QTcpSocket* socket = new QTcpSocket(this);
     socket->setSocketDescriptor(socketDescriptor);
     connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
-    connect(socket, SIGNAL(readyRead()), SLOT(read()));
+    connect(socket, SIGNAL(readyRead()), this, SLOT(read()));
 
     connections.append(socket);
+    connectionsType.insert(socket, "");
 
     //Just keep the socket open
     //socket->disconnectFromHost();
 }
 
-int TcpSocketServer::broadcast(QByteArray messageText)
+int TcpSocketServer::broadcast(QByteArray messageText, QByteArray type /* = "" */)
 {
     int counter = 0;
     foreach(QTcpSocket *socket, connections)
     {
+        if (connectionsType.value(socket) != type)
+            continue;
+
         socket->write(messageText);
         counter++;
     }
@@ -79,8 +83,20 @@ void TcpSocketServer::read()
         return;
     }
 
+    //Preprocessing to get connection type
+    if (request->getCommand().toUpper() == "HELLO")
+    {
+        QByteArray hardwareType = request->getParameter("value");
+        if (hardwareType == "")
+            hardwareType = request->getParameter("type");
+        connectionsType.insert(socket, hardwareType);
+    }
+
+    //Post processing by higher level classes
     SocketResponse response(socket, socket->peerAddress().toString().toLatin1(), socket->peerPort());
     this->requestHandler->service(*request, response);
+
+    //Clean up
     buffer = QByteArray();
     delete request;
 }
@@ -93,6 +109,7 @@ void TcpSocketServer::disconnected()
 
     QTcpSocket *socket = (QTcpSocket *)QObject::sender();
 
+    connectionsType.remove(socket);
     connections.removeOne(socket);
     socket->close();
     socket->deleteLater();

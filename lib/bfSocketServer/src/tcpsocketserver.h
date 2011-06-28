@@ -24,7 +24,7 @@ public:
     virtual ~TcpSocketServer();
 
     /** Broadcast a message to all connected clients */
-    int broadcast(QByteArray messageText);
+    int broadcast(QByteArray messageText, QByteArray type = "");
 
 protected:
 
@@ -41,6 +41,7 @@ private:
 
     /** Pool of socket connections */
     QList<QTcpSocket*> connections;
+    QMap<QTcpSocket*, QByteArray> connectionsType;
 
 private slots:
 
