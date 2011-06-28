@@ -174,7 +174,25 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "RemoteControl")
     {
         //Forward to browser
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "netvbrowser");
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "all");
+
+        //Reply to JavaScriptCore/ControlPanel
+        if (numClient > 0)
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to browser</value></data>", true);
+        else
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No browser running</value></data>", true);
+
+        /*
+        QByteArray buffer = this->Execute(docroot + "/scripts/remote_control.sh", QStringList(dataString));
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+        buffer = QByteArray();
+        */
+    }
+
+    else if (cmdString == "Key")
+    {
+        //Forward to browser
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "all");
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
@@ -307,7 +325,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     else if (cmdString == "RemoteControl")
     {
         //Forward to browser
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "<value></data></xml>", "netvbrowser");
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "<value></data></xml>", "all");
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0) {
@@ -318,19 +336,22 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
             response.setParameter("value", "No browser running");
         }
         response.write();
+    }
 
-        //Response to all pending long polling HTTP requests
-        /*
-        while (!longPollResponses.isEmpty())
-        {
-             HttpResponse* httpresponse = longPollResponses.takeFirst();
-             if (!httpresponse->isOpen())
-                 continue;
-             httpresponse->write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + dataString + "</value></data>", true);
-             httpresponse->disconnectFromHost();
+    else if (cmdString == "Key")
+    {
+        //Forward to browser
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "<value></data></xml>", "all");
+
+        //Reply to JavaScriptCore/ControlPanel
+        if (numClient > 0) {
+            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+            response.setParameter("value", "Command forwarded to browser");
+        }else{
+            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+            response.setParameter("value", "No browser running");
         }
-        QByteArray buffer = dataString;
-        */
+        response.write();
     }
 
     else if (cmdString == "GetScreenshotPath")
