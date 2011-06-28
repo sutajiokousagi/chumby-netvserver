@@ -54,7 +54,7 @@ int TcpSocketServer::broadcast(QByteArray messageText, QByteArray type /* = "" *
     int counter = 0;
     foreach(QTcpSocket *socket, connections)
     {
-        if (connectionsType.value(socket) != type)
+        if (connectionsType.value(socket) != type && type != "all")
             continue;
 
         socket->write(messageText);
