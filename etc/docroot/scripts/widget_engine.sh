@@ -39,7 +39,7 @@ if [ "$cmd" == "startminimize" ]; then
 		${process_name} -i ${widget_engine_swf} &
 		sleep 1
 	fi
-	setplayer 0 0 1 1
+	setplayer b 0 0 1 1
 	exit;
 fi
 
@@ -52,7 +52,7 @@ if [ "$cmd" == "minimize" -o "$cmd" == "hide" ]; then
 		${process_name} -i ${widget_engine_swf} &
 		sleep 1
 	fi
-	setplayer 0 0 1 1
+	setplayer b 0 0 1 1
 	exit;
 fi
 
@@ -65,7 +65,7 @@ if [ "$cmd" == "maximize" -o "$cmd" == "fullscreen" -o "$cmd" == "show" ]; then
 		${process_name} -i ${widget_engine_swf} &
 		sleep 1
 	fi
-	setplayer 0 0 1279 719
+	setplayer b 0 0 1279 719
 	exit;
 fi
 
@@ -102,8 +102,6 @@ if [ "$cmd" == "setbox" ]; then
 		${process_name} -i ${widget_engine_swf} &
 		sleep 1
 	fi
-	ex=$(($2 + $4))
-	ey=$(($3 + $5))
-	setplayer $2 $3 $ex $ey
+	setplayer b $2 $3 $4 $5
 	exit;
 fi
