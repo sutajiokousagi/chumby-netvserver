@@ -8,11 +8,22 @@ case "$1" in
 
 		# prefix chroma key
 		fpga_ctl w 0xc 2
-		fpga_ctl w 0xd 0
-		fpga_ctl w 0xe 7
-		fpga_ctl w 0xf 0
+		fpga_ctl w 0xd 240
+		fpga_ctl w 0xe 0
+		fpga_ctl w 0xf 240
+		
+		# if no network config, start in AP mode
+		# IP address of the interface
+		IPADDRESS=$(ifconfig ${wlan0} | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 
-		# Start in the background so we don't hog the console
+		# Extract IP address of wlan0
+		if [ ! -e /psp/network_config -o ${#IPADDRESS} -lt 4 ];
+		then
+			echo "Starting in Access Point mode"
+			/usr/share/netvserver/docroot/scripts/start_ap.sh
+		fi
+
+		# start in the background so we don't hog the console
 		# This app uses QtGui hence requires -qws option,
 		# but does not render anything to the framebuffer
 		NeTVServer -qws -nomouse 2>&1 2> /dev/null&
