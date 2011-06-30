@@ -10,6 +10,9 @@
 #define BRIDGE_RETURN_STATUS_SUCCESS        "1"
 #define BRIDGE_RETURN_STATUS_ERROR          "2"
 
+#define BRIDGE_NETWORK_CONFIG               "/psp/network_config"
+#define BRIDGE_ACCOUNT_CONFIG               "/psp/chumby_account"
+
 BridgeController::BridgeController(QSettings* settings, QObject* parent)
     :HttpRequestHandler(parent)
 {
@@ -199,12 +202,6 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to browser</value></data>", true);
         else
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No browser running</value></data>", true);
-
-        /*
-        QByteArray buffer = this->Execute(docroot + "/scripts/remote_control.sh", QStringList(dataString));
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
-        buffer = QByteArray();
-        */
     }
 
     else if (cmdString == "LongPoll")
@@ -213,6 +210,76 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
         //Prevent the connection handler (httpconnectionhandler.cpp) to disconnect & delete the current response
         response.setLongPollMode(true);
+    }
+
+    else if (cmdString == "SetTime")
+    {
+        // <time> is time formatted in GMT time as "yyyy.mm.dd-hh:mm:ss"
+        // <timezone> is standard timezone ID string formated as "Asia/Singapore"
+        QString time = request.getParameter("time");
+        QString timezone = request.getParameter("timezone");
+
+        QStringList argsList;
+        argsList.append(time);
+        argsList.append(timezone);
+        QByteArray buffer = this->Execute(docroot + "/scripts/set_time.sh", argsList);
+
+        //Reply to JavaScriptCore/ControlPanel
+        if (time == "")    response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>time parameter is required</value></data>", true);
+        else               response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+    }
+
+    else if (cmdString == "SetNetwork")
+    {
+        QString type = request.getParameter("type");
+        QString allocation = request.getParameter("wifi_allocation");
+        QString ssid = request.getParameter("wifi_ssid");
+        QString auth = request.getParameter("wifi_auth");
+        QString encryption = request.getParameter("wifi_encryption");
+        QString key = request.getParameter("wifi_password");
+        QString encoding = request.getParameter("wifi_encoding");
+
+        if (type == "")         type = "wlan";
+        if (auth == "")         auth = "OPEN";
+        if (encryption == "")   encryption = "NONE";
+        if (encoding == "")     encoding = "ascii";
+        if (allocation == "")   allocation = "dhcp";
+
+        QString network_config = QString("<configuration type=\"%1\" allocation=\"%2\" ssid=\"%3\" auth=\"%4\" encryption=\"%5\" key=\"%6\" encoding=\"%7\" />")
+                                                         .arg(type).arg(allocation).arg(ssid).arg(auth).arg(encryption).arg(key).arg(encoding);
+        bool fileOK = SetFileContents(BRIDGE_NETWORK_CONFIG, network_config.toLatin1());
+
+        QByteArray buffer;
+        if (!fileOK)        buffer = this->GetFileContents(BRIDGE_NETWORK_CONFIG);
+        else                buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
+
+        //Reply to JavaScriptCore/ControlPanel
+        if (!fileOK)        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+        else                response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+    }
+
+    else if (cmdString == "SetAccount")
+    {
+        QString activated = request.getParameter("activated");
+        QString username = request.getParameter("chumby_username");
+        QString password = request.getParameter("chumby_password");
+        QString device_name = request.getParameter("chumby_device_name");
+
+        if (activated == "")    activated = "false";
+        if (device_name == "")  device_name = "NeTV";
+
+        QString account_config = QString("<configuration username=\"%1\" password=\"%2\" device_name=\"%3\" />").arg(username).arg(password).arg(device_name);
+        bool fileOK = SetFileContents(BRIDGE_ACCOUNT_CONFIG, account_config.toLatin1());
+
+        //We should ask the JSCore to do something here.
+        //QByteArray buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
+        QByteArray buffer;
+        if (!fileOK)        buffer = this->GetFileContents(BRIDGE_ACCOUNT_CONFIG);
+        else                activated.toLatin1();
+
+        //Reply to JavaScriptCore/ControlPanel
+        if (!fileOK)        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+        else                response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
     }
 
     //-----------
@@ -372,6 +439,83 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
+    else if (cmdString == "SetTime")
+    {
+        // <time> is time formatted in GMT time as "yyyy.mm.dd-hh:mm:ss"
+        // <timezone> is standard timezone ID string formated as "Asia/Singapore"
+        QString time = request.getParameter("time");
+        QString timezone = request.getParameter("timezone");
+
+        QStringList argsList;
+        argsList.append(time);
+        argsList.append(timezone);
+        QByteArray buffer = this->Execute(docroot + "/scripts/set_time.sh", argsList);
+
+        response.setCommand(cmdString);
+        response.setParameter("data", buffer.trimmed());
+        response.write();
+    }
+
+    else if (cmdString == "SetNetwork")
+    {
+        fprintf(stderr,"Receiving SetNetwork command\n");
+
+        QString type = request.getParameter("type");
+        QString allocation = request.getParameter("wifi_allocation");
+        QString ssid = request.getParameter("wifi_ssid");
+        QString auth = request.getParameter("wifi_auth");
+        QString encryption = request.getParameter("wifi_encryption");
+        QString key = request.getParameter("wifi_password");
+        QString encoding = request.getParameter("wifi_encoding");
+
+        if (type == "")         type = "wlan";
+        if (auth == "")         auth = "OPEN";
+        if (encryption == "")   encryption = "NONE";
+        if (encoding == "")     encoding = "ascii";
+        if (allocation == "")   allocation = "dhcp";
+
+        QString network_config = QString("<configuration type=\"%1\" allocation=\"%2\" ssid=\"%3\" auth=\"%4\" encryption=\"%5\" key=\"%6\" encoding=\"%7\" />")
+                                                         .arg(type).arg(allocation).arg(ssid).arg(auth).arg(encryption).arg(key).arg(encoding);
+        bool fileOK = SetFileContents(BRIDGE_NETWORK_CONFIG, network_config.toLatin1());
+
+        QByteArray buffer;
+        if (!fileOK)        fprintf(stderr,"Error writing network config file\n");
+        else                fprintf(stderr,"Writing network config file OK\n");
+        if (!fileOK)        buffer = this->GetFileContents(BRIDGE_NETWORK_CONFIG);
+        else                buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
+        response.setCommand(cmdString);
+        response.setParameter("data", buffer.trimmed());
+        response.write();
+    }
+
+    else if (cmdString == "SetAccount")
+    {
+        fprintf(stderr,"Receiving SetAccount command\n");
+
+        QString activated = request.getParameter("activated");
+        QString username = request.getParameter("chumby_username");
+        QString password = request.getParameter("chumby_password");
+        QString device_name = request.getParameter("chumby_device_name");
+
+        if (activated == "")    activated = "false";
+        if (device_name == "")  device_name = "NeTV";
+
+        QString account_config = QString("<configuration username=\"%1\" password=\"%2\" device_name=\"%3\" />").arg(username).arg(password).arg(device_name);
+        bool fileOK = SetFileContents(BRIDGE_ACCOUNT_CONFIG, account_config.toLatin1());
+
+        //We should ask the JSCore to do something here.
+        //QByteArray buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
+        QByteArray buffer;
+        if (!fileOK)        fprintf(stderr,"Error writing account config file\n");
+        else                fprintf(stderr,"Writing account config file OK\n");
+        if (!fileOK)        buffer = this->GetFileContents(BRIDGE_ACCOUNT_CONFIG);
+        else                activated.toLatin1();
+
+        response.setCommand(cmdString);
+        response.setParameter("data", buffer.trimmed());
+        response.write();
+    }
+
     //-----------
 
 #if defined (CURSOR_CONTROLLER)
@@ -470,6 +614,11 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 //-----------------------------------------------------------------------------------------------------------
 // Process Utilities
 //-----------------------------------------------------------------------------------------------------------
+
+QByteArray BridgeController::Execute(const QString &fullPath)
+{
+    return this->Execute(fullPath, QStringList());
+}
 
 QByteArray BridgeController::Execute(const QString &fullPath, QStringList args)
 {
