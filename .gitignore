@@ -3,6 +3,7 @@
 *.debug
 *.release
 *.exe
+*.swf
 tmp
 debug
 release
@@ -24,3 +25,4 @@ etc/docroot/widgets
 etc/docroot/CPanel
 etc/docroot/JSCore
 etc/docroot/tmp/*
+etc/docroot/index*
