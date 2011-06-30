@@ -32,11 +32,6 @@ function sendMultiValueCommand(cmd, dataArray)
 	//Which address to submit to
 	var web_address = "./bridge";
 	
-	//Convert data array to XML format
-	var xmlDataString = '';
-	for (var key in dataArray)
-		xmlDataString += '<' + key + '>' + dataArray[key] + '</' + key + '>';
-	
 	//Create a clean new form and input fields
 	var myForm = document.createElement("form");
 	myForm.method = 'POST';
@@ -46,11 +41,14 @@ function sendMultiValueCommand(cmd, dataArray)
 	myInput1.setAttribute('name', 'cmd');
 	myInput1.setAttribute('value', cmd);
 	myForm.appendChild(myInput1);
-	
-	var myInput2 = document.createElement("input");
-	myInput2.setAttribute('name', 'data');
-	myInput2.setAttribute('value', xmlDataString);
-	myForm.appendChild(myInput2);
+
+	for (var key in dataArray)
+	{
+		var myInput2 = document.createElement("input");
+		myInput2.setAttribute('name', key);
+		myInput2.setAttribute('value', dataArray[key]);
+		myForm.appendChild(myInput2);
+	}
 	
 	//Submit & clean up
 	document.body.appendChild(myForm) ;
@@ -337,4 +335,66 @@ function UnlinkFile()
 	}
 }
 
+function SetTime()
+{
+	// <time> is time formatted in GMT time as "yyyy.mm.dd-hh:mm:ss"
+    // <timezone> is standard timezone ID string formated as "Asia/Singapore
+		
+	var dataString1 = document.form_SetTime.inputField.value;
+	var dataString2 = document.form_SetTime.inputField2.value;
+	var dataArray = { time:dataString1, timezone:dataString2 };
+	
+	if (dataString1 == '') 
+	{
+		alert('Input field(s) are required');
+		console.log('Input field(s) are empty');
+	}
+	else
+	{
+		sendMultiValueCommand('SetTime', dataArray);
+	}
+}
 
+function SetNetwork()
+{
+	// <time> is time formatted in GMT time as "yyyy.mm.dd-hh:mm:ss"
+    // <timezone> is standard timezone ID string formated as "Asia/Singapore
+		
+	var dataString1 = document.form_SetNetwork.inputField.value;
+	var dataString2 = document.form_SetNetwork.inputField2.value;
+	var dataString3 = document.form_SetNetwork.inputField3.value;
+	var dataString4 = document.form_SetNetwork.inputField4.value;
+	var dataString5 = document.form_SetNetwork.inputField5.value;
+	var dataArray = { wifi_ssid:dataString1, wifi_password:dataString2, wifi_encryption:dataString3, wifi_auth:dataString4, wifi_allocation:dataString5 };
+	
+	if (dataString1 == '')
+	{
+		alert('Input field(s) are required');
+		console.log('Input field(s) are empty');
+	}
+	else
+	{
+		sendMultiValueCommand('SetNetwork', dataArray);
+	}
+}
+
+function SetAccount()
+{
+	// <time> is time formatted in GMT time as "yyyy.mm.dd-hh:mm:ss"
+    // <timezone> is standard timezone ID string formated as "Asia/Singapore
+		
+	var dataString1 = document.form_SetAccount.inputField.value;
+	var dataString2 = document.form_SetAccount.inputField2.value;
+	var dataString3 = document.form_SetAccount.inputField3.value;
+	var dataArray = { chumby_username:dataString1, chumby_password:dataString2, chumby_device_name:dataString3 };
+	
+	if (dataString1 == '' || dataString2 == '') 
+	{
+		alert('Input field(s) are required');
+		console.log('Input field(s) are empty');
+	}
+	else
+	{
+		sendMultiValueCommand('SetAccount', dataArray);
+	}
+}

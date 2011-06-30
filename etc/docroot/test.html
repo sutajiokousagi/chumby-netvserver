@@ -485,7 +485,72 @@
 			</td>
 		</tr>
 		</form>
+		
+		
+		<!-- SetTime -->
+		<form name="form_SetTime" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				SetTime
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="yyyy.mm.dd-hh:mm:ss" > (time)
+				<input type="text" size="256" name="inputField2" value="" > (timezone)
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="SetTime()">
+			</td>
+		</tr>
+		</form>
+		
+		
+		<!-- SetNetwork -->
+		<form name="form_SetNetwork" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				SetNetwork
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="ChumbyTest" > (ssid)
+				<input type="text" size="256" name="inputField2" value="" > (key)
+				<input type="text" size="256" name="inputField3" value="NONE" > (encryption)
+				<input type="text" size="256" name="inputField4" value="OPEN" > (auth)
+				<input type="text" size="256" name="inputField5" value="dhcp" > (allocation)
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="SetNetwork()">
+			</td>
+		</tr>
+		</form>
+		
+		
+		<!-- SetAccount -->
+		<form name="form_SetAccount" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				SetAccount
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="myusername" > (username)
+				<input type="text" size="256" name="inputField2" value="mypassword" > (password)
+				<input type="text" size="256" name="inputField3" value="NeTV Living Room" > (device name)
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="SetAccount()">
+			</td>
+		</tr>
+		</form>
 
+		
 	</table>
 	
 </td>
