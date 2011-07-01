@@ -25,7 +25,7 @@ if [ "$cmd" == "start" ]; then
 	then
 		echo "Already running"
 	else
-		${process_name} -i ${widget_engine_swf} &
+		${process_name} -i ${widget_engine_swf} 2>&1 > /dev/null &
 	fi
 	exit;
 fi
@@ -36,7 +36,7 @@ if [ "$cmd" == "startminimize" ]; then
 	then
 		echo "Already running"
 	else
-		${process_name} -i ${widget_engine_swf} &
+		${process_name} -i ${widget_engine_swf} 2>&1 > /dev/null &
 		sleep 1
 	fi
 	setplayer b 0 0 1 1
@@ -49,7 +49,7 @@ if [ "$cmd" == "minimize" -o "$cmd" == "hide" ]; then
 	then
 		echo ""
 	else
-		${process_name} -i ${widget_engine_swf} &
+		${process_name} -i ${widget_engine_swf} 2>&1 > /dev/null &
 		sleep 1
 	fi
 	setplayer b 0 0 1 1
@@ -62,7 +62,7 @@ if [ "$cmd" == "maximize" -o "$cmd" == "fullscreen" -o "$cmd" == "show" ]; then
 	then
 		echo ""
 	else
-		${process_name} -i ${widget_engine_swf} &
+		${process_name} -i ${widget_engine_swf} 2>&1 > /dev/null &
 		sleep 1
 	fi
 	setplayer b 0 0 1279 719
@@ -89,7 +89,7 @@ if [ "$cmd" == "restart" ]; then
 		kill -9 $(pidof $process_name)
 		sleep 1
 	fi
-	${process_name} -i ${widget_engine_swf} &
+	${process_name} -i ${widget_engine_swf} 2>&1 > /dev/null &
 	exit;
 fi
 
@@ -99,7 +99,7 @@ if [ "$cmd" == "setbox" ]; then
 	then
 		echo ""
 	else
-		${process_name} -i ${widget_engine_swf} &
+		${process_name} -i ${widget_engine_swf} 2>&1 > /dev/null &
 		sleep 1
 	fi
 	setplayer b $2 $3 $4 $5
