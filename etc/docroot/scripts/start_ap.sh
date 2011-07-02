@@ -1,6 +1,6 @@
 #!/bin/sh
 
-INTIF=wlan0
+INTIF=$(ls -1 /sys/class/net/ | grep wlan | head -1)
 
 # Path of various configuration files
 CONFPATH=/usr/share/netvserver/docroot/scripts/hostapd.conf
@@ -34,6 +34,7 @@ sleep 1
 
 # Run hostapd, to set up the access point
 cp ${CONFPATH} /tmp/hostapd.conf
+echo "interface=${INTIF}" >> /tmp/hostapd.conf
 hostapd -B /tmp/hostapd.conf
 
 sleep 1

@@ -15,7 +15,7 @@ killall hostapd
 killall dnsmasq
 
 # Reset network interface
-ifconfig wlan0 up
+ifconfig $(ls -1 /sys/class/net/ | grep wlan | head -1) up
 
 # Start NetworkManager
 /etc/init.d/NetworkManager restart
