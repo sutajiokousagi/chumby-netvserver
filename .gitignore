@@ -4,6 +4,7 @@
 *.release
 *.exe
 *.swf
+*.pdf
 tmp
 debug
 release
@@ -27,3 +28,6 @@ etc/docroot/JSCore
 etc/docroot/tmp/*
 etc/docroot/index*
 etc/docroot/images
+etc/docroot/.gitignore
+etc/docroot/.git
+etc/docroot/*.giosave*
