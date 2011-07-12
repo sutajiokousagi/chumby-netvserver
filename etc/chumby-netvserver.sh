@@ -39,8 +39,13 @@ case "$1" in
 		killall NeTVServer 2> /dev/null
 		;;
 
+	restart)
+		$0 stop
+		$0 start
+		;;
+
 	*)
 
-		echo "Usage: $0 {start|stop}"
+		echo "Usage: $0 {start|stop|restart}"
 		;;
 esac
