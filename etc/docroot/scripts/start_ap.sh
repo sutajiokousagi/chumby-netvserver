@@ -59,4 +59,4 @@ fi
 
 # Run dnsmasq, which is a combination DNS relay and DHCP server.
 mkdir -p /var/lib/misc
-dnsmasq -F 192.168.100.100,192.168.100.130,1h -i ${INTIF} -K -C ${DNSCONF}
+dnsmasq -z -F 192.168.100.100,192.168.100.130,1h -i ${INTIF} -K -C ${DNSCONF}
