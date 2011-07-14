@@ -14,20 +14,18 @@ case "$1" in
 		fpga_ctl w 0xe 0
 		fpga_ctl w 0xf 240
 		
-		# if no network config, start in AP mode
-		# IP address of the interface
-		IPADDRESS=$(ifconfig ${wlan0} | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
+		# Temp fix for "Semop lock/unlock failure Identifier removed" flood
+		rm -rf /tmp/qtembedded-0
 
-		# Extract IP address of wlan0
-		if [ ! -e /psp/network_config -o ${#IPADDRESS} -lt 4 ];
-		then
+		# Network status
+		network_status=$(network_status.sh)
+		hasLinkTrue=$(echo $network_status | grep 'link="true"')
+		if [ ${#hasLinkTrue} -gt 10 ]; then
+			echo "Internet connection is valid"
+		else
 			echo "Starting in Access Point mode"
 			/usr/share/netvserver/docroot/scripts/start_ap.sh
 		fi
-
-		# Temp fix for "Semop lock/unlock failure Identifier removed" flood
-		sleep 2
-		rm -rf /tmp/qtembedded-0
 
 		# start in the background so we don't hog the console
 		# This app uses QtGui hence requires -qws option,
