@@ -248,9 +248,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         //No password given
         if (key == "")
         {
-            encryption = "";
             encoding = "";
-            auth = "";
         }
         else if (encryption == "WEP")
         {
@@ -496,9 +494,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         //No password given
         if (key == "")
         {
-            encryption = "";
             encoding = "";
-            auth = "";
         }
         else if (encryption == "WEP")
         {
