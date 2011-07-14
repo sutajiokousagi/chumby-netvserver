@@ -41,7 +41,7 @@ fi
 #
 # Print them out
 #
-echo "<guid>${GUID}</guid>"
+echo "<guid>$GUID</guid>"
 echo "<dcid>$DCID</dcid>"
 echo "<hwver>$hwver</hwver>"
 echo "<fwver>$fwver</fwver>"
