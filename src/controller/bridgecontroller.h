@@ -39,6 +39,7 @@ private:
     qint64  GetFileSize(const QString &fullPath);
     QByteArray GetFileContents(const QString &fullPath);
     bool SetFileContents(const QString &fullPath, QByteArray data);
+    bool SetFileExecutable(const QString &fullPath);
     bool UnlinkFile(const QString &fullPath);
 };
 

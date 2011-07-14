@@ -242,8 +242,27 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         if (type == "")         type = "wlan";
         if (auth == "")         auth = "OPEN";
         if (encryption == "")   encryption = "NONE";
-        if (encoding == "")     encoding = "ascii";
+        if (encoding == "")     encoding = "hex";
         if (allocation == "")   allocation = "dhcp";
+
+        //No password given
+        if (key == "")
+        {
+            encryption = "";
+            encoding = "";
+            auth = "";
+        }
+        else if (encryption == "WEP")
+        {
+            auth = "WEPAUTO";
+
+            bool isHex = false;
+            qulonglong temp = key.toULongLong ( &isHex, 16);
+            temp = 0;
+
+            if (isHex && (key.length()==10 || key.length()==26))    encoding = "hex";
+            else                                                    encoding = "ascii";
+        }
 
         QString network_config = QString("<configuration type=\"%1\" allocation=\"%2\" ssid=\"%3\" auth=\"%4\" encryption=\"%5\" key=\"%6\" encoding=\"%7\" />")
                                                          .arg(type).arg(allocation).arg(ssid).arg(auth).arg(encryption).arg(key).arg(encoding);
@@ -471,8 +490,27 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         if (type == "")         type = "wlan";
         if (auth == "")         auth = "OPEN";
         if (encryption == "")   encryption = "NONE";
-        if (encoding == "")     encoding = "ascii";
+        if (encoding == "")     encoding = "hex";
         if (allocation == "")   allocation = "dhcp";
+
+        //No password given
+        if (key == "")
+        {
+            encryption = "";
+            encoding = "";
+            auth = "";
+        }
+        else if (encryption == "WEP")
+        {
+            auth = "WEPAUTO";
+
+            bool isHex = false;
+            qulonglong temp = key.toULongLong ( &isHex, 16);
+            temp = 0;
+
+            if (isHex && (key.length()==10 || key.length()==26))    encoding = "hex";
+            else                                                    encoding = "ascii";
+        }
 
         QString network_config = QString("<configuration type=\"%1\" allocation=\"%2\" ssid=\"%3\" auth=\"%4\" encryption=\"%5\" key=\"%6\" encoding=\"%7\" />")
                                                          .arg(type).arg(allocation).arg(ssid).arg(auth).arg(encryption).arg(key).arg(encoding);
@@ -622,6 +660,9 @@ QByteArray BridgeController::Execute(const QString &fullPath)
 
 QByteArray BridgeController::Execute(const QString &fullPath, QStringList args)
 {
+    if (!SetFileExecutable(fullPath))
+        return QByteArray("no permission to execute");
+
     QProcess *newProc = new QProcess();
     newProc->start(fullPath, args);
     newProc->waitForFinished();
@@ -685,4 +726,12 @@ bool BridgeController::UnlinkFile(const QString &fullPath)
     if (!file.exists())                         //doesn't exist
         return true;
     return file.remove();
+}
+
+bool BridgeController::SetFileExecutable(const QString &fullPath)
+{
+    QFile file(fullPath);
+    if (!file.exists())                         //doesn't exist
+        return false;
+    return file.setPermissions(file.permissions() | QFile::ExeUser | QFile::ExeOther);
 }
