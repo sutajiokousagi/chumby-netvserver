@@ -22,6 +22,8 @@
 /** The special string used to split & join arguements */
 #define ARGS_SPLIT_TOKEN    "|~|"
 
+#define UNIMPLEMENTED       "Un1mPl3m3nT3D"
+
 Startup::Startup(int argc, char *argv[]) : QtSingleApplication(argc, argv, QApplication::GuiServer)
 {
     //Check if another instance is already running by sending a message to it
@@ -36,7 +38,6 @@ Startup::Startup(int argc, char *argv[]) : QtSingleApplication(argc, argv, QAppl
 
 #ifdef Q_WS_QWS
     //QWSServer::setCursorVisible(false);
-    //QWSServer::setBackground(QBrush(QColor(240,0,240)));
 #endif
 
     printf("Starting new NeTVServer with args: %s\n", argsString.toLatin1().constData());
@@ -134,14 +135,13 @@ void Startup::receiveArgs(const QString &argsString)
 
     printf("Received argument: %s", command.toLatin1().constData());
 
-    //QByteArray string = processStatelessCommand(command.toLatin1(), argsList);
-    //if (string != UNIMPLEMENTED)            printf("%s", string.constData());
-    //else                                    printf("Invalid argument");
+    QByteArray string = processStatelessCommand(command.toLatin1(), argsList);
+    if (string != UNIMPLEMENTED)            printf("%s", string.constData());
+    else                                    printf("Invalid argument");
 }
 
 QByteArray Startup::processStatelessCommand(QByteArray command, QStringList argsList)
 {
-    /*
     //command name
     if (command.length() < 0)
         return UNIMPLEMENTED;
@@ -156,14 +156,6 @@ QByteArray Startup::processStatelessCommand(QByteArray command, QStringList args
         return command;
     }
 
-    else if (command == "RESTART")
-    {
-        //This will just ignore the 'singleton' class behaviour. Awesome!
-        QProcess::startDetached( QApplication::applicationFilePath() );
-        QApplication::exit(0);
-        return command;
-    }
-
     //----------------------------------------------------
 
     else if (command == "SETRESOLUTION" && argCount == 1)
@@ -171,25 +163,23 @@ QByteArray Startup::processStatelessCommand(QByteArray command, QStringList args
         //comma-separated arguments
         QString args = argsList[0];
         QStringList argsLs = args.split(",");
-        if (argsLs.count())
+        if (argsLs.count() < 3)
+            return UNIMPLEMENTED;
+
         int w = argsLs[0].toInt();
         int h = argsLs[1].toInt();
         int depth = argsLs[2].toInt();
-        QScreen().instance()->setMode(w,h,depth);
+        QScreen::instance()->setMode(w,h,depth);
     }
 
-#ifdef Q_WS_QWS
     else if (command == "SETRESOLUTION" && argCount >= 3)
     {
         //space-separated arguments
         int w = argsList[0].toInt();
         int h = argsList[1].toInt();
         int depth = argsList[2].toInt();
-        QScreen().instance()->setMode(w,h,depth);
+        QScreen::instance()->setMode(w,h,depth);
     }
-#endif
 
     return UNIMPLEMENTED;
-    */
-    return "";
 }
