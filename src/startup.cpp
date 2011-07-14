@@ -1,6 +1,5 @@
 #ifdef Q_WS_QWS
-    #include <QWSServer>
-    #include <QBrush>
+    #include <QScreen>
     #include <QColor>
 #endif
 
@@ -40,7 +39,7 @@ Startup::Startup(int argc, char *argv[]) : QtSingleApplication(argc, argv, QAppl
 
 #ifdef Q_WS_QWS
     //QWSServer::setCursorVisible(false);
-    //QWSServer::setBackground(QBrush(QColor(0,7,0)));
+    //QWSServer::setBackground(QBrush(QColor(240,0,240)));
 #endif
 
     printf("Starting new NeTVServer with args: %s\n", argsString.toLatin1().constData());
@@ -52,6 +51,12 @@ Startup::Startup(int argc, char *argv[]) : QtSingleApplication(argc, argv, QAppl
 
 void Startup::start()
 {
+#ifdef Q_WS_QWS
+    // Fill the screen with default chroma key color
+    QScreen* theScreen = QScreen::instance();
+    theScreen->solidFill(QColor(240,0,240), QRegion(0,0, theScreen->width(),theScreen->height()));
+#endif
+
     // Initialize the core application
     QtSingleApplication* app = this;
     app->setApplicationName(APPNAME);
