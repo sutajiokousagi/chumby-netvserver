@@ -31,6 +31,9 @@ fi
 # No flash plugin on NeTV
 flashplugin='0'
 
+# Flash version
+flashver='10.62.0'
+
 # Network status
 network_status=$(network_status.sh)
 internet='false'
@@ -47,5 +50,6 @@ echo "<dcid>$DCID</dcid>"
 echo "<hwver>$hwver</hwver>"
 echo "<fwver>$fwver</fwver>"
 echo "<flashplugin>$flashplugin</flashplugin>"
+echo "<flashver>$flashver</flashver>"
 echo "<internet>$internet</internet>"
 echo "$network_status"
