@@ -50,6 +50,7 @@ Startup::Startup(int argc, char *argv[]) : QtSingleApplication(argc, argv, QAppl
 void Startup::start()
 {
     // Fill the screen with default chroma key color
+    // This will fail during Linking on Qt Desktop version
     QScreen* theScreen = QScreen::instance();
     theScreen->solidFill(QColor(240,0,240), QRegion(0,0, theScreen->width(),theScreen->height()));
 
