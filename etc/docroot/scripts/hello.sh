@@ -4,26 +4,27 @@
 #
 
 # Give demo GUID if no guidgen.sh
-GUID=$(guidgen.sh)
-if [ -n $GUID ]; then
+if [ ! -e /usr/bin/guidgen -o -z $GUID ]; then
 	GUID=A620123B-1F0E-B7CB-0E11-921ADB7BE22A
+else	
+	GUID=$(/usr/bin/guidgen.sh)
 fi
 
 # To be replaced by a actual script
 DCID=''
-if [ -n $DCID ]; then
+if [ -z $DCID ]; then
 	DCID='a long string of 1024 bytes'
 fi
 
 # To be replaced by a dcid script
 hwver=''
-if [ -n $hwver ]; then
+if [ -z $hwver ]; then
 	hwver='10.1'
 fi
 
 # To be replaced by a dcid script
 fwver=''
-if [ -n $fwver ]; then
+if [ -z $fwver ]; then
 	fwver='1.0'
 fi
 
@@ -33,8 +34,8 @@ flashplugin='0'
 # Network status
 network_status=$(network_status.sh)
 internet='false'
-hasLinkTrue=$(echo network_status | grep 'link="true"')
-if [ -n $hasLinkTrue ]; then
+hasLinkTrue=$(echo $network_status | grep 'link="true"')
+if [ ${#hasLinkTrue} -gt 10 ]; then
 	internet='true'
 fi
 

@@ -25,6 +25,10 @@ case "$1" in
 			/usr/share/netvserver/docroot/scripts/start_ap.sh
 		fi
 
+		# Temp fix for "Semop lock/unlock failure Identifier removed" flood
+		sleep 2
+		rm -rf /tmp/qtembedded-0
+
 		# start in the background so we don't hog the console
 		# This app uses QtGui hence requires -qws option,
 		# but does not render anything to the framebuffer
@@ -32,7 +36,6 @@ case "$1" in
 
 		# fullscreen
 		setbox 0 0 1279 719
-
 		;;
 
 	stop)
