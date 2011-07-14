@@ -3,6 +3,8 @@
 
 case "$1" in
 	start)
+		export QWS_KEYBOARD=chumbyirkb
+
 		# hide the ugly initialization sequence
 		setbox 0 0 1 1
 
@@ -37,8 +39,13 @@ case "$1" in
 		killall NeTVServer 2> /dev/null
 		;;
 
+	restart)
+		$0 stop
+		$0 start
+		;;
+
 	*)
 
-		echo "Usage: $0 {start|stop}"
+		echo "Usage: $0 {start|stop|restart}"
 		;;
 esac
