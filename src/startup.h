@@ -2,6 +2,8 @@
 #define STARTUP_H
 
 #include <qtsingleapplication.h>
+#include <QByteArray>
+#include <QStringList>
 
 /**
   The main class of the application
@@ -21,6 +23,7 @@ private slots:
 protected:
 
     void start();
+    QByteArray processStatelessCommand(QByteArray command, QStringList argsList = QStringList());
 };
 
 #endif // STARTUP_H

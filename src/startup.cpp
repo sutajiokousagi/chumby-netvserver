@@ -1,8 +1,5 @@
-#ifdef Q_WS_QWS
-    #include <QScreen>
-    #include <QColor>
-#endif
-
+#include <QScreen>
+#include <QColor>
 #include <QDir>
 #include "startup.h"
 #include "static.h"
@@ -51,11 +48,9 @@ Startup::Startup(int argc, char *argv[]) : QtSingleApplication(argc, argv, QAppl
 
 void Startup::start()
 {
-#ifdef Q_WS_QWS
     // Fill the screen with default chroma key color
     QScreen* theScreen = QScreen::instance();
     theScreen->solidFill(QColor(240,0,240), QRegion(0,0, theScreen->width(),theScreen->height()));
-#endif
 
     // Initialize the core application
     QtSingleApplication* app = this;
@@ -138,4 +133,63 @@ void Startup::receiveArgs(const QString &argsString)
     argCount = argsList.count();
 
     printf("Received argument: %s", command.toLatin1().constData());
+
+    //QByteArray string = processStatelessCommand(command.toLatin1(), argsList);
+    //if (string != UNIMPLEMENTED)            printf("%s", string.constData());
+    //else                                    printf("Invalid argument");
+}
+
+QByteArray Startup::processStatelessCommand(QByteArray command, QStringList argsList)
+{
+    /*
+    //command name
+    if (command.length() < 0)
+        return UNIMPLEMENTED;
+    command = command.toUpper();
+
+    //arguments
+    int argCount = argsList.count();
+
+    if (command == "QUIT" || command == "EXIT" || command == "TERMINATE")
+    {
+        QApplication::exit(0);
+        return command;
+    }
+
+    else if (command == "RESTART")
+    {
+        //This will just ignore the 'singleton' class behaviour. Awesome!
+        QProcess::startDetached( QApplication::applicationFilePath() );
+        QApplication::exit(0);
+        return command;
+    }
+
+    //----------------------------------------------------
+
+    else if (command == "SETRESOLUTION" && argCount == 1)
+    {
+        //comma-separated arguments
+        QString args = argsList[0];
+        QStringList argsLs = args.split(",");
+        if (argsLs.count())
+        int w = argsLs[0].toInt();
+        int h = argsLs[1].toInt();
+        int depth = argsLs[2].toInt();
+        QScreen().instance()->setMode(w,h,depth);
+    }
+
+#ifdef Q_WS_QWS
+    else if (command == "SETRESOLUTION" && argCount >= 3)
+    {
+        //space-separated arguments
+        int w = argsList[0].toInt();
+        int h = argsList[1].toInt();
+        int depth = argsList[2].toInt();
+        QScreen().instance()->setMode(w,h,depth);
+    }
+#endif
+
+    return UNIMPLEMENTED;
+    */
+    return "";
 }
