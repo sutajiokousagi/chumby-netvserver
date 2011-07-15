@@ -47,12 +47,38 @@
 */
 
 #include "startup.h"
+#include <unistd.h>
+#include <QtGui/QApplication>
+#include <qtsingleapplication.h>
+#include "stdio.h"
 
-/**
-  Entry point of the program.
-*/
 int main(int argc, char *argv[])
 {
-    Startup startup(argc, argv);
-    return startup.exec();
+    //Check if another instance is already running by sending a message to it
+    QtSingleApplication instance(argc, argv, QApplication::GuiServer);
+    instance.setApplicationName(APPNAME);
+    instance.setOrganizationName(ORGANISATION);
+
+    QStringList argsList = instance.arguments();
+    QString argsString = argsList.join(ARGS_SPLIT_TOKEN);
+
+    if (instance.sendMessage(argsString))
+    {
+        printf("Sending arguments to running NeTVServer instance: %s\n", argsString.toLatin1().constData());
+        return 0;
+        printf("Quitting... This should not be seen!!!!!");
+    }
+
+    // If the args list contains "-d", then daemonize
+    if (argsList.contains("-d"))
+        daemon(0, 0);
+
+    printf("Starting new NeTVServer with args:");
+    printf("%s", argsString.toLatin1().constData());
+
+    Startup startup;
+    startup.receiveArgs(argsString);
+
+    QObject::connect(&instance, SIGNAL(messageReceived(const QString&)), &startup, SLOT(receiveArgs(const QString&)));
+    return instance.exec();
 }

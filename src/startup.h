@@ -1,22 +1,34 @@
 #ifndef STARTUP_H
 #define STARTUP_H
 
-#include <qtsingleapplication.h>
+#include <QObject>
 #include <QByteArray>
 #include <QStringList>
+
+/** Name of this application */
+#define APPNAME "NeTVServer"
+
+/** Publisher of this application */
+#define ORGANISATION "Chumby Industries"
+
+/** Short description of this application */
+#define DESCRIPTION "Customized web server based on Qt"
+
+/** The special string used to split & join arguements */
+#define ARGS_SPLIT_TOKEN    "|~|"
 
 /**
   The main class of the application
 */
-class Startup : public QtSingleApplication
+class Startup : public QObject
 {
     Q_OBJECT
 
 public:
 
-    Startup(int argc, char *argv[]);
+    Startup(QObject* parent=0);
 
-private slots:
+public slots:
 
     void receiveArgs(const QString &argsString);
 

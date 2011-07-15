@@ -17,17 +17,6 @@ case "$1" in
 		# Temp fix for "Semop lock/unlock failure Identifier removed" flood
 		rm -rf /tmp/qtembedded-0
 
-		# Network status
-		# Too early to detect it here
-		#network_status=$(network_status.sh)
-		#hasLinkTrue=$(echo $network_status | grep 'link="true"')
-		#if [ ${#hasLinkTrue} -gt 10 ]; then
-		#	echo "Internet connection is valid"
-		#else
-		#	echo "Starting in Access Point mode"
-		#	/usr/share/netvserver/docroot/scripts/start_ap.sh
-		#fi
-
 		# start in the background so we don't hog the console
 		# This app uses QtGui hence requires -qws option,
 		# but does not render anything to the framebuffer

@@ -10,41 +10,11 @@
 #include "udpsocketserver.h"
 #include "requestmapper.h"
 
-/** Name of this application */
-#define APPNAME "NeTVServer"
-
-/** Publisher of this application */
-#define ORGANISATION "Chumby Industries"
-
-/** Short description of this application */
-#define DESCRIPTION "Customized web server based on Qt"
-
-/** The special string used to split & join arguements */
-#define ARGS_SPLIT_TOKEN    "|~|"
-
 #define UNIMPLEMENTED       "Un1mPl3m3nT3D"
 
-Startup::Startup(int argc, char *argv[]) : QtSingleApplication(argc, argv, QApplication::GuiServer)
+Startup::Startup(QObject* parent) : QObject(parent)
 {
-    //Check if another instance is already running by sending a message to it
-    QStringList argsList = this->arguments();
-    QString argsString = argsList.join(ARGS_SPLIT_TOKEN);
 
-    if (this->sendMessage(argsString))
-    {
-        printf("Sending '%s' to running NeTVServer instance\n", argsString.toLatin1().constData());
-        exit(0);
-    }
-
-#ifdef Q_WS_QWS
-    //QWSServer::setCursorVisible(false);
-#endif
-
-    printf("Starting new NeTVServer with args: %s\n", argsString.toLatin1().constData());
-
-    start();
-    this->receiveArgs(argsString);
-    QObject::connect(this, SIGNAL(messageReceived(const QString&)), this, SLOT(receiveArgs(const QString&)));
 }
 
 void Startup::start()
@@ -55,67 +25,64 @@ void Startup::start()
     theScreen->solidFill(QColor(240,0,240), QRegion(0,0, theScreen->width(),theScreen->height()));
 
     // Initialize the core application
-    QtSingleApplication* app = this;
-    app->setApplicationName(APPNAME);
-    app->setOrganizationName(ORGANISATION);
-    QString configFileName=Static::getConfigDir()+"/"+QCoreApplication::applicationName()+".ini";
+    QString configFileName=Static::getConfigDir()+"/"+APPNAME+".ini";
 
     // Configure logging into files
-    QSettings* mainLogSettings=new QSettings(configFileName,QSettings::IniFormat,app);
+    QSettings* mainLogSettings=new QSettings(configFileName,QSettings::IniFormat,this);
     mainLogSettings->beginGroup("mainLogFile");
-    QSettings* debugLogSettings=new QSettings(configFileName,QSettings::IniFormat,app);
+    QSettings* debugLogSettings=new QSettings(configFileName,QSettings::IniFormat,this);
     debugLogSettings->beginGroup("debugLogFile");
-    Logger* logger=new DualFileLogger(mainLogSettings,debugLogSettings,10000,app);
+    Logger* logger=new DualFileLogger(mainLogSettings,debugLogSettings,10000,this);
     logger->installMsgHandler();
 
     // Configure session store
-    QSettings* sessionSettings=new QSettings(configFileName,QSettings::IniFormat,app);
+    QSettings* sessionSettings=new QSettings(configFileName,QSettings::IniFormat,this);
     sessionSettings->beginGroup("sessions");
-    Static::sessionStore=new HttpSessionStore(sessionSettings,app);
+    Static::sessionStore=new HttpSessionStore(sessionSettings,this);
 
     // Configure static file controller
-    QSettings* fileSettings=new QSettings(configFileName,QSettings::IniFormat,app);
+    QSettings* fileSettings=new QSettings(configFileName,QSettings::IniFormat,this);
     fileSettings->beginGroup("docroot");
-    Static::staticFileController=new StaticFileController(fileSettings,app);
+    Static::staticFileController=new StaticFileController(fileSettings,this);
 
     // Configure script controller
-    Static::scriptController=new ScriptController(fileSettings,app);
+    Static::scriptController=new ScriptController(fileSettings,this);
 
     // Configure cursor controller
 #if defined (CURSOR_CONTROLLER)
-    Static::cursorController=new CursorController(fileSettings,app);
+    Static::cursorController=new CursorController(fileSettings,this);
 #endif
 
     // Configure framebuffer controller
-    QSettings* fbSettings=new QSettings(configFileName,QSettings::IniFormat,app);
+    QSettings* fbSettings=new QSettings(configFileName,QSettings::IniFormat,this);
     fbSettings->beginGroup("framebuffer-controller");
-    Static::framebufferController=new FramebufferController(fbSettings, app);
+    Static::framebufferController=new FramebufferController(fbSettings, this);
 
     // Configure bridge controller
-    Static::bridgeController=new BridgeController(fileSettings,app);
+    Static::bridgeController=new BridgeController(fileSettings,this);
 
     // Configure Flash policy server
-    QSettings* flashpolicySettings=new QSettings(configFileName,QSettings::IniFormat,app);
+    QSettings* flashpolicySettings=new QSettings(configFileName,QSettings::IniFormat,this);
     flashpolicySettings->beginGroup("flash-policy-server");
-    new FlashPolicyServer(flashpolicySettings, app);
+    new FlashPolicyServer(flashpolicySettings, this);
 
-    RequestMapper *requestMapper = new RequestMapper(app);
+    RequestMapper *requestMapper = new RequestMapper(this);
 
     // Configure and start the TCP listener
     qDebug("ServiceHelper: Starting service");
-    QSettings* listenerSettings=new QSettings(configFileName,QSettings::IniFormat,app);
+    QSettings* listenerSettings=new QSettings(configFileName,QSettings::IniFormat,this);
     listenerSettings->beginGroup("listener");
-    new HttpListener(listenerSettings, requestMapper, app);
+    new HttpListener(listenerSettings, requestMapper, this);
 
     // Configure TCP socket server
-    QSettings* tcpServerSettings=new QSettings(configFileName,QSettings::IniFormat,app);
+    QSettings* tcpServerSettings=new QSettings(configFileName,QSettings::IniFormat,this);
     tcpServerSettings->beginGroup("tcp-socket-server");
-    Static::tcpSocketServer=new TcpSocketServer(tcpServerSettings, requestMapper, app);
+    Static::tcpSocketServer=new TcpSocketServer(tcpServerSettings, requestMapper, this);
 
     // Configure UDP socket server
-    QSettings* udpServerSettings=new QSettings(configFileName,QSettings::IniFormat,app);
+    QSettings* udpServerSettings=new QSettings(configFileName,QSettings::IniFormat,this);
     udpServerSettings->beginGroup("udp-socket-server");
-    Static::udpSocketServer=new UdpSocketServer(udpServerSettings, requestMapper, app);
+    Static::udpSocketServer=new UdpSocketServer(udpServerSettings, requestMapper, this);
 
     printf("NeTVServer has started");
     qDebug("Startup: Application has started");
@@ -151,15 +118,9 @@ QByteArray Startup::processStatelessCommand(QByteArray command, QStringList args
     //arguments
     int argCount = argsList.count();
 
-    if (command == "QUIT" || command == "EXIT" || command == "TERMINATE")
-    {
-        QApplication::exit(0);
-        return command;
-    }
-
     //----------------------------------------------------
 
-    else if (command == "SETRESOLUTION" && argCount == 1)
+    if (command == "SETRESOLUTION" && argCount == 1)
     {
         //comma-separated arguments
         QString args = argsList[0];
