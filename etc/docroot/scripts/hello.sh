@@ -42,6 +42,13 @@ if [ ${#hasLinkTrue} -gt 10 ]; then
 	internet='true'
 fi
 
+# MAC address
+INTIF=wlan0
+MAC=$(ifconfig | grep ${INTIF} | tr -s ' ' | cut -d ' ' -f5)
+
+# IP address
+IP=$(/sbin/ifconfig ${INTIF} | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
+
 #
 # Print them out
 #
@@ -52,4 +59,6 @@ echo "<fwver>$fwver</fwver>"
 echo "<flashplugin>$flashplugin</flashplugin>"
 echo "<flashver>$flashver</flashver>"
 echo "<internet>$internet</internet>"
+echo "<mac>$MAC</mac>"
+echo "<ip>$IP</ip>"
 echo "$network_status"
