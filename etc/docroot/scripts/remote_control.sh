@@ -13,8 +13,11 @@ if [ "$cmd" == "reset" ];
 then
 	# Hide the flash player
 	setplayer 0 0 1 1 
-	
-	# Reset the browser
+
+	# Minimize the browser first	
+	/usr/bin/NeTVBrowser -qws -nomouse Hide
+		
+	# Reset the browser (to homepage)
 	start_netvbrowser.sh
 
 	# Print out the command received
