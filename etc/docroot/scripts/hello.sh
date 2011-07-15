@@ -4,7 +4,7 @@
 #
 
 # Give demo GUID if no guidgen.sh
-if [ ! -e /usr/bin/guidgen -o -z $GUID ]; then
+if [ ! -e /usr/bin/guidgen.sh ]; then
 	GUID=A620123B-1F0E-B7CB-0E11-921ADB7BE22A
 else	
 	GUID=$(/usr/bin/guidgen.sh)
