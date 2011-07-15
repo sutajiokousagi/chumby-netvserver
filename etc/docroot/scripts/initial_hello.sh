@@ -29,7 +29,7 @@ if [ -z $hwver ]; then
 fi
 
 # To be replaced by a dcid script
-fwver=''
+fwver=$(chumby_version -f)
 if [ -z $fwver ]; then
 	fwver='1.0'
 fi
