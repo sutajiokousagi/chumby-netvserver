@@ -53,7 +53,22 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     if (cmdString == "Hello")
     {
+        //Returning GUID, DCID, HWver, SWver, etc.Z
         QByteArray buffer = this->Execute(docroot + "/scripts/hello.sh", QStringList(dataString));
+        if (buffer.length() > 5)
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data>" + buffer.trimmed() + "</data>", true);
+        else
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data>" + buffer.trimmed() + "</data>", true);
+        buffer = QByteArray();
+    }
+
+    if (cmdString == "InitialHello")
+    {
+        //This is identical to 'Hello' command except that it will switch to Acces Point mode if necessary
+        //To be called only once by JavaScriptCore
+
+        //Returning GUID, DCID, HWver, SWver, etc.
+        QByteArray buffer = this->Execute(docroot + "/scripts/initial_hello.sh", QStringList(dataString));
         if (buffer.length() > 5)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data>" + buffer.trimmed() + "</data>", true);
         else
@@ -231,40 +246,16 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "SetNetwork")
     {
-        QString type = request.getParameter("type");
-        QString allocation = request.getParameter("wifi_allocation");
-        QString ssid = request.getParameter("wifi_ssid");
-        QString auth = request.getParameter("wifi_auth");
-        QString encryption = request.getParameter("wifi_encryption");
-        QString key = request.getParameter("wifi_password");
-        QString encoding = request.getParameter("wifi_encoding");
-
-        if (type == "")         type = "wlan";
-        if (auth == "")         auth = "OPEN";
-        if (encryption == "")   encryption = "NONE";
-        if (encoding == "")     encoding = "hex";
-        if (allocation == "")   allocation = "dhcp";
-
-        //No password given
-        if (key == "")
-        {
-            encoding = "";
-        }
-        else if (encryption == "WEP")
-        {
-            auth = "WEPAUTO";
-
-            bool isHex = false;
-            qulonglong temp = key.toULongLong ( &isHex, 16);
-            temp = 0;
-
-            if (isHex && (key.length()==10 || key.length()==26))    encoding = "hex";
-            else                                                    encoding = "ascii";
-        }
-
-        QString network_config = QString("<configuration type=\"%1\" allocation=\"%2\" ssid=\"%3\" auth=\"%4\" encryption=\"%5\" key=\"%6\" encoding=\"%7\" />")
-                                                         .arg(type).arg(allocation).arg(ssid).arg(auth).arg(encryption).arg(key).arg(encoding);
-        bool fileOK = SetFileContents(BRIDGE_NETWORK_CONFIG, network_config.toLatin1());
+        QHash<QString,QString> params;
+        params.insert("type", request.getParameter("type"));
+        params.insert("allocation", request.getParameter("wifi_allocation"));
+        params.insert("ssid", request.getParameter("wifi_ssid"));
+        params.insert("auth", request.getParameter("wifi_auth"));
+        params.insert("encryption", request.getParameter("wifi_encryption"));
+        params.insert("key", request.getParameter("wifi_password"));
+        params.insert("encoding", request.getParameter("wifi_encoding"));
+        bool fileOK = SetNetworkConfig(params);
+        params.clear();
 
         QByteArray buffer;
         if (!fileOK)        buffer = this->GetFileContents(BRIDGE_NETWORK_CONFIG);
@@ -381,8 +372,20 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         //The type of connection is already handled by the TcpSocketServer, but we do post-processing here
         //QByteArray hardwareType = request.getParameter("value");
 
-        //Returning GUID, DCID, HWver, SWver, etc. (mostly useful for Android/iOS)
+        //Returning GUID, DCID, HWver, SWver, etc.
         QByteArray buffer = this->Execute(docroot + "/scripts/hello.sh", QStringList(dataString));
+        response.setCommand(cmdString);
+        response.setParameter("data", buffer.trimmed());
+        response.write();
+    }
+
+    if (cmdString == "InitialHello")
+    {
+        //This is identical to 'Hello' command except that it will switch to Acces Point mode if necessary
+        //To be called only once by JavaScriptCore
+
+        //Returning GUID, DCID, HWver, SWver, etc.
+        QByteArray buffer = this->Execute(docroot + "/scripts/initial_hello.sh", QStringList(dataString));
         response.setCommand(cmdString);
         response.setParameter("data", buffer.trimmed());
         response.write();
@@ -477,40 +480,16 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     {
         fprintf(stderr,"Receiving SetNetwork command\n");
 
-        QString type = request.getParameter("type");
-        QString allocation = request.getParameter("wifi_allocation");
-        QString ssid = request.getParameter("wifi_ssid");
-        QString auth = request.getParameter("wifi_auth");
-        QString encryption = request.getParameter("wifi_encryption");
-        QString key = request.getParameter("wifi_password");
-        QString encoding = request.getParameter("wifi_encoding");
-
-        if (type == "")         type = "wlan";
-        if (auth == "")         auth = "OPEN";
-        if (encryption == "")   encryption = "NONE";
-        if (encoding == "")     encoding = "hex";
-        if (allocation == "")   allocation = "dhcp";
-
-        //No password given
-        if (key == "")
-        {
-            encoding = "";
-        }
-        else if (encryption == "WEP")
-        {
-            auth = "WEPAUTO";
-
-            bool isHex = false;
-            qulonglong temp = key.toULongLong ( &isHex, 16);
-            temp = 0;
-
-            if (isHex && (key.length()==10 || key.length()==26))    encoding = "hex";
-            else                                                    encoding = "ascii";
-        }
-
-        QString network_config = QString("<configuration type=\"%1\" allocation=\"%2\" ssid=\"%3\" auth=\"%4\" encryption=\"%5\" key=\"%6\" encoding=\"%7\" />")
-                                                         .arg(type).arg(allocation).arg(ssid).arg(auth).arg(encryption).arg(key).arg(encoding);
-        bool fileOK = SetFileContents(BRIDGE_NETWORK_CONFIG, network_config.toLatin1());
+        QHash<QString,QString> params;
+        params.insert("type", request.getParameter("type"));
+        params.insert("allocation", request.getParameter("wifi_allocation"));
+        params.insert("ssid", request.getParameter("wifi_ssid"));
+        params.insert("auth", request.getParameter("wifi_auth"));
+        params.insert("encryption", request.getParameter("wifi_encryption"));
+        params.insert("key", request.getParameter("wifi_password"));
+        params.insert("encoding", request.getParameter("wifi_encoding"));
+        bool fileOK = SetNetworkConfig(params);
+        params.clear();
 
         QByteArray buffer;
         if (!fileOK)        fprintf(stderr,"Error writing network config file\n");
@@ -670,6 +649,54 @@ QByteArray BridgeController::Execute(const QString &fullPath, QStringList args)
     newProc = NULL;
 
     return buffer;
+}
+
+//-----------------------------------------------------------------------------------------------------------
+// Helper
+//-----------------------------------------------------------------------------------------------------------
+
+bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
+{
+    QString type = parameters.value("type");
+    QString allocation = parameters.value("allocation");
+    QString ssid = parameters.value("ssid");
+    QString auth = parameters.value("auth");
+    QString encryption = parameters.value("encryption");
+    QString key = parameters.value("key");
+    QString encoding = parameters.value("encoding");
+
+    if (type == "")         type = "wlan";
+    if (auth == "")         auth = "OPEN";
+    if (encryption == "")   encryption = "NONE";
+    if (encoding == "")     encoding = "hex";
+    if (allocation == "")   allocation = "dhcp";
+
+    //No password given or open network
+    if (key == "" || encryption == "NONE")
+    {
+        encoding = "";
+        auth = "OPEN";
+    }
+    else if (encryption == "WEP")
+    {
+        auth = "WEPAUTO";
+
+        bool isHex = false;
+        qulonglong temp = key.toULongLong ( &isHex, 16);
+        temp = 0;
+
+        if (isHex && (key.length()==10 || key.length()==26))    encoding = "hex";
+        else                                                    encoding = "ascii";
+    }
+    //WPA
+    else
+    {
+        encoding = "";
+    }
+
+    QString network_config = QString("<configuration type=\"%1\" allocation=\"%2\" ssid=\"%3\" auth=\"%4\" encryption=\"%5\" key=\"%6\" encoding=\"%7\" />")
+                                                     .arg(type).arg(allocation).arg(ssid).arg(auth).arg(encryption).arg(key).arg(encoding);
+    return SetFileContents(BRIDGE_NETWORK_CONFIG, network_config.toLatin1());
 }
 
 //-----------------------------------------------------------------------------------------------------------

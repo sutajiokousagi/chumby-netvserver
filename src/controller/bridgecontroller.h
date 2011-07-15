@@ -34,6 +34,9 @@ private:
     QByteArray Execute(const QString &fullPath);
     QByteArray Execute(const QString &fullPath, QStringList args);
 
+    /** Helper */
+    bool SetNetworkConfig(QHash<QString, QString> parameters);
+
     /** File Utilities */
     bool FileExists(const QString &fullPath);
     qint64  GetFileSize(const QString &fullPath);
