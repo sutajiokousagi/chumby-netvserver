@@ -14,7 +14,7 @@
 
 Startup::Startup(QObject* parent) : QObject(parent)
 {
-
+    start();
 }
 
 void Startup::start()
