@@ -16,19 +16,19 @@ else
 	GUID=$(/usr/bin/guidgen.sh)
 fi
 
-# To be replaced by a actual script
+# To be replaced by a script
 DCID=''
 if [ -z $DCID ]; then
 	DCID='a long string of 1024 bytes'
 fi
 
-# To be replaced by a dcid script
+# To be replaced by a script
 hwver=''
 if [ -z $hwver ]; then
 	hwver='10.1'
 fi
 
-# To be replaced by a dcid script
+# Software version
 fwver=$(chumby_version -f)
 if [ -z $fwver ]; then
 	fwver='1.0'

@@ -22,8 +22,8 @@ if [ -z $hwver ]; then
 	hwver='10.1'
 fi
 
-# To be replaced by a dcid script
-fwver=''
+# Software version
+fwver=$(chumby_version -f)
 if [ -z $fwver ]; then
 	fwver='1.0'
 fi
