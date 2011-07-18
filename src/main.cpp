@@ -49,6 +49,8 @@
 #include "startup.h"
 #include <unistd.h>
 #include <QtGui/QApplication>
+#include <QWSServer>
+#include <QBrush>
 #include <qtsingleapplication.h>
 #include "stdio.h"
 
@@ -58,6 +60,9 @@ int main(int argc, char *argv[])
     QtSingleApplication instance(argc, argv, QApplication::GuiServer);
     instance.setApplicationName(APPNAME);
     instance.setOrganizationName(ORGANISATION);
+
+    //Pink background
+    QWSServer::setBackground(QBrush(QColor(240,0,240)));
 
     QStringList argsList = instance.arguments();
     QString argsString = argsList.join(ARGS_SPLIT_TOKEN);
