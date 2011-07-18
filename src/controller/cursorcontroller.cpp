@@ -239,7 +239,7 @@ int CursorController::setup_uinput_device(int maxX, int maxY, bool isRelative, c
     uinp_fd = open(device, O_WRONLY | O_NDELAY);
     if (uinp_fd == NULL)
     {
-        qDebug("CursorController: unable to open %s", device);
+        //qDebug("CursorController: unable to open %s", device);
         return -1;
     }
 
@@ -291,7 +291,7 @@ int CursorController::setup_uinput_device(int maxX, int maxY, bool isRelative, c
 
     if ( ioctl(uinp_fd, UI_DEV_CREATE) )
     {
-        qDebug("Unable to create UINPUT device.");
+        //qDebug("Unable to create UINPUT device.");
         return -1;
     }
 */

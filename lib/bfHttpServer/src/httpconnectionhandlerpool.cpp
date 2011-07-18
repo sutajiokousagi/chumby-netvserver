@@ -48,7 +48,7 @@ void HttpConnectionHandlerPool::cleanup() {
         if (!handler->isBusy()) {
             if (++idleCounter > maxIdleHandlers) {
                 pool.removeOne(handler);
-                qDebug("HttpConnectionHandlerPool: Removed connection handler (%x), pool size is now %i",(unsigned int) handler,pool.size());
+                //qDebug("HttpConnectionHandlerPool: Removed connection handler (%x), pool size is now %i",(unsigned int) handler,pool.size());
                 connect(handler,SIGNAL(finished()),handler,SLOT(deleteLater()));
                 handler->quit();
                 break; // remove only one handler in each interval

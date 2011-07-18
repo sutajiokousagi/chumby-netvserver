@@ -28,27 +28,25 @@ HttpConnectionHandler::HttpConnectionHandler(QSettings* settings, HttpRequestHan
     connect(&readTimer, SIGNAL(timeout()), SLOT(readTimeout()));
 
     readTimer.setSingleShot(true);
-    qDebug("HttpConnectionHandler (%x): constructed",(unsigned int) this);
     this->start();
 }
 
 
 HttpConnectionHandler::~HttpConnectionHandler()
 {
-    qDebug("HttpConnectionHandler (%x): destroyed",(unsigned int) this);
+
 }
 
 
 void HttpConnectionHandler::run()
 {
-    qDebug("HttpConnectionHandler (%x): thread started",(unsigned int) this);
     try {
         exec();
     }
     catch (...) {
         qCritical("HttpConnectionHandler (%x): an uncatched exception occured in the thread",(unsigned int) this);
     }
-    qDebug("HttpConnectionHandler (%x): thread stopped",(unsigned int) this);
+
     // Change to the main thread, otherwise deleteLater() would not work
     moveToThread(QCoreApplication::instance()->thread());
 }
@@ -56,7 +54,7 @@ void HttpConnectionHandler::run()
 
 void HttpConnectionHandler::handleConnection(int socketDescriptor)
 {
-    qDebug("HttpConnectionHandler (%x): handle new connection",(unsigned int) this);
+    //qDebug("HttpConnectionHandler (%x): handle new connection",(unsigned int) this);
 
     //For some reason it fails here, although HttpConnectionHandlerPool already check the same condition
     //Q_ASSERT(socket.isBusy()==false);                     // if not, then the handler is already busy
@@ -85,7 +83,7 @@ bool HttpConnectionHandler::isBusy()
 
 void HttpConnectionHandler::readTimeout()
 {
-    qDebug("HttpConnectionHandler (%x): read timeout occured",(unsigned int) this);
+    //qDebug("HttpConnectionHandler (%x): read timeout occured",(unsigned int) this);
     socket.write("HTTP/1.1 408 request timeout\r\nConnection: close\r\n\r\n408 request timeout\r\n");
     socket.disconnectFromHost();
     delete currentRequest;
@@ -95,7 +93,7 @@ void HttpConnectionHandler::readTimeout()
 
 void HttpConnectionHandler::disconnected()
 {
-    qDebug("HttpConnectionHandler (%x): disconnected",(unsigned int) this);
+    //qDebug("HttpConnectionHandler (%x): disconnected",(unsigned int) this);
     socket.close();
     delete currentRequest;
     currentRequest=0;
@@ -104,10 +102,6 @@ void HttpConnectionHandler::disconnected()
 
 void HttpConnectionHandler::read()
 {
-#ifdef SUPERVERBOSE
-    qDebug("HttpConnectionHandler (%x): read input",(unsigned int) this);
-#endif
-
     // Create new HttpRequest object if necessary
     if (!currentRequest) {
         currentRequest=new HttpRequest(settings);
@@ -133,9 +127,9 @@ void HttpConnectionHandler::read()
     }
 
     // If the request is complete, let the request mapper dispatch it
-    if (currentRequest->getStatus()==HttpRequest::complete) {
+    if (currentRequest->getStatus()==HttpRequest::complete)
+    {
         readTimer.stop();
-        qDebug("HttpConnectionHandler (%x): received request",(unsigned int) this);
         HttpResponse response(&socket);
         try {
             requestHandler->service(*currentRequest, response);

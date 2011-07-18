@@ -40,7 +40,6 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
     // Forbid access to files outside the docroot directory
     if (path.startsWith("/.."))
     {
-        qWarning("StaticFileController: somebody attempted to access a file outside the docroot directory");
         response.setStatus(403,"forbidden");
         response.write("403 forbidden",true);
     }
@@ -58,7 +57,6 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
     }
 
     // The file is not in cache.
-    qDebug("StaticFileController: Cache miss for %s", path.data());
 
     // If the filename is a directory, append index.html.
     if (QFileInfo(docroot+path).isDir())
@@ -83,7 +81,6 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
         // Error opening the file
         if (!anotherFile.open(QIODevice::ReadOnly))
         {
-            qWarning("StaticFileController: Cannot open existing file %s for reading",qPrintable(anotherFile.fileName()));
             response.setStatus(403,"forbidden");
             response.write("403 forbidden",true);
             return;
@@ -97,12 +94,9 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
         return;
     }
 
-    qDebug("StaticFileController: Open file %s", qPrintable(file.fileName()));
-
     // Error opening the file
     if (!file.open(QIODevice::ReadOnly))
     {
-        qWarning("StaticFileController: Cannot open existing file %s for reading",qPrintable(file.fileName()));
         response.setStatus(403,"forbidden");
         response.write("403 forbidden",true);
         return;

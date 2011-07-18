@@ -20,7 +20,6 @@ RequestMapper::RequestMapper(QObject* parent) : HttpRequestHandler(parent), Sock
 void RequestMapper::service(HttpRequest& request, HttpResponse& response)
 {
     QByteArray path = request.getPath();
-    qDebug("RequestMapper: path=%s", path.data());
 
     if (path.startsWith("/dump")) {
         DumpController().service(request, response);

@@ -18,7 +18,7 @@ ScriptController::ScriptController(QSettings* settings, QObject* parent)
         QFileInfo configFile(settings->fileName());
         docroot=QFileInfo(configFile.absolutePath(),docroot).absoluteFilePath();
     }
-    qDebug("ScriptController: docroot=%s, encoding=%s",qPrintable(docroot),qPrintable(encoding));
+    //qDebug("ScriptController: docroot=%s, encoding=%s",qPrintable(docroot),qPrintable(encoding));
 }
 
 

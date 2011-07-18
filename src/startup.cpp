@@ -23,12 +23,14 @@ void Startup::start()
     QString configFileName=Static::getConfigDir()+"/"+APPNAME+".ini";
 
     // Configure logging into files
+    /*
     QSettings* mainLogSettings=new QSettings(configFileName,QSettings::IniFormat,this);
     mainLogSettings->beginGroup("mainLogFile");
     QSettings* debugLogSettings=new QSettings(configFileName,QSettings::IniFormat,this);
     debugLogSettings->beginGroup("debugLogFile");
     Logger* logger=new DualFileLogger(mainLogSettings,debugLogSettings,10000,this);
     logger->installMsgHandler();
+    */
 
     // Configure session store
     QSettings* sessionSettings=new QSettings(configFileName,QSettings::IniFormat,this);

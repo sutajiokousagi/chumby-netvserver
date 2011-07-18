@@ -22,24 +22,16 @@ HttpListener::HttpListener(QSettings* settings, HttpRequestHandler* requestHandl
     {
         qCritical("HttpListener: Cannot bind on port %i: %s", port,qPrintable(errorString()));
     }
-    else
-    {
-        qDebug("HttpListener: Listening on port %i", port);
-    }
 }
 
 HttpListener::~HttpListener()
 {
     close();
-    qDebug("HttpListener: closed");
 }
 
 
 void HttpListener::incomingConnection(int socketDescriptor)
 {
-#ifdef SUPERVERBOSE
-    qDebug("HttpListener: New connection");
-#endif
     HttpConnectionHandler* freeHandler = pool.getConnectionHandler();
 
     // Let the handler process the new connection.
