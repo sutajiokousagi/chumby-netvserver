@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QByteArray>
 #include <QStringList>
+#include <QWSServer>
+#include <QWSWindow>
 
 /** Name of this application */
 #define APPNAME "NeTVServer"
@@ -17,9 +19,7 @@
 /** The special string used to split & join arguements */
 #define ARGS_SPLIT_TOKEN    "|~|"
 
-/**
-  The main class of the application
-*/
+
 class Startup : public QObject
 {
     Q_OBJECT
@@ -31,6 +31,7 @@ public:
 public slots:
 
     void receiveArgs(const QString &argsString);
+    void windowEvent ( QWSWindow * window, QWSServer::WindowEvent eventType );
 
 protected:
 

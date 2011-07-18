@@ -107,6 +107,22 @@ void Startup::receiveArgs(const QString &argsString)
     else                                    printf("NeTVServer: Invalid argument");
 }
 
+void Startup::windowEvent ( QWSWindow * window, QWSServer::WindowEvent eventType )
+{
+    QWSServer *qserver = QWSServer::instance();
+    const QList<QWSWindow *> winList = qserver->clientWindows();
+    if (winList.count() > 0)
+    {
+        printf("NeTVServer: painting is enabled [%d windows]", winList.count());
+        qserver->enablePainting(true);
+    }
+    else
+    {
+        printf("NeTVServer: painting is disabled [%d windows]", winList.count());
+        qserver->enablePainting(false);
+    }
+}
+
 QByteArray Startup::processStatelessCommand(QByteArray command, QStringList argsList)
 {
     //command name

@@ -61,9 +61,6 @@ int main(int argc, char *argv[])
     instance.setApplicationName(APPNAME);
     instance.setOrganizationName(ORGANISATION);
 
-    //Pink background
-    QWSServer::setBackground(QBrush(QColor(240,0,240)));
-
     QStringList argsList = instance.arguments();
     QString argsString = argsList.join(ARGS_SPLIT_TOKEN);
 
@@ -81,9 +78,16 @@ int main(int argc, char *argv[])
     printf("Starting new NeTVServer with args:");
     printf("%s", argsString.toLatin1().constData());
 
+    //Pink background (temp fix. We should completely prevent it from drawing in non-window area)
+    QWSServer *qserver = QWSServer::instance();
+    qserver->setBackground(QBrush(QColor(240,0,240)));
+    qserver->setCursorVisible(false);
+    qserver->enablePainting(false);
+
     Startup startup;
     startup.receiveArgs(argsString);
 
     QObject::connect(&instance, SIGNAL(messageReceived(const QString&)), &startup, SLOT(receiveArgs(const QString&)));
+    QObject::connect(qserver, SIGNAL(windowEvent(QWSWindow*, QWSServer::WindowEvent)), &startup, SLOT(windowEvent(QWSWindow*, QWSServer::WindowEvent)));
     return instance.exec();
 }
