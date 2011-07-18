@@ -13,6 +13,8 @@
 #define BRIDGE_NETWORK_CONFIG               "/psp/network_config"
 #define BRIDGE_ACCOUNT_CONFIG               "/psp/chumby_account"
 
+#define ARGS_SPLIT_TOKEN    "|~|"
+
 BridgeController::BridgeController(QSettings* settings, QObject* parent)
     :HttpRequestHandler(parent)
 {
@@ -177,6 +179,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "ControlPanel")
     {
+        //Send it straight to browser
+        //int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "<value></data></xml>", "netvbrowser");
+
         QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
         buffer = QByteArray();
@@ -394,6 +399,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     else if (cmdString == "ControlPanel")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
+
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setParameter("value", buffer.trimmed());
         response.write();
@@ -411,10 +417,10 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
     else if (cmdString == "RemoteControl")
     {
-        //Forward to browser
+        //Forward to all clients
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "<value></data></xml>", "all");
 
-        //Reply to JavaScriptCore/ControlPanel
+        //Reply to socket client (Android/iOS)
         if (numClient > 0) {
             response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
             response.setParameter("value", "Command forwarded to browser");
@@ -427,10 +433,10 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
     else if (cmdString == "Key")
     {
-        //Forward to browser
+        //Forward to all clients
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "<value></data></xml>", "all");
 
-        //Reply to JavaScriptCore/ControlPanel
+        //Reply to socket client (Android/iOS)
         if (numClient > 0) {
             response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
             response.setParameter("value", "Command forwarded to browser");

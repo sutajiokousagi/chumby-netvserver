@@ -19,11 +19,6 @@ Startup::Startup(QObject* parent) : QObject(parent)
 
 void Startup::start()
 {
-    // Fill the screen with default chroma key color
-    // This will fail during Linking on Qt Desktop version
-    QScreen* theScreen = QScreen::instance();
-    theScreen->solidFill(QColor(240,0,240), QRegion(0,0, theScreen->width(),theScreen->height()));
-
     // Initialize the core application
     QString configFileName=Static::getConfigDir()+"/"+APPNAME+".ini";
 
@@ -109,6 +104,9 @@ void Startup::receiveArgs(const QString &argsString)
 
 void Startup::windowEvent ( QWSWindow * window, QWSServer::WindowEvent eventType )
 {
+    Q_UNUSED(window);
+    Q_UNUSED(eventType);
+
     QWSServer *qserver = QWSServer::instance();
     const QList<QWSWindow *> winList = qserver->clientWindows();
     if (winList.count() > 0)
@@ -146,12 +144,19 @@ QByteArray Startup::processStatelessCommand(QByteArray command, QStringList args
         int w = argsLs[0].toInt();
         int h = argsLs[1].toInt();
         int depth = argsLs[2].toInt();
-        QScreen::instance()->setMode(w,h,depth);
 
-        // Fill the screen with default chroma key color
-        // This will fail during Linking on Qt Desktop version
-        QScreen* theScreen = QScreen::instance();
-        theScreen->solidFill(QColor(240,0,240), QRegion(0,0, theScreen->width(),theScreen->height()));
+        //resize the screen driver
+        QWSServer *qserver = QWSServer::instance();
+        qserver->enablePainting(false);
+        QScreen::instance()->setMode(w,h,depth);
+        qserver->enablePainting(true);
+
+        //forward to browser
+        if (Static::tcpSocketServer != NULL)
+            Static::tcpSocketServer->broadcast("<xml><cmd>Show</cmd></xml>", "netvbrowser");
+
+        //redraw the entire screen
+        qserver->refresh();
 
         return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
     }
@@ -162,12 +167,19 @@ QByteArray Startup::processStatelessCommand(QByteArray command, QStringList args
         int w = argsList[0].toInt();
         int h = argsList[1].toInt();
         int depth = argsList[2].toInt();
-        QScreen::instance()->setMode(w,h,depth);
 
-        // Fill the screen with default chroma key color
-        // This will fail during Linking on Qt Desktop version
-        QScreen* theScreen = QScreen::instance();
-        theScreen->solidFill(QColor(240,0,240), QRegion(0,0, theScreen->width(),theScreen->height()));
+        //resize the screen driver
+        QWSServer *qserver = QWSServer::instance();
+        qserver->enablePainting(false);
+        QScreen::instance()->setMode(w,h,depth);
+        qserver->enablePainting(true);
+
+        //forward to browser
+        if (Static::tcpSocketServer != NULL)
+            Static::tcpSocketServer->broadcast("<xml><cmd>Show</cmd></xml>", "netvbrowser");
+
+        //redraw the entire screen
+        qserver->refresh();
 
         return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
     }
