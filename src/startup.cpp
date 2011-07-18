@@ -85,7 +85,6 @@ void Startup::start()
     Static::udpSocketServer=new UdpSocketServer(udpServerSettings, requestMapper, this);
 
     printf("NeTVServer has started");
-    qDebug("Startup: Application has started");
 }
 
 void Startup::receiveArgs(const QString &argsString)
@@ -104,8 +103,8 @@ void Startup::receiveArgs(const QString &argsString)
     printf("Received argument: %s", command.toLatin1().constData());
 
     QByteArray string = processStatelessCommand(command.toLatin1(), argsList);
-    if (string != UNIMPLEMENTED)            printf("%s", string.constData());
-    else                                    printf("Invalid argument");
+    if (string != UNIMPLEMENTED)            printf("NeTVServer: %s", string.constData());
+    else                                    printf("NeTVServer: Invalid argument");
 }
 
 QByteArray Startup::processStatelessCommand(QByteArray command, QStringList argsList)
@@ -132,6 +131,13 @@ QByteArray Startup::processStatelessCommand(QByteArray command, QStringList args
         int h = argsLs[1].toInt();
         int depth = argsLs[2].toInt();
         QScreen::instance()->setMode(w,h,depth);
+
+        // Fill the screen with default chroma key color
+        // This will fail during Linking on Qt Desktop version
+        QScreen* theScreen = QScreen::instance();
+        theScreen->solidFill(QColor(240,0,240), QRegion(0,0, theScreen->width(),theScreen->height()));
+
+        return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
     }
 
     else if (command == "SETRESOLUTION" && argCount >= 3)
@@ -141,6 +147,13 @@ QByteArray Startup::processStatelessCommand(QByteArray command, QStringList args
         int h = argsList[1].toInt();
         int depth = argsList[2].toInt();
         QScreen::instance()->setMode(w,h,depth);
+
+        // Fill the screen with default chroma key color
+        // This will fail during Linking on Qt Desktop version
+        QScreen* theScreen = QScreen::instance();
+        theScreen->solidFill(QColor(240,0,240), QRegion(0,0, theScreen->width(),theScreen->height()));
+
+        return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
     }
 
     return UNIMPLEMENTED;
