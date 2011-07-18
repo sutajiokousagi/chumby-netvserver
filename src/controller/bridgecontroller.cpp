@@ -2,6 +2,7 @@
 #include "../static.h"
 #include <QFileInfo>
 #include <QDir>
+#include <QDebug>
 #include <QProcess>
 #include <QApplication>
 #include <QDesktopWidget>
@@ -490,7 +491,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         params.insert("type", request.getParameter("type"));
         params.insert("allocation", request.getParameter("wifi_allocation"));
         params.insert("ssid", request.getParameter("wifi_ssid"));
-        params.insert("auth", request.getParameter("wifi_auth"));
+        params.insert("auth", request.getParameter("wifi_authentication"));
         params.insert("encryption", request.getParameter("wifi_encryption"));
         params.insert("key", request.getParameter("wifi_password"));
         params.insert("encoding", request.getParameter("wifi_encoding"));
@@ -670,6 +671,12 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
     QString encryption = parameters.value("encryption");
     QString key = parameters.value("key");
     QString encoding = parameters.value("encoding");
+
+    //Debug
+    qDebug() << "Received network config: ";
+    QHash<QString, QString>::iterator i;
+    for  (i = parameters.begin (); i != parameters.end (); i++)
+        qDebug() << i.key() << " = " << i.value();
 
     if (type == "")         type = "wlan";
     if (auth == "")         auth = "OPEN";
