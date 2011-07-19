@@ -66,7 +66,6 @@ void Startup::start()
     RequestMapper *requestMapper = new RequestMapper(this);
 
     // Configure and start the TCP listener
-    qDebug("ServiceHelper: Starting service");
     QSettings* listenerSettings=new QSettings(configFileName,QSettings::IniFormat,this);
     listenerSettings->beginGroup("listener");
     new HttpListener(listenerSettings, requestMapper, this);

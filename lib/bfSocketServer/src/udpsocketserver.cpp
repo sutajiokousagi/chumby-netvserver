@@ -105,6 +105,7 @@ void UdpSocketServer::run()
         qDebug() << "UdpSocketServer failed to bind to port " << port;
         return;
     }
+    qDebug("UdpSocketServer: Listening on port %i", port);
 
     //Get own IP addresses
     QList <QHostAddress> list = QHostInfo::fromName(QHostInfo::localHostName()).addresses();
