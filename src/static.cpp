@@ -54,7 +54,7 @@ QString Static::getConfigDir()
         {
             // found
             configDir=dir;
-            qDebug("Using config file %s",qPrintable(file.fileName()));
+            qDebug("NeTVServer: Using config file %s",qPrintable(file.fileName()));
             return configDir;
         }
     }
