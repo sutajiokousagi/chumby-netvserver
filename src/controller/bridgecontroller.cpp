@@ -83,7 +83,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "REFRESH")
     {
         QWSServer::instance()->refresh();
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data>" + buffer.trimmed() + "</data>", true);
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data></data>", true);
     }
 
     else if (cmdString == "GETXML")
