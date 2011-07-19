@@ -116,10 +116,16 @@ void UdpSocketServer::run()
 
         while(sock.hasPendingDatagrams())
         {
-            char buf[MAX_MSG_LENGTH];
+            int bytesAvail = sock.pendingDatagramSize();
+            char *buf = (char*) malloc(bytesAvail);
+            memset(buf, 0, sizeof(bytesAvail));
+
             QHostAddress peerAddress;
-            memset(buf, 0, sizeof(buf));
-            sock.readDatagram(buf, MAX_MSG_LENGTH, &peerAddress);
+            int byteRead = sock.readDatagram(buf, bytesAvail, &peerAddress);
+            if (byteRead <= 0) {
+                free(buf);
+                continue;
+            }
 
             //Check loopback
             bool isLoopback = false;
@@ -130,7 +136,7 @@ void UdpSocketServer::run()
             //This interface is mainly used for external mobile device only
             if (!isLoopback)
             {
-                SocketRequest *request = new SocketRequest(QByteArray(buf), peerAddress.toString().toLatin1(), port);
+                SocketRequest *request = new SocketRequest(QByteArray(buf, byteRead), peerAddress.toString().toLatin1(), port);
                 if (!request->hasError() && this->requestHandler != NULL)
                 {
                     SocketResponse response(&sock, peerAddress.toString().toLatin1() , port);
@@ -138,6 +144,8 @@ void UdpSocketServer::run()
                 }
                 delete request;
             }
+
+            free(buf);
         }
     }
 

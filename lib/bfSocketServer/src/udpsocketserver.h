@@ -10,8 +10,7 @@
 #include <QHostAddress>
 #include "socketrequesthandler.h"
 
-#define SERVICE_INTERVAL    20                  //milliseconds
-#define MAX_MSG_LENGTH      256
+#define SERVICE_INTERVAL    25                  //milliseconds
 #define MULTICAST_GROUP     "225.0.0.37"
 #define USE_MULTICAST       false
 #define DATA_MESSAGE        "da"
