@@ -31,3 +31,4 @@ etc/docroot/images
 etc/docroot/.gitignore
 etc/docroot/.git
 etc/docroot/*.giosave*
+etc/docroot/src
