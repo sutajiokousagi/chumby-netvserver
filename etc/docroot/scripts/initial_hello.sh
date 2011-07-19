@@ -49,10 +49,8 @@ if [ ${#hasLinkTrue} -gt 15 ]; then
 fi
 
 # MAC address
-INTIF=wlan0
+INTIF=$(ls -1 /sys/class/net/ | grep wlan | head -1)
 MAC=$(ifconfig | grep ${INTIF} | tr -s ' ' | cut -d ' ' -f5)
-
-# IP address
 IP=$(/sbin/ifconfig ${INTIF} | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 
 #
