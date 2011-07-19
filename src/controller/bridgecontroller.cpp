@@ -256,7 +256,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         params.insert("type", request.getParameter("type"));
         params.insert("allocation", request.getParameter("wifi_allocation"));
         params.insert("ssid", request.getParameter("wifi_ssid"));
-        params.insert("auth", request.getParameter("wifi_auth"));
+        params.insert("auth", request.getParameter("wifi_authentication"));
         params.insert("encryption", request.getParameter("wifi_encryption"));
         params.insert("key", request.getParameter("wifi_password"));
         params.insert("encoding", request.getParameter("wifi_encoding"));
@@ -485,7 +485,15 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
     else if (cmdString == "SetNetwork")
     {
-        fprintf(stderr,"Receiving SetNetwork command\n");
+        /*
+        qDebug() << "    wifi_ssid = " << request.getParameter("wifi_ssid");
+        qDebug() << "    wifi_password = " << request.getParameter("wifi_password");
+        qDebug() << "    wifi_authentication = " << request.getParameter("wifi_authentication");
+        qDebug() << "    wifi_encryption = " << request.getParameter("wifi_encryption");
+        qDebug() << "    wifi_allocation = " << request.getParameter("wifi_allocation");
+        qDebug() << "    wifi_encoding = " << request.getParameter("wifi_encoding");
+        qDebug() << "    type = " << request.getParameter("type");
+        */
 
         QHash<QString,QString> params;
         params.insert("type", request.getParameter("type"));
@@ -673,10 +681,12 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
     QString encoding = parameters.value("encoding");
 
     //Debug
+    /*
     qDebug() << "Received network config: ";
     QHash<QString, QString>::iterator i;
     for  (i = parameters.begin (); i != parameters.end (); i++)
         qDebug() << i.key() << " = " << i.value();
+    */
 
     if (type == "")         type = "wlan";
     if (auth == "")         auth = "OPEN";
