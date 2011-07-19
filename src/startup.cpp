@@ -134,7 +134,13 @@ QByteArray Startup::processStatelessCommand(QByteArray command, QStringList args
 
     //----------------------------------------------------
 
-    if (command == "SETRESOLUTION" && argCount == 1)
+    if (command == "REFRESH")
+    {
+        //redraw the entire screen
+        QWSServer::instance()->refresh();
+    }
+
+    else if (command == "SETRESOLUTION" && argCount == 1)
     {
         //comma-separated arguments
         QString args = argsList[0];

@@ -6,6 +6,7 @@
 #include <QProcess>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QWSServer>
 
 #define BRIDGE_RETURN_STATUS_UNIMPLEMENTED  "0"
 #define BRIDGE_RETURN_STATUS_SUCCESS        "1"
@@ -43,7 +44,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     //Protocol documentation
     //https://internal.chumby.com/wiki/index.php/JavaScript/HTML_-_Hardware_Bridge_protocol
 
-    QByteArray cmdString = request.getParameter("cmd");
+    QByteArray cmdString = request.getParameter("cmd").toUpper();
     QByteArray dataXmlString = request.getParameter("data");
     QByteArray dataString = "";
 
@@ -54,7 +55,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     //-----------
 
-    if (cmdString == "Hello")
+    if (cmdString == "HELLO")
     {
         //Returning GUID, DCID, HWver, SWver, etc.Z
         QByteArray buffer = this->Execute(docroot + "/scripts/hello.sh", QStringList(dataString));
@@ -65,7 +66,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         buffer = QByteArray();
     }
 
-    if (cmdString == "InitialHello")
+    if (cmdString == "INITIALHELLO")
     {
         //This is identical to 'Hello' command except that it will switch to Acces Point mode if necessary
         //To be called only once by JavaScriptCore
@@ -79,28 +80,34 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         buffer = QByteArray();
     }
 
-    else if (cmdString == "GetXML")
+    else if (cmdString == "REFRESH")
+    {
+        QWSServer::instance()->refresh();
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data>" + buffer.trimmed() + "</data>", true);
+    }
+
+    else if (cmdString == "GETXML")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/wget.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
         buffer = QByteArray();
     }
 
-    else if (cmdString == "GetJPG" || cmdString == "GetJPEG")
+    else if (cmdString == "GETJPG" || cmdString == "GETJPEG")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/tmp_download.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
     }
 
-    else if (cmdString == "HasFlashPlugin")
+    else if (cmdString == "HASFLASHPLUGIN")
     {
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>false</value></data>", true);
     }
 
-    else if (cmdString == "PlayWidget")
+    else if (cmdString == "PLAYWIDGET")
     {
         //Forward to widget rendering engine
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "");
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "widget_engine");
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
@@ -109,10 +116,10 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data>", true);
     }
 
-    else if (cmdString == "PlaySWF")
+    else if (cmdString == "PLAYSWF")
     {
         //Forward to widget rendering engine
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "");
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "widget_engine");
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
@@ -121,10 +128,10 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data>", true);
     }
 
-    else if (cmdString == "SetWidgetSize")
+    else if (cmdString == "SETWIDGETSIZE")
     {
         //Forward to widget rendering engine
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>");
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "widget_engine");
 
         //Set the window size
         this->Execute(docroot + "/scripts/setbox.sh", QStringList(dataString));
@@ -138,14 +145,14 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     //-----------
 
-    else if (cmdString == "SetBox")
+    else if (cmdString == "SETBOX")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/setbox.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
         buffer = QByteArray();
     }
 
-    else if (cmdString == "SetChromaKey")
+    else if (cmdString == "SETCHROMAKEY")
     {
         //Contruct arguments
         dataString = dataString.toLower();
@@ -178,7 +185,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         }
     }
 
-    else if (cmdString == "ControlPanel")
+    else if (cmdString == "CONTROLPANEL")
     {
         //Send it straight to browser
         //int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "<value></data></xml>", "netvbrowser");
@@ -188,14 +195,14 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         buffer = QByteArray();
     }
 
-    else if (cmdString == "WidgetEngine")
+    else if (cmdString == "WIDGETENGINE")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/widget_engine.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
         buffer = QByteArray();
     }
 
-    else if (cmdString == "RemoteControl")
+    else if (cmdString == "REMOTECONTROL")
     {
         //Forward to browser
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "all");
@@ -213,7 +220,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         */
     }
 
-    else if (cmdString == "Key")
+    else if (cmdString == "KEY")
     {
         //Forward to browser
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "all");
@@ -225,7 +232,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No browser running</value></data>", true);
     }
 
-    else if (cmdString == "LongPoll")
+    else if (cmdString == "LONGPOLL")
     {
         longPollResponses.append(&response);
 
@@ -233,7 +240,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         response.setLongPollMode(true);
     }
 
-    else if (cmdString == "SetTime")
+    else if (cmdString == "SETTIME")
     {
         // <time> is time formatted in GMT time as "yyyy.mm.dd-hh:mm:ss"
         // <timezone> is standard timezone ID string formated as "Asia/Singapore"
@@ -250,7 +257,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         else               response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
     }
 
-    else if (cmdString == "SetNetwork")
+    else if (cmdString == "SETNETWORK")
     {
         QHash<QString,QString> params;
         params.insert("type", request.getParameter("type"));
@@ -272,7 +279,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         else                response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
     }
 
-    else if (cmdString == "SetAccount")
+    else if (cmdString == "SETACCOUNT")
     {
         QString activated = request.getParameter("activated");
         QString username = request.getParameter("chumby_username");
@@ -298,24 +305,24 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     //-----------
 
-    else if (cmdString == "GetAllParams")
+    else if (cmdString == "GETALLPARAMS")
     {
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_UNIMPLEMENTED + "</status><data><value>GetAllParams</value></data>", true);
     }
 
-    else if (cmdString == "GetParam")
+    else if (cmdString == "GETPARAM")
     {
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_UNIMPLEMENTED + "</status><data><value>GetParam</value></data>", true);
     }
 
-    else if (cmdString == "SetParam")
+    else if (cmdString == "SETPARAM")
     {
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_UNIMPLEMENTED + "</status><data><value>SetParam</value></data>", true);
     }
 
     //-----------
 
-    else if (cmdString == "GetFileContents")
+    else if (cmdString == "GETFILECONTENTS")
     {
         QByteArray filedata = GetFileContents(dataString);
         if (filedata == "file not found" || filedata == "no permission")
@@ -324,7 +331,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + filedata + "</value></data>", true);
     }
 
-    else if (cmdString == "SetFileContents")
+    else if (cmdString == "SETFILECONTENTS")
     {
         //<path>full path to a file</path><content>........</content>
         QByteArray path = dataXmlString.mid(6, dataXmlString.indexOf("</path>") - 6);
@@ -335,7 +342,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + QByteArray().setNum(GetFileSize(path)) + "</value></data>", true);
     }
 
-    else if (cmdString == "FileExists")
+    else if (cmdString == "FILEEXISTS")
     {
         QByteArray existStr = "false";
         if (FileExists(dataString))
@@ -343,13 +350,13 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + existStr + "</value></data>", true);
     }
 
-    else if (cmdString == "GetFileSize")
+    else if (cmdString == "GETFILESIZE")
     {
         QByteArray sizeStr = QByteArray().setNum(GetFileSize(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + sizeStr + "</value></data>", true);
     }
 
-    else if (cmdString == "UnlinkFile")
+    else if (cmdString == "UNLINKFILE")
     {
         bool success = UnlinkFile(dataString);
         if (!success)
@@ -369,11 +376,11 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
 void BridgeController::service(SocketRequest& request, SocketResponse& response)
 {
-    QByteArray cmdString = request.getCommand();
+    QByteArray cmdString = request.getCommand().toUpper();
     QByteArray dataString = request.getParameter("value").trimmed();
 
 
-    if (cmdString == "Hello")
+    if (cmdString == "HELLO")
     {
         //The type of connection is already handled by the TcpSocketServer, but we do post-processing here
         //QByteArray hardwareType = request.getParameter("value");
@@ -385,7 +392,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    if (cmdString == "InitialHello")
+    else if (cmdString == "INITIALHELLO")
     {
         //This is identical to 'Hello' command except that it will switch to Acces Point mode if necessary
         //To be called only once by JavaScriptCore
@@ -397,7 +404,14 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    else if (cmdString == "ControlPanel")
+    else if (cmdString == "REFRESH")
+    {
+        QWSServer::instance()->refresh();
+        response.setCommand(cmdString);
+        response.write();
+    }
+
+    else if (cmdString == "CONTROLPANEL")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
 
@@ -407,7 +421,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         buffer = QByteArray();
     }
 
-    else if (cmdString == "WidgetEngine")
+    else if (cmdString == "WIDGETENGINE")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/widget_engine.sh", QStringList(dataString));
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
@@ -416,7 +430,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         buffer = QByteArray();
     }
 
-    else if (cmdString == "RemoteControl")
+    else if (cmdString == "REMOTECONTROL")
     {
         //Forward to all clients
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "<value></data></xml>", "all");
@@ -432,7 +446,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    else if (cmdString == "Key")
+    else if (cmdString == "KEY")
     {
         //Forward to all clients
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "<value></data></xml>", "all");
@@ -448,7 +462,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    else if (cmdString == "GetScreenshotPath")
+    else if (cmdString == "GETSCREENSHOTPATH")
     {
         QByteArray tmpString = QByteArray("http://" +  request.getLocalAddress() + "/framebuffer");
         if (tmpString != "")
@@ -459,14 +473,14 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         }
     }
 
-    else if (cmdString == "SetScreenshotRes")
+    else if (cmdString == "SETSCREENSHOTRES")
     {
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setParameter("value", "Screenshot resolution changed");
         response.write();
     }
 
-    else if (cmdString == "SetTime")
+    else if (cmdString == "SETTIME")
     {
         // <time> is time formatted in GMT time as "yyyy.mm.dd-hh:mm:ss"
         // <timezone> is standard timezone ID string formated as "Asia/Singapore"
@@ -483,7 +497,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    else if (cmdString == "SetNetwork")
+    else if (cmdString == "SETNETWORK")
     {
         /*
         qDebug() << "    wifi_ssid = " << request.getParameter("wifi_ssid");
@@ -516,7 +530,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    else if (cmdString == "SetAccount")
+    else if (cmdString == "SETACCOUNT")
     {
         fprintf(stderr,"Receiving SetAccount command\n");
 
@@ -547,7 +561,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     //-----------
 
 #if defined (CURSOR_CONTROLLER)
-    else if (cmdString == "CurDown")
+    else if (cmdString == "CURDOWN")
     {
         bool isXOK = true;
         bool isYOK = true;
@@ -571,7 +585,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         }
     }
 
-    else if (cmdString == "CurMove")
+    else if (cmdString == "CURMOVE")
     {
         bool isXOK = true;
         bool isYOK = true;
@@ -594,7 +608,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         }
     }
 
-    else if (cmdString == "CurUp")
+    else if (cmdString == "CURUP")
     {
         bool isXOK = true;
         bool isYOK = true;
@@ -618,9 +632,9 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         }
     }
 
-    else if (cmdString == "CursorMode")
+    else if (cmdString == "CURSORMODE")
     {
-        bool isRelative = request.getParameter("value") == "relative";
+        bool isRelative = request.getParameter("value").toUpper() == "RELATIVE";
         if (isRelative)         Static::cursorController->setRelativeMode();
         else                    Static::cursorController->setAbsoluteMode();
 
