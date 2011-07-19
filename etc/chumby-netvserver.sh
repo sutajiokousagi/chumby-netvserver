@@ -19,10 +19,6 @@ case "$1" in
 		# but does not render anything to the framebuffer
 		NeTVServer -qws -nomouse 2>&1 2> /dev/null&
 		
-		# Temp fix for "Semop lock/unlock failure Identifier removed" flood
-		# Should be after we started the Qt process
-		rm -rf /tmp/qtembedded-0
-
 		# fullscreen
 		setbox 0 0 1279 719
 		;;
