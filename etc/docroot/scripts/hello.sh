@@ -32,7 +32,7 @@ fi
 flashplugin='0'
 
 # Flash version
-flashver='10.62.0'
+flashver=$(chumbyflashplayer.x -v | sed '5!d')
 
 # Network status
 network_status=$(network_status.sh)
