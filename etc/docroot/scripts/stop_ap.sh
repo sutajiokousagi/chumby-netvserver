@@ -20,3 +20,6 @@ ifconfig $(ls -1 /sys/class/net/ | grep wlan | head -1) up
 # Start NetworkManager
 /etc/init.d/NetworkManager restart
 
+# We must find a way to check if NetworkManager connects succesfully,
+# otherwise, revert to AP mode
+
