@@ -411,19 +411,22 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    else if (cmdString == "CONTROLPANEL")
-    {
-        QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
+    //-----------
+    //Mostly from Android/iOS devices
 
+    else if (cmdString == "WIDGETENGINE")
+    {
+        QByteArray buffer = this->Execute(docroot + "/scripts/widget_engine.sh", QStringList(dataString));
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setParameter("value", buffer.trimmed());
         response.write();
         buffer = QByteArray();
     }
 
-    else if (cmdString == "WIDGETENGINE")
+    else if (cmdString == "CONTROLPANEL")
     {
-        QByteArray buffer = this->Execute(docroot + "/scripts/widget_engine.sh", QStringList(dataString));
+        QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
+
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setParameter("value", buffer.trimmed());
         response.write();
@@ -641,6 +644,25 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         //No response
     }
 #endif
+
+    //-----------
+    //Mostly from Flash widget_engine.swf
+
+    else if (cmdString == "JAVASCRIPT")
+    {
+        //Forward to browser
+        int numClient = Static::tcpSocketServer->broadcast(request.getRawData(), "netvbrowser");
+
+        //Reply to socket client (Android/iOS)
+        if (numClient > 0) {
+            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+            response.setParameter("value", "Command forwarded to browser");
+        }else{
+            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+            response.setParameter("value", "No browser running");
+        }
+        response.write();
+    }
 
     //-----------
 

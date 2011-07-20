@@ -23,6 +23,7 @@ public:
 
     bool hasError();
 
+    QByteArray getRawData();
     QByteArray getCommand();
     QByteArray getAddress();
     QByteArray getLocalAddress();
@@ -36,6 +37,7 @@ private:
 
     bool containsError;
 
+    QByteArray rawData;
     QByteArray commandText;
     QByteArray address;
     quint16 port;

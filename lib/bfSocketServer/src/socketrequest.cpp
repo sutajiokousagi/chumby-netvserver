@@ -7,6 +7,7 @@
 
 SocketRequest::SocketRequest(QByteArray data, QByteArray address, quint16 port)
 {
+    this->rawData = data;
     this->commandText = "no-no-no-no-command";
     this->containsError = false;
     this->address = address;
@@ -31,6 +32,11 @@ SocketRequest::~SocketRequest()
 bool SocketRequest::hasError()
 {
     return containsError;
+}
+
+QByteArray SocketRequest::getRawData()
+{
+    return this->rawData;
 }
 
 QByteArray SocketRequest::getCommand()
