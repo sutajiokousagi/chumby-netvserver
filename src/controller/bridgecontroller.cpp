@@ -162,7 +162,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "WIDGETENGINE")
     {
-        //Forward some command to widget rendering engine
+        //Forward simple commands to widget rendering engine
         if (!dataString.contains(" "))
             Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + dataString + "</cmd></xml>", "widget_engine");
 
