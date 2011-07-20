@@ -116,33 +116,6 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data>", true);
     }
 
-    else if (cmdString == "PLAYSWF")
-    {
-        //Forward to widget rendering engine
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "widget_engine");
-
-        //Reply to JavaScriptCore/ControlPanel
-        if (numClient > 0)
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to widget rendering engine</value></data>", true);
-        else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data>", true);
-    }
-
-    else if (cmdString == "SETWIDGETSIZE")
-    {
-        //Forward to widget rendering engine
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "widget_engine");
-
-        //Set the window size
-        this->Execute(docroot + "/scripts/setbox.sh", QStringList(dataString));
-
-        //Reply to JavaScriptCore/ControlPanel
-        if (numClient > 0)
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to widget rendering engine</value></data>", true);
-        else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data>", true);
-    }
-
     //-----------
 
     else if (cmdString == "SETBOX")
@@ -185,21 +158,45 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         }
     }
 
-    else if (cmdString == "CONTROLPANEL")
-    {
-        //Send it straight to browser
-        //int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "netvbrowser");
+    //-----------
 
-        QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
+    else if (cmdString == "WIDGETENGINE")
+    {
+        //Forward some command to widget rendering engine
+        if (!dataString.contains(" "))
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + dataString + "</cmd></xml>", "widget_engine");
+
+        QByteArray buffer = this->Execute(docroot + "/scripts/widget_engine.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
         buffer = QByteArray();
     }
 
-    else if (cmdString == "WIDGETENGINE")
+
+    else if (cmdString == "PLAYSWF")
     {
-        QByteArray buffer = this->Execute(docroot + "/scripts/widget_engine.sh", QStringList(dataString));
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
-        buffer = QByteArray();
+        //Forward to widget rendering engine
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "widget_engine");
+
+        //Reply to JavaScriptCore/ControlPanel
+        if (numClient > 0)
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to widget rendering engine</value></data>", true);
+        else
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data>", true);
+    }
+
+    else if (cmdString == "SETWIDGETSIZE")
+    {
+        //Forward to widget rendering engine
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "widget_engine");
+
+        //Set the window size
+        this->Execute(docroot + "/scripts/setbox.sh", QStringList(dataString));
+
+        //Reply to JavaScriptCore/ControlPanel
+        if (numClient > 0)
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to widget rendering engine</value></data>", true);
+        else
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data>", true);
     }
 
     else if (cmdString == "REMOTECONTROL")
@@ -220,6 +217,18 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         */
     }
 
+    //-----------
+
+    else if (cmdString == "CONTROLPANEL")
+    {
+        //Send it straight to browser
+        //int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "netvbrowser");
+
+        QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+        buffer = QByteArray();
+    }
+
     else if (cmdString == "KEY")
     {
         //Forward to browser
@@ -232,13 +241,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No browser running</value></data>", true);
     }
 
-    else if (cmdString == "LONGPOLL")
-    {
-        longPollResponses.append(&response);
-
-        //Prevent the connection handler (httpconnectionhandler.cpp) to disconnect & delete the current response
-        response.setLongPollMode(true);
-    }
+    //-----------
 
     else if (cmdString == "SETTIME")
     {
