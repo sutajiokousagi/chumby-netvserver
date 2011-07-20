@@ -57,8 +57,10 @@ int TcpSocketServer::broadcast(QByteArray messageText, QByteArray type /* = "" *
         if (connectionsType.value(socket) != type && type != "all")
             continue;
 
-        socket->write(messageText);
-        counter++;
+        //Check if we successfully write the data to socket
+        qint64 byteWriten = socket->write(messageText);
+        if (byteWriten == messageText.length())
+            counter++;
     }
     return counter;
 }
