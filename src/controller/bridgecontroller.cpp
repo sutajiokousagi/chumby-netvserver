@@ -188,7 +188,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "CONTROLPANEL")
     {
         //Send it straight to browser
-        //int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "<value></data></xml>", "netvbrowser");
+        //int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "netvbrowser");
 
         QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
@@ -436,7 +436,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     else if (cmdString == "REMOTECONTROL")
     {
         //Forward to all clients
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "<value></data></xml>", "all");
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "all");
 
         //Reply to socket client (Android/iOS)
         if (numClient > 0) {
@@ -452,7 +452,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     else if (cmdString == "KEY")
     {
         //Forward to all clients
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "<value></data></xml>", "all");
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "all");
 
         //Reply to socket client (Android/iOS)
         if (numClient > 0) {
