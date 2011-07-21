@@ -79,15 +79,19 @@ int main(int argc, char *argv[])
     printf("%s", argsString.toLatin1().constData());
 
     //Pink background (temp fix. We should completely prevent it from drawing in non-window area)
+#ifdef ENABLE_QWS_STUFF
     QWSServer *qserver = QWSServer::instance();
     qserver->setBackground(QBrush(QColor(240,0,240)));
     qserver->setCursorVisible(false);
     qserver->enablePainting(false);
+#endif
 
     Startup startup;
     startup.receiveArgs(argsString);
 
     QObject::connect(&instance, SIGNAL(messageReceived(const QString&)), &startup, SLOT(receiveArgs(const QString&)));
+#ifdef ENABLE_QWS_STUFF
     QObject::connect(qserver, SIGNAL(windowEvent(QWSWindow*, QWSServer::WindowEvent)), &startup, SLOT(windowEvent(QWSWindow*, QWSServer::WindowEvent)));
+#endif
     return instance.exec();
 }

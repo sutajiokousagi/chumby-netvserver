@@ -1,9 +1,3 @@
-#/**
-  @file
-  @author Stefan Frings
-  @version $Id: static.h 938 2010-12-05 14:29:58Z stefan $
-*/
-
 #ifndef STATIC_H
 #define STATIC_H
 
@@ -16,9 +10,14 @@
 #include "controller/bridgecontroller.h"
 #include "controller/framebuffercontroller.h"
 
-#if defined (CURSOR_CONTROLLER)
+#ifdef CURSOR_CONTROLLER
     #include "controller/cursorcontroller.h"
 #endif
+
+#ifdef ENABLE_DBUS_STUFF
+    #include "dbusmonitor.h"
+#endif
+
 
 /**
   This class contains some static resources that are used by the application.
@@ -72,8 +71,13 @@ public:
     /** Controller for framebuffer */
     static FramebufferController* framebufferController;
 
+    /** DBus monitor */
+#ifdef ENABLE_DBUS_STUFF
+    static DBusMonitor* dbusMonitor;
+#endif
+
     /** Controller for input device */
-#if defined (CURSOR_CONTROLLER)
+#ifdef CURSOR_CONTROLLER
     static CursorController* cursorController;
 #endif
 

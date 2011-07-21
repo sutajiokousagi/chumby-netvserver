@@ -3,7 +3,6 @@
 #include <QDir>
 #include "startup.h"
 #include "static.h"
-#include "dualfilelogger.h"
 #include "httplistener.h"
 #include "flashpolicyserver.h"
 #include "tcpsocketserver.h"
@@ -22,15 +21,10 @@ void Startup::start()
     // Initialize the core application
     QString configFileName=Static::getConfigDir()+"/"+APPNAME+".ini";
 
-    // Configure logging into files
-    /*
-    QSettings* mainLogSettings=new QSettings(configFileName,QSettings::IniFormat,this);
-    mainLogSettings->beginGroup("mainLogFile");
-    QSettings* debugLogSettings=new QSettings(configFileName,QSettings::IniFormat,this);
-    debugLogSettings->beginGroup("debugLogFile");
-    Logger* logger=new DualFileLogger(mainLogSettings,debugLogSettings,10000,this);
-    logger->installMsgHandler();
-    */
+    // DBus monitor
+#ifdef ENABLE_DBUS_STUFF
+    Static::dbusMonitor = new DBusMonitor(this);
+#endif
 
     // Configure session store
     QSettings* sessionSettings=new QSettings(configFileName,QSettings::IniFormat,this);
@@ -46,7 +40,7 @@ void Startup::start()
     Static::scriptController=new ScriptController(fileSettings,this);
 
     // Configure cursor controller
-#if defined (CURSOR_CONTROLLER)
+#ifdef CURSOR_CONTROLLER
     Static::cursorController=new CursorController(fileSettings,this);
 #endif
 
@@ -108,18 +102,20 @@ void Startup::windowEvent ( QWSWindow * window, QWSServer::WindowEvent eventType
     Q_UNUSED(window);
     Q_UNUSED(eventType);
 
+#ifdef ENABLE_QWS_STUFF
     QWSServer *qserver = QWSServer::instance();
     const QList<QWSWindow *> winList = qserver->clientWindows();
     if (winList.count() > 0)
     {
-        printf("NeTVServer: painting is enabled [%d windows]", winList.count());
+        qDebug("NeTVServer: painting is enabled [%d windows]", winList.count());
         qserver->enablePainting(true);
     }
     else
     {
-        printf("NeTVServer: painting is disabled [%d windows]", winList.count());
+        qDebug("NeTVServer: painting is disabled [%d windows]", winList.count());
         qserver->enablePainting(false);
     }
+#endif
 }
 
 QByteArray Startup::processStatelessCommand(QByteArray command, QStringList argsList)
@@ -132,9 +128,16 @@ QByteArray Startup::processStatelessCommand(QByteArray command, QStringList args
     //arguments
     int argCount = argsList.count();
 
+    if (command == "HELLO")
+    {
+        //Just a dummy command
+        qDebug("argCount %d", argCount);
+    }
+
     //----------------------------------------------------
 
-    if (command == "REFRESH")
+#ifdef ENABLE_QWS_STUFF
+    else if (command == "REFRESH")
     {
         //redraw the entire screen
         QWSServer::instance()->refresh();
@@ -190,6 +193,7 @@ QByteArray Startup::processStatelessCommand(QByteArray command, QStringList args
 
         return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
     }
+#endif
 
     return UNIMPLEMENTED;
 }

@@ -92,11 +92,13 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No browser found</value></data>", true);
     }
 
+#ifdef ENABLE_QWS_STUFF
     else if (cmdString == "REFRESH")
     {
         QWSServer::instance()->refresh();
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data></data>", true);
     }
+#endif
 
     else if (cmdString == "GETXML")
     {
@@ -435,12 +437,14 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
+#ifdef ENABLE_QWS_STUFF
     else if (cmdString == "REFRESH")
     {
         QWSServer::instance()->refresh();
         response.setCommand(cmdString);
         response.write();
     }
+#endif
 
     //-----------
     //Mostly from Android/iOS devices

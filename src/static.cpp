@@ -1,9 +1,3 @@
-/**
-  @file
-  @author Stefan Frings
-  @version $Id: static.cpp 938 2010-12-05 14:29:58Z stefan $
-*/
-
 #include "static.h"
 #include <QCoreApplication>
 #include <QDir>
@@ -20,7 +14,11 @@ UdpSocketServer* Static::udpSocketServer=0;
 BridgeController* Static::bridgeController=0;
 FramebufferController* Static::framebufferController=0;
 
-#if defined (CURSOR_CONTROLLER)
+#ifdef ENABLE_DBUS_STUFF
+    DBusMonitor* Static::dbusMonitor=0;
+#endif
+
+#ifdef CURSOR_CONTROLLER
     CursorController* Static::cursorController=0;
 #endif
 

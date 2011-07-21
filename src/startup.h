@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QByteArray>
 #include <QStringList>
-#include <QWSServer>
 #include <QWSWindow>
 
 /** Name of this application */

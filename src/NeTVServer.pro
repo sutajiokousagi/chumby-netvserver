@@ -3,10 +3,11 @@
 # by adding 'controllers' classes
 #
 
-QT = core network gui
+QT = core network gui dbus
 TARGET = NeTVServer
 TEMPLATE = app
 CONFIG += CONSOLE
+CONFIG += qdbus
 
 DESTDIR = $$PWD
 
@@ -29,6 +30,9 @@ SOURCES = main.cpp \
     controller/dumpcontroller.cpp \
     controller/fileuploadcontroller.cpp \
     controller/sessioncontroller.cpp
+
+# QWSServer
+#DEFINES += ENABLE_QWS_STUFF
 
 # Shell script execution (cgi-like)
 HEADERS += $$PWD/controller/scriptcontroller.h
@@ -74,10 +78,13 @@ OTHER_FILES += \
 # Singleton & command line argument passing
 include(../lib/qtsingleapplication-2.6_1-opensource/src/qtsingleapplication.pri)
 
-include(../lib/bfLogging/src/bfLogging.pri)
 include(../lib/bfHttpServer/src/bfHttpServer.pri)
 include(../lib/bfFlashPolicyServer/src/bfFlashpolicyserver.pri)
 include(../lib/bfSocketServer/src/bfSocketserver.pri)
+
+# QDBus
+DEFINES += ENABLE_DBUS_STUFF
+include(../lib/bfDBusMonitor/src/bfDBusMonitor.pri)
 
 # Change the name of the target, when is debug mode
 CONFIG( debug, debug|release ) {
