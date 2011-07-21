@@ -143,6 +143,7 @@ void SocketResponse::writeToSocket(QByteArray data)
             ptr += written;
             remaining -= written;
         }
+        socket->flush();
     }
     else if (udpsocket)
     {
