@@ -80,6 +80,18 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         buffer = QByteArray();
     }
 
+    else if (cmdString == "SETURL")
+    {
+        //Send it straight to browser
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "netvbrowser");
+
+        //Reply to JavaScriptCore/ControlPanel
+        if (numClient > 0)
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to browser</value></data>", true);
+        else
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No browser found</value></data>", true);
+    }
+
     else if (cmdString == "REFRESH")
     {
         QWSServer::instance()->refresh();
@@ -404,6 +416,22 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         QByteArray buffer = this->Execute(docroot + "/scripts/initial_hello.sh", QStringList(dataString));
         response.setCommand(cmdString);
         response.setParameter("data", buffer.trimmed());
+        response.write();
+    }
+
+    else if (cmdString == "SETURL")
+    {
+        //Send it straight to browser
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "netvbrowser");
+
+        //Reply to socket client (Android/iOS)
+        if (numClient > 0) {
+            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+            response.setParameter("value", "Command forwarded to browser");
+        }else{
+            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+            response.setParameter("value", "No browser running");
+        }
         response.write();
     }
 

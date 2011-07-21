@@ -32,3 +32,4 @@ etc/docroot/.gitignore
 etc/docroot/.git
 etc/docroot/*.giosave*
 etc/docroot/src
+etc/docroot/css_crash*

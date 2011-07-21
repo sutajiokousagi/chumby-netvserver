@@ -61,6 +61,21 @@ function Hello()
 	sendSingleValueCommand('Hello', '');
 }
 
+function SetUrl()
+{
+	var dataString = document.form_SetUrl.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('SetUrl', dataString);
+	}
+}
+
 function GetXML()
 {
 	var dataString = document.form_GetXML.inputField.value;
