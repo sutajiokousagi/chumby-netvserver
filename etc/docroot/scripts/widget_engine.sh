@@ -24,7 +24,7 @@ if [ "$cmd" == "start" ]; then
 	if ps ax | grep -v grep | grep $process_name > /dev/null
 	then
 		echo "Already running"
-		kill -s CONT $(pidof $process_name)
+		setplayer c
 	else
 		${process_name} -i ${widget_engine_swf} 2> /dev/null > /dev/null &
 	fi
@@ -41,7 +41,7 @@ if [ "$cmd" == "startminimize" ]; then
 		sleep 3
 	fi
 	setplayer c 0 0 1 1
-	kill -s STOP $(pidof $process_name)
+	setplayer p
 	exit;
 fi
 
@@ -56,7 +56,7 @@ if [ "$cmd" == "minimize" -o "$cmd" == "hide" ]; then
 		
 	fi
 	setplayer c 0 0 1 1
-	kill -s STOP $(pidof $process_name)
+	setplayer p
 	exit;
 fi
 
@@ -67,10 +67,10 @@ if [ "$cmd" == "maximize" -o "$cmd" == "fullscreen" -o "$cmd" == "show" ]; then
 		echo "Already running"
 	else
 		${process_name} -i ${widget_engine_swf} 2> /dev/null > /dev/null &
-		sleep 2
+		sleep 3
 	fi
 	setplayer c 0 0 1280 720
-	kill -s CONT $(pidof $process_name)
+	setplayer c
 	exit;
 fi
 
