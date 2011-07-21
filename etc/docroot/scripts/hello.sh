@@ -36,7 +36,7 @@ flashver=$(chumbyflashplayer.x -v | sed '5!d')
 
 # Network status
 network_status=$(network_status.sh)
-internet='false'
+internet='connecting'
 hasLinkTrue=$(echo $network_status | grep 'link="true"')
 if [ ${#hasLinkTrue} -gt 10 ]; then
 	internet='true'
@@ -46,6 +46,14 @@ fi
 INTIF=$(ls -1 /sys/class/net/ | grep wlan | head -1)
 MAC=$(ifconfig | grep ${INTIF} | tr -s ' ' | cut -d ' ' -f5)
 IP=$(/sbin/ifconfig ${INTIF} | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
+
+# Network manager state
+nmstate=$(dbus-send --system --print-reply --dest='org.freedesktop.NetworkManager' /org/freedesktop/NetworkManager org.freedesktop.DBus.Properties.Get string:'' string:'State' | grep uint32 | awk '{print $3}')
+if [ "$nmstate" == "2" ]; then
+	internet='connecting'
+elif [ "$nmstate" == "4" -o "$nmstate" == "1" ]; then
+	internet='false'
+fi
 
 #
 # Print them out
