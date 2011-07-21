@@ -32,7 +32,7 @@ SOURCES = main.cpp \
     controller/sessioncontroller.cpp
 
 # QWSServer
-#DEFINES += ENABLE_QWS_STUFF
+DEFINES += ENABLE_QWS_STUFF
 
 # Shell script execution (cgi-like)
 HEADERS += $$PWD/controller/scriptcontroller.h
