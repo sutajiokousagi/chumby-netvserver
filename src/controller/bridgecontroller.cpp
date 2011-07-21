@@ -471,7 +471,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     else if (cmdString == "REMOTECONTROL")
     {
         //Forward to all clients
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "all");
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "netvbrowser");
 
         //Reply to socket client (Android/iOS)
         if (numClient > 0) {
