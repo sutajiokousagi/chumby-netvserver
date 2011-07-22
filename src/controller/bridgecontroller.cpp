@@ -178,7 +178,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     {
         //Forward simple commands to widget rendering engine
         if (!dataString.contains(" "))
-            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + dataString + "</cmd></xml>", "widget_engine");
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "widget_engine");
 
         QByteArray buffer = this->Execute(docroot + "/scripts/widget_engine.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
