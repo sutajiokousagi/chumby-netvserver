@@ -11,7 +11,7 @@
 #endif
 
 //Constructor
-RequestMapper::RequestMapper(QObject* parent) : HttpRequestHandler(parent), SocketRequestHandler(parent)
+RequestMapper::RequestMapper(QObject* parent) : HttpRequestHandler(parent), SocketRequestHandler()
 {
 
 }

@@ -4,13 +4,13 @@
 #include "socketrequest.h"
 #include "socketresponse.h"
 
-class SocketRequestHandler : public QObject
+class SocketRequestHandler
 {
 
 public:
 
     /** Constructor */
-    SocketRequestHandler(QObject* parent=0);
+    SocketRequestHandler();
 
     /** Destructor */
     virtual ~SocketRequestHandler();

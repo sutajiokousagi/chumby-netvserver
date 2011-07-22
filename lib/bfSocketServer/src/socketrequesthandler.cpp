@@ -1,7 +1,6 @@
 #include "socketrequesthandler.h"
 
-SocketRequestHandler::SocketRequestHandler(QObject* parent)
-    : QObject(parent)
+SocketRequestHandler::SocketRequestHandler()
 {
 }
 

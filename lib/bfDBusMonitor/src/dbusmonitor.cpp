@@ -17,8 +17,8 @@ DBusMonitor::DBusMonitor(QObject *parent) : QObject(parent)
         nm_interface->connection().connect(nm_interface->service(), nm_interface->path(), nm_interface->interface(), "DeviceRemoved", this, SLOT(DeviceRemoved(QDBusObjectPath)));
         qDebug("DBusMonitor: started");
 
-        QVariant state = nm_interface->property("State");
-        qDebug() << "DBusMonitor: NetworkManager State: " << state.toUInt();
+        //QVariant state = nm_interface->property("State");
+        //qDebug() << "DBusMonitor: NetworkManager State: " << state.toUInt();
     }
 }
 

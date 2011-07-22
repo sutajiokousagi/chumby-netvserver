@@ -72,10 +72,10 @@ void Startup::start()
     // DBus monitor
 #ifdef ENABLE_DBUS_STUFF
     Static::dbusMonitor = new DBusMonitor(this);
-    QObject::connect(Static::dbusMonitor, SIGNAL(signal_StateChanged(uint)), (SocketRequestHandler*)Static::bridgeController, SLOT(slot_StateChanged(uint)));
-    QObject::connect(Static::dbusMonitor, SIGNAL(signal_PropertiesChanged(QByteArray,QByteArray)), (SocketRequestHandler*)Static::bridgeController, SLOT(slot_PropertiesChanged(QByteArray,QByteArray)));
-    QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceAdded(QByteArray)), (SocketRequestHandler*)Static::bridgeController, SLOT(slot_DeviceAdded(QByteArray)));
-    QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceRemoved(QByteArray)), (SocketRequestHandler*)Static::bridgeController, SLOT(slot_DeviceRemoved(QByteArray)));
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_StateChanged(uint)), Static::bridgeController, SLOT(slot_StateChanged(uint)));
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_PropertiesChanged(QByteArray,QByteArray)), Static::bridgeController, SLOT(slot_PropertiesChanged(QByteArray,QByteArray)));
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceAdded(QByteArray)), Static::bridgeController, SLOT(slot_DeviceAdded(QByteArray)));
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceRemoved(QByteArray)), Static::bridgeController, SLOT(slot_DeviceRemoved(QByteArray)));
 #endif
 
     printf("NeTVServer has started");
