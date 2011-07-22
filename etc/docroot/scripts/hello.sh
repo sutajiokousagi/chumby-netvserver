@@ -11,13 +11,13 @@ else
 fi
 
 # To be replaced by a actual script
-DCID=''
+DCID=$(dcid -o | grep -v "xml version="
 if [ -z $DCID ]; then
 	DCID='a long string of 1024 bytes'
 fi
 
 # To be replaced by a dcid script
-hwver=''
+hwver=$(chumby_version -h)
 if [ -z $hwver ]; then
 	hwver='10.1'
 fi
