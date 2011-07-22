@@ -35,7 +35,7 @@ QT += dbus
 
 # QWSServer
 message("ENABLE_QWS_STUFF enabled")
-#DEFINES += ENABLE_QWS_STUFF
+DEFINES += ENABLE_QWS_STUFF
 
 # Shell script execution (cgi-like)
 HEADERS += $$PWD/controller/scriptcontroller.h
