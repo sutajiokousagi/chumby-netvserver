@@ -18,7 +18,7 @@ DBusMonitor::DBusMonitor(QObject *parent) : QObject(parent)
         qDebug("DBusMonitor: started");
 
         QVariant state = nm_interface->property("State");
-        qDebug() << "DBusMonitor: NetworkManager State: " << state;
+        qDebug() << "DBusMonitor: NetworkManager State: " << state.toUInt();
     }
 }
 
@@ -38,11 +38,11 @@ void DBusMonitor::StateChanged(uint state)
 void DBusMonitor::DeviceAdded(QDBusObjectPath objPath)
 {
     qDebug() << "DBusMonitor: [DeviceAdded] ";
-    emit signal_DeviceAdded(objPath);
+    emit signal_DeviceAdded(objPath.path().toLatin1());
 }
 
 void DBusMonitor::DeviceRemoved(QDBusObjectPath objPath)
 {
     qDebug() << "DBusMonitor: [DeviceRemoved] ";
-    emit signal_DeviceRemoved(objPath);
+    emit signal_DeviceRemoved(objPath.path().toLatin1());
 }

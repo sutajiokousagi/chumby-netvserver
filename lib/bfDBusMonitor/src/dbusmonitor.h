@@ -22,9 +22,9 @@ private:
 signals:
 
     void signal_StateChanged(uint state);
-    //void signal_PropertiesChanged();
-    void signal_DeviceAdded(QDBusObjectPath objPath);
-    void signal_DeviceRemoved(QDBusObjectPath objPath);
+    void signal_PropertiesChanged(QByteArray prop_name, QByteArray prop_value);
+    void signal_DeviceAdded(QByteArray objPath);
+    void signal_DeviceRemoved(QByteArray objPath);
 
 private slots:
 

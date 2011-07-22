@@ -3,7 +3,7 @@
 # by adding 'controllers' classes
 #
 
-QT = core network gui dbus
+QT = core network gui
 TARGET = NeTVServer
 TEMPLATE = app
 CONFIG += CONSOLE
@@ -31,7 +31,12 @@ SOURCES = main.cpp \
     controller/fileuploadcontroller.cpp \
     controller/sessioncontroller.cpp
 
+# DBus support
+message("DBus enabled")
+QT += dbus
+
 # QWSServer
+message("ENABLE_QWS_STUFF enabled")
 DEFINES += ENABLE_QWS_STUFF
 
 # Shell script execution (cgi-like)
@@ -83,8 +88,10 @@ include(../lib/bfFlashPolicyServer/src/bfFlashpolicyserver.pri)
 include(../lib/bfSocketServer/src/bfSocketserver.pri)
 
 # QDBus
-DEFINES += ENABLE_DBUS_STUFF
-include(../lib/bfDBusMonitor/src/bfDBusMonitor.pri)
+contains( QT, dbus ) {
+    DEFINES += ENABLE_DBUS_STUFF
+    include(../lib/bfDBusMonitor/src/bfDBusMonitor.pri)
+}
 
 # Change the name of the target, when is debug mode
 CONFIG( debug, debug|release ) {

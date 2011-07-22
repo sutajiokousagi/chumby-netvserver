@@ -19,6 +19,14 @@ public:
     /** Receive & response to socket requests */
     void service(SocketRequest& request, SocketResponse& response);
 
+public slots:
+
+    // From dbusmonitor.h
+    void slot_StateChanged(uint state);
+    void slot_PropertiesChanged(QByteArray prop_name, QByteArray prop_value);
+    void slot_DeviceAdded(QByteArray objPath);
+    void slot_DeviceRemoved(QByteArray objPath);
+
 private:
 
     /** Long polling HTTP response */

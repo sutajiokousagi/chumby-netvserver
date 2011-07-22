@@ -852,3 +852,35 @@ bool BridgeController::SetFileExecutable(const QString &fullPath)
         return false;
     return file.setPermissions(file.permissions() | QFile::ExeUser | QFile::ExeOther);
 }
+
+//----------------------------------------------------------------------------------------------------
+// Public slots
+//----------------------------------------------------------------------------------------------------
+
+// From dbusmonitor.h
+void BridgeController::slot_StateChanged(uint state)
+{
+    //Forward it to browser
+    qDebug() << "BridgeController: [NMStateChanged] " << state;
+    Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMStateChanged</cmd><data><value>") + QString().number(state).toLatin1() + "</value></data></xml>", "netvbrowser");
+}
+
+void BridgeController::slot_PropertiesChanged(QByteArray /* prop_name */, QByteArray /* prop_value */)
+{
+    //Forward it to browser
+    //qDebug() << "BridgeController: [NMPropertiesChanged] " << state;
+    //Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMPropertiesChanged</cmd><data><value>" + objPath + "</value></data></xml>", "netvbrowser");
+}
+void BridgeController::slot_DeviceAdded(QByteArray objPath)
+{
+    //Forward it to browser
+    qDebug() << "BridgeController: [NMDeviceAdded] " << objPath;
+    Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMDeviceAdded</cmd><data><value>") + objPath + "</value></data></xml>", "netvbrowser");
+}
+
+void BridgeController::slot_DeviceRemoved(QByteArray objPath)
+{
+    //Forward it to browser
+    qDebug() << "BridgeController: [NMDeviceRemoved] " << objPath;
+    Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMDeviceRemoved</cmd><data><value>") + objPath + "</value></data></xml>", "netvbrowser");
+}

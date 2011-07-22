@@ -21,11 +21,6 @@ void Startup::start()
     // Initialize the core application
     QString configFileName=Static::getConfigDir()+"/"+APPNAME+".ini";
 
-    // DBus monitor
-#ifdef ENABLE_DBUS_STUFF
-    Static::dbusMonitor = new DBusMonitor(this);
-#endif
-
     // Configure session store
     QSettings* sessionSettings=new QSettings(configFileName,QSettings::IniFormat,this);
     sessionSettings->beginGroup("sessions");
@@ -73,6 +68,15 @@ void Startup::start()
     QSettings* udpServerSettings=new QSettings(configFileName,QSettings::IniFormat,this);
     udpServerSettings->beginGroup("udp-socket-server");
     Static::udpSocketServer=new UdpSocketServer(udpServerSettings, requestMapper, this);
+
+    // DBus monitor
+#ifdef ENABLE_DBUS_STUFF
+    Static::dbusMonitor = new DBusMonitor(this);
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_StateChanged(uint)), (SocketRequestHandler*)Static::bridgeController, SLOT(slot_StateChanged(uint)));
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_PropertiesChanged(QByteArray,QByteArray)), (SocketRequestHandler*)Static::bridgeController, SLOT(slot_PropertiesChanged(QByteArray,QByteArray)));
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceAdded(QByteArray)), (SocketRequestHandler*)Static::bridgeController, SLOT(slot_DeviceAdded(QByteArray)));
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceRemoved(QByteArray)), (SocketRequestHandler*)Static::bridgeController, SLOT(slot_DeviceRemoved(QByteArray)));
+#endif
 
     printf("NeTVServer has started");
 }
