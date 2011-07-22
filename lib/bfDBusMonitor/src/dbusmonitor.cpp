@@ -17,8 +17,8 @@ DBusMonitor::DBusMonitor(QObject *parent) : QObject(parent)
         QDBusConnection::sessionBus().connect(QString(), QString(), "org.freedesktop.NetworkManager", "DeviceRemoved", this, SLOT(DeviceRemoved(QDBusObjectPath)));
         qDebug("DBusMonitor: started");
 
-        QVariant fsreply = fsif.property("State");
-        qDebug() << "DBusMonitor: NVM State: " << fsreply;
+        QVariant state = nm_interface->property("State");
+        qDebug() << "DBusMonitor: NVM State: " << state;
     }
 }
 
