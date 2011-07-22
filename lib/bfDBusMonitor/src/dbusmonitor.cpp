@@ -3,42 +3,46 @@
 
 DBusMonitor::DBusMonitor(QObject *parent) : QObject(parent)
 {
-    nm_interface = new org::freedesktop::NetworkManagerInterface("org.freedesktop.NetworkManager", "org/freedesktop/NetworkManager", QDBusConnection::systemBus(), this);
+    nm_interface = new org::freedesktop::NetworkManagerInterface(this);
 
     if (!nm_interface->isValid())
     {
         qDebug("DBusMonitor: error");
-        qDebug("%s", qPrintable(QDBusConnection::systemBus().lastError().message()));
+        qDebug("%s", qPrintable(nm_interface->connection().lastError().message()));
     }
     else
     {
-        QDBusConnection::sessionBus().connect(QString(), QString(), "org.freedesktop.NetworkManager", "StateChanged", this, SLOT(StateChanged(uint)));
-        QDBusConnection::sessionBus().connect(QString(), QString(), "org.freedesktop.NetworkManager", "DeviceAdded", this, SLOT(DeviceAdded(QDBusObjectPath)));
-        QDBusConnection::sessionBus().connect(QString(), QString(), "org.freedesktop.NetworkManager", "DeviceRemoved", this, SLOT(DeviceRemoved(QDBusObjectPath)));
+        nm_interface->connection().connect(nm_interface->service(), nm_interface->path(), nm_interface->interface(), "StateChanged", this, SLOT(StateChanged(uint)));
+        nm_interface->connection().connect(nm_interface->service(), nm_interface->path(), nm_interface->interface(), "DeviceAdded", this, SLOT(DeviceAdded(QDBusObjectPath)));
+        nm_interface->connection().connect(nm_interface->service(), nm_interface->path(), nm_interface->interface(), "DeviceRemoved", this, SLOT(DeviceRemoved(QDBusObjectPath)));
         qDebug("DBusMonitor: started");
 
         QVariant state = nm_interface->property("State");
-        qDebug() << "DBusMonitor: NVM State: " << state;
+        qDebug() << "DBusMonitor: NetworkManager State: " << state;
     }
 }
 
 DBusMonitor::~DBusMonitor()
 {
+    delete nm_interface;
     qDebug("DBusMonitor: closed");
 }
 
 
-void DBusMonitor::StateChanged(const uint &state)
+void DBusMonitor::StateChanged(uint state)
 {
     qDebug() << "DBusMonitor: [StateChanged] " << state;
+    emit signal_StateChanged(state);
 }
 
-void DBusMonitor::DeviceAdded(const QDBusObjectPath & /* objPath */)
+void DBusMonitor::DeviceAdded(QDBusObjectPath objPath)
 {
     qDebug() << "DBusMonitor: [DeviceAdded] ";
+    emit signal_DeviceAdded(objPath);
 }
 
-void DBusMonitor::DeviceRemoved(const QDBusObjectPath & /* objPath */)
+void DBusMonitor::DeviceRemoved(QDBusObjectPath objPath)
 {
     qDebug() << "DBusMonitor: [DeviceRemoved] ";
+    emit signal_DeviceRemoved(objPath);
 }

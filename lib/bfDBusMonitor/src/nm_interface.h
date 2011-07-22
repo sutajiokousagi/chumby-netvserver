@@ -20,8 +20,14 @@ public:
     static inline const char *staticInterfaceName()
     { return "org.freedesktop.NetworkManager"; }
 
+    static inline const char *staticServiceName()
+    { return "org.freedesktop.NetworkManager"; }
+
+    static inline const char *staticPathName()
+    { return "/org/freedesktop/NetworkManager"; }
+
 public:
-    OrgFreedesktopNetworkManagerInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
+    OrgFreedesktopNetworkManagerInterface(QObject *parent = 0);
 
     ~OrgFreedesktopNetworkManagerInterface();
 
@@ -53,10 +59,10 @@ public Q_SLOTS: // METHODS
     */
 
 Q_SIGNALS: // SIGNALS
-    void StateChanged(const uint &state);
+    void StateChanged(uint state);
     //void PropertiesChanged();
-    void DeviceAdded(const QDBusObjectPath &objPath);
-    void DeviceRemoved(const QDBusObjectPath &objPath);
+    void DeviceAdded(QDBusObjectPath objPath);
+    void DeviceRemoved(QDBusObjectPath objPath);
 };
 
 namespace org {

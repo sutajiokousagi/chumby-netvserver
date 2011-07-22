@@ -19,12 +19,19 @@ private:
 
     org::freedesktop::NetworkManagerInterface *nm_interface;
 
+signals:
+
+    void signal_StateChanged(uint state);
+    //void signal_PropertiesChanged();
+    void signal_DeviceAdded(QDBusObjectPath objPath);
+    void signal_DeviceRemoved(QDBusObjectPath objPath);
+
 private slots:
 
-    void StateChanged(const uint &state);
+    void StateChanged(uint state);
     //void PropertiesChanged();
-    void DeviceAdded(const QDBusObjectPath &objPath);
-    void DeviceRemoved(const QDBusObjectPath &objPath);
+    void DeviceAdded(QDBusObjectPath objPath);
+    void DeviceRemoved(QDBusObjectPath objPath);
 };
 
 #endif // DBUSMONITOR_H
