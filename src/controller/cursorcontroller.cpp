@@ -5,8 +5,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-CursorController::CursorController(QSettings* /* settings */, QObject* parent)
-    :HttpRequestHandler(parent)
+CursorController::CursorController(QSettings* /* settings */) : HttpRequestHandler()
 {
     this->resX = QApplication::desktop()->screenGeometry().width();
     this->resY = QApplication::desktop()->screenGeometry().height();

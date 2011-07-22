@@ -9,8 +9,7 @@
 #include <QDir>
 #include <QDateTime>
 
-StaticFileController::StaticFileController(QSettings* settings, QObject* parent)
-    :HttpRequestHandler(parent)
+StaticFileController::StaticFileController(QSettings* settings) : HttpRequestHandler()
 {
     maxAge=settings->value("maxAge","60000").toInt();
     encoding=settings->value("encoding","UTF-8").toString();

@@ -6,7 +6,7 @@
 #include <QByteArray>
 #include <QBuffer>
 
-FramebufferController::FramebufferController(QSettings* settings, QObject* parent) : HttpRequestHandler(parent)
+FramebufferController::FramebufferController(QSettings* settings) : HttpRequestHandler()
 {
     width=settings->value("width","400").toInt();
     height=settings->value("height","240").toInt();

@@ -19,7 +19,6 @@ HEADERS = \
     static.h \
     startup.h \
     requestmapper.h \
-    controller/dumpcontroller.h \
     controller/fileuploadcontroller.h \
     controller/sessioncontroller.h
 
@@ -27,7 +26,6 @@ SOURCES = main.cpp \
     static.cpp \
     startup.cpp \
     requestmapper.cpp \
-    controller/dumpcontroller.cpp \
     controller/fileuploadcontroller.cpp \
     controller/sessioncontroller.cpp
 
@@ -37,7 +35,7 @@ QT += dbus
 
 # QWSServer
 message("ENABLE_QWS_STUFF enabled")
-DEFINES += ENABLE_QWS_STUFF
+#DEFINES += ENABLE_QWS_STUFF
 
 # Shell script execution (cgi-like)
 HEADERS += $$PWD/controller/scriptcontroller.h

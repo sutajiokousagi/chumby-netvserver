@@ -3,8 +3,7 @@
 #include <QDir>
 #include <QProcess>
 
-ScriptController::ScriptController(QSettings* settings, QObject* parent)
-    :HttpRequestHandler(parent)
+ScriptController::ScriptController(QSettings* settings) : HttpRequestHandler()
 {
     encoding=settings->value("encoding","UTF-8").toString();
     docroot=settings->value("path",".").toString();

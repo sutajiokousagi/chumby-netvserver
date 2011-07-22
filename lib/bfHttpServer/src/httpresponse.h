@@ -34,7 +34,8 @@
   a progress bar.
 */
 
-class HttpResponse {
+class HttpResponse
+{
     Q_DISABLE_COPY(HttpResponse)
 public:
 

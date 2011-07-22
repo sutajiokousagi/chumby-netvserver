@@ -32,7 +32,8 @@
   The body is always a little larger than the file itself.
 */
 
-class HttpRequest {
+class HttpRequest
+{
     Q_DISABLE_COPY(HttpRequest)
     friend class HttpSessionStore;
 public:

@@ -4,9 +4,9 @@
 #include "httprequesthandler.h"
 #include "socketrequesthandler.h"
 
-class BridgeController : public HttpRequestHandler, public SocketRequestHandler
+class BridgeController : public QObject, public HttpRequestHandler, public SocketRequestHandler
 {
-    //Q_OBJECT
+    Q_OBJECT
     //Q_DISABLE_COPY(BridgeController);
 public:
 

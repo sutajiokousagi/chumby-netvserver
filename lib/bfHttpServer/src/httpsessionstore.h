@@ -30,9 +30,10 @@
   </pre></code>
 */
 
-class HttpSessionStore : public QObject {
+class HttpSessionStore : public QObject
+{
     Q_OBJECT
-    Q_DISABLE_COPY(HttpSessionStore);
+
 public:
 
     /** Constructor. */

@@ -17,7 +17,7 @@
 
 #define ARGS_SPLIT_TOKEN    "|~|"
 
-BridgeController::BridgeController(QSettings* settings, QObject* parent) : HttpRequestHandler(parent)
+BridgeController::BridgeController(QSettings* settings, QObject* parent) : QObject(parent), HttpRequestHandler(), SocketRequestHandler()
 {
     longPollResponses.clear();
 

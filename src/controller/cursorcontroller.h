@@ -22,12 +22,11 @@
 
 class CursorController : public HttpRequestHandler
 {
-    Q_OBJECT
-    Q_DISABLE_COPY(CursorController);
+
 public:
 
     /** Constructor */
-    CursorController(QSettings* settings, QObject* parent = 0);
+    CursorController(QSettings* settings);
 
     /** Generates the response */
     void service(HttpRequest& request, HttpResponse& response);

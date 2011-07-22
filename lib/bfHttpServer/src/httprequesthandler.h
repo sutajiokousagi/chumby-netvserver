@@ -22,14 +22,14 @@
    @see StaticFileController which delivers static local files.
 */
 
-class HttpRequestHandler : public QObject
+class HttpRequestHandler
 {
-    Q_OBJECT
-    Q_DISABLE_COPY(HttpRequestHandler)
+    //Q_OBJECT
+    //Q_DISABLE_COPY(HttpRequestHandler)
 public:
 
     /** Constructor */
-    HttpRequestHandler(QObject* parent=0);
+    HttpRequestHandler();
 
     /** Destructor */
     virtual ~HttpRequestHandler();

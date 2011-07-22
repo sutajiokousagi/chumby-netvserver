@@ -17,15 +17,13 @@
 
 class RequestMapper : public HttpRequestHandler, public SocketRequestHandler
 {
-    //Q_OBJECT
-    //Q_DISABLE_COPY(RequestMapper)
+
 public:
 
     /**
       Constructor.
-      @param parent Parent object
     */
-    RequestMapper(QObject* parent=0);
+    RequestMapper();
 
     /**
       Dispatch a request to a controller.

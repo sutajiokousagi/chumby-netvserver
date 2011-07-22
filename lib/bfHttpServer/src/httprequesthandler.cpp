@@ -6,9 +6,9 @@
 
 #include "httprequesthandler.h"
 
-HttpRequestHandler::HttpRequestHandler(QObject* parent)
-    : QObject(parent)
-{}
+HttpRequestHandler::HttpRequestHandler()
+{
+}
 
 HttpRequestHandler::~HttpRequestHandler() {}
 

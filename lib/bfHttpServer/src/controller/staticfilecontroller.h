@@ -37,12 +37,11 @@
 
 class StaticFileController : public HttpRequestHandler
 {
-    Q_OBJECT
-    Q_DISABLE_COPY(StaticFileController);
+
 public:
 
     /** Constructor */
-    StaticFileController(QSettings* settings, QObject* parent = 0);
+    StaticFileController(QSettings* settings);
 
     /** Generates the response */
     void service(HttpRequest& request, HttpResponse& response);

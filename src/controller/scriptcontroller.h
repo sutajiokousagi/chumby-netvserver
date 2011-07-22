@@ -7,12 +7,11 @@
 
 class ScriptController : public HttpRequestHandler
 {
-    Q_OBJECT
-    Q_DISABLE_COPY(ScriptController);
+
 public:
 
     /** Constructor */
-    ScriptController(QSettings* settings, QObject* parent = 0);
+    ScriptController(QSettings* settings);
 
     /** Generates the response */
     void service(HttpRequest& request, HttpResponse& response);

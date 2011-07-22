@@ -13,10 +13,9 @@
   This controller displays a HTML form for file upload and recieved the file.
 */
 
+class FileUploadController : public HttpRequestHandler
+{
 
-class FileUploadController : public HttpRequestHandler {
-    Q_OBJECT
-    Q_DISABLE_COPY(FileUploadController);
 public:
 
     /** Constructor */

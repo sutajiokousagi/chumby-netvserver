@@ -22,60 +22,61 @@ void Startup::start()
     QString configFileName=Static::getConfigDir()+"/"+APPNAME+".ini";
 
     // Configure session store
-    QSettings* sessionSettings=new QSettings(configFileName,QSettings::IniFormat,this);
+    QSettings* sessionSettings=new QSettings(configFileName,QSettings::IniFormat);
     sessionSettings->beginGroup("sessions");
-    Static::sessionStore=new HttpSessionStore(sessionSettings,this);
+    Static::sessionStore=new HttpSessionStore(sessionSettings, this);
 
     // Configure static file controller
-    QSettings* fileSettings=new QSettings(configFileName,QSettings::IniFormat,this);
+    QSettings* fileSettings=new QSettings(configFileName,QSettings::IniFormat);
     fileSettings->beginGroup("docroot");
-    Static::staticFileController=new StaticFileController(fileSettings,this);
+    Static::staticFileController=new StaticFileController(fileSettings);
 
     // Configure script controller
-    Static::scriptController=new ScriptController(fileSettings,this);
+    Static::scriptController=new ScriptController(fileSettings);
 
     // Configure cursor controller
 #ifdef CURSOR_CONTROLLER
-    Static::cursorController=new CursorController(fileSettings,this);
+    Static::cursorController=new CursorController(fileSettings);
 #endif
 
     // Configure framebuffer controller
-    QSettings* fbSettings=new QSettings(configFileName,QSettings::IniFormat,this);
+    QSettings* fbSettings=new QSettings(configFileName,QSettings::IniFormat);
     fbSettings->beginGroup("framebuffer-controller");
-    Static::framebufferController=new FramebufferController(fbSettings, this);
+    Static::framebufferController=new FramebufferController(fbSettings);
 
     // Configure bridge controller
     Static::bridgeController=new BridgeController(fileSettings,this);
 
     // Configure Flash policy server
-    QSettings* flashpolicySettings=new QSettings(configFileName,QSettings::IniFormat,this);
+    QSettings* flashpolicySettings=new QSettings(configFileName,QSettings::IniFormat);
     flashpolicySettings->beginGroup("flash-policy-server");
     new FlashPolicyServer(flashpolicySettings, this);
 
-    RequestMapper *requestMapper = new RequestMapper(this);
+    RequestMapper *requestMapper = new RequestMapper();
 
     // Configure and start the TCP listener
-    QSettings* listenerSettings=new QSettings(configFileName,QSettings::IniFormat,this);
+    QSettings* listenerSettings=new QSettings(configFileName,QSettings::IniFormat);
     listenerSettings->beginGroup("listener");
     new HttpListener(listenerSettings, requestMapper, this);
 
     // Configure TCP socket server
-    QSettings* tcpServerSettings=new QSettings(configFileName,QSettings::IniFormat,this);
+    QSettings* tcpServerSettings=new QSettings(configFileName,QSettings::IniFormat);
     tcpServerSettings->beginGroup("tcp-socket-server");
     Static::tcpSocketServer=new TcpSocketServer(tcpServerSettings, requestMapper, this);
 
     // Configure UDP socket server
-    QSettings* udpServerSettings=new QSettings(configFileName,QSettings::IniFormat,this);
+    QSettings* udpServerSettings=new QSettings(configFileName,QSettings::IniFormat);
     udpServerSettings->beginGroup("udp-socket-server");
     Static::udpSocketServer=new UdpSocketServer(udpServerSettings, requestMapper, this);
 
     // DBus monitor
 #ifdef ENABLE_DBUS_STUFF
-    Static::dbusMonitor = new DBusMonitor(this);
-    QObject::connect(Static::dbusMonitor, SIGNAL(signal_StateChanged(uint)), Static::bridgeController, SLOT(slot_StateChanged(uint)));
-    QObject::connect(Static::dbusMonitor, SIGNAL(signal_PropertiesChanged(QByteArray,QByteArray)), Static::bridgeController, SLOT(slot_PropertiesChanged(QByteArray,QByteArray)));
-    QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceAdded(QByteArray)), Static::bridgeController, SLOT(slot_DeviceAdded(QByteArray)));
-    QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceRemoved(QByteArray)), Static::bridgeController, SLOT(slot_DeviceRemoved(QByteArray)));
+    DBusMonitor *dbusMonitor = new DBusMonitor(this);
+    Static::dbusMonitor = dbusMonitor;
+    QObject::connect(dbusMonitor, SIGNAL(signal_StateChanged(uint)), Static::bridgeController, SLOT(slot_StateChanged(uint)));
+    QObject::connect(dbusMonitor, SIGNAL(signal_PropertiesChanged(QByteArray,QByteArray)), Static::bridgeController, SLOT(slot_PropertiesChanged(QByteArray,QByteArray)));
+    QObject::connect(dbusMonitor, SIGNAL(signal_DeviceAdded(QByteArray)), Static::bridgeController, SLOT(slot_DeviceAdded(QByteArray)));
+    QObject::connect(dbusMonitor, SIGNAL(signal_DeviceRemoved(QByteArray)), Static::bridgeController, SLOT(slot_DeviceRemoved(QByteArray)));
 #endif
 
     printf("NeTVServer has started");

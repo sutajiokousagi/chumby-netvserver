@@ -1,17 +1,16 @@
 #include "requestmapper.h"
 #include "static.h"
-#include "controller/dumpcontroller.h"
 #include "controller/templatecontroller.h"
 #include "controller/fileuploadcontroller.h"
 #include "controller/sessioncontroller.h"
-
 
 #if defined CURSOR_CONTROLLER
     #include "controller/cursorcontroller.h"
 #endif
 
+
 //Constructor
-RequestMapper::RequestMapper(QObject* parent) : HttpRequestHandler(parent), SocketRequestHandler()
+RequestMapper::RequestMapper() : HttpRequestHandler(), SocketRequestHandler()
 {
 
 }
@@ -21,11 +20,7 @@ void RequestMapper::service(HttpRequest& request, HttpResponse& response)
 {
     QByteArray path = request.getPath();
 
-    if (path.startsWith("/dump")) {
-        DumpController().service(request, response);
-    }
-
-    else if (path.startsWith("/file")) {
+    if (path.startsWith("/file")) {
         FileUploadController().service(request, response);
     }
 

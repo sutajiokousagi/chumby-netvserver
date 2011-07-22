@@ -10,12 +10,11 @@
 
 class FramebufferController : public HttpRequestHandler
 {
-    Q_OBJECT
-    Q_DISABLE_COPY(FramebufferController);
+
 public:
 
     /** Constructor */
-    FramebufferController(QSettings* settings, QObject* parent = 0);
+    FramebufferController(QSettings* settings);
 
     /** Generates the response */
     void service(HttpRequest& request, HttpResponse& response);

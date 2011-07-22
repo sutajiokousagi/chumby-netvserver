@@ -13,9 +13,9 @@
   This controller demonstrates how to use sessions.
 */
 
-class SessionController : public HttpRequestHandler {
-    Q_OBJECT
-    Q_DISABLE_COPY(SessionController);
+class SessionController : public HttpRequestHandler
+{
+
 public:
 
     /** Constructor */

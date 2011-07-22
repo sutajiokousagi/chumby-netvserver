@@ -8,11 +8,10 @@
 #include <QDateTime>
 #include <QUuid>
 
-HttpSessionStore::HttpSessionStore(QSettings* settings, QObject* parent)
-    :QObject(parent)
+HttpSessionStore::HttpSessionStore(QSettings* settings, QObject* parent) : QObject(parent)
 {
     this->settings=settings;
-    connect(&cleanupTimer,SIGNAL(timeout()),this,SLOT(timerEvent()));
+    connect(&cleanupTimer, SIGNAL(timeout()), this, SLOT(timerEvent()));
     cleanupTimer.start(60000);
     cookieName=settings->value("cookieName","sessionid").toByteArray();
     expirationTime=settings->value("expirationTime",3600000).toInt();
