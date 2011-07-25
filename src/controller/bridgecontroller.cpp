@@ -883,3 +883,31 @@ void BridgeController::slot_DeviceRemoved(QByteArray objPath)
     qDebug() << "BridgeController: [NMDeviceRemoved] " << objPath;
     Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMDeviceRemoved</cmd><data><value>") + objPath + "</value></data></xml>", "netvbrowser");
 }
+
+// From inputlistener.h
+void BridgeController::slot_keyInput(Qt::Key keycode, bool /* isPress */, bool /* autoRepeat */)
+{
+    switch (keycode)
+    {
+        case Qt::Key_Up:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>up</value></data></xml>"), "netvbrowser");
+            break;
+        case Qt::Key_Down:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>down</value></data></xml>"), "netvbrowser");
+            break;
+        case Qt::Key_Left:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>left</value></data></xml>"), "netvbrowser");
+            break;
+        case Qt::Key_Right:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>right</value></data></xml>"), "netvbrowser");
+            break;
+        case Qt::Key_Enter:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>center</value></data></xml>"), "netvbrowser");
+            break;
+        case Qt::Key_Space:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>widget</value></data></xml>"), "netvbrowser");
+            break;
+        default:
+            break;
+    }
+}

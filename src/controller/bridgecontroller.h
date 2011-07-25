@@ -27,6 +27,9 @@ public slots:
     void slot_DeviceAdded(QByteArray objPath);
     void slot_DeviceRemoved(QByteArray objPath);
 
+    // From inputlistener.h
+    void slot_keyInput(Qt::Key keycode, bool isPress, bool autoRepeat);
+
 private:
 
     /** Long polling HTTP response */

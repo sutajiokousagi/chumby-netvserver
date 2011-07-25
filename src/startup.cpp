@@ -79,6 +79,11 @@ void Startup::start()
     QObject::connect(dbusMonitor, SIGNAL(signal_DeviceRemoved(QByteArray)), Static::bridgeController, SLOT(slot_DeviceRemoved(QByteArray)));
 #endif
 
+    // Input listener
+    InputListener *inputListener = new InputListener(this, "/dev/input/event1");
+    Static::inputListener = inputListener;
+    QObject::connect(inputListener, SIGNAL(signal_keyInput(Qt::Key,bool,bool)), Static::bridgeController, SLOT(slot_keyInput(Qt::Key,bool,bool)));
+
     printf("NeTVServer has started");
 }
 
