@@ -28,9 +28,6 @@ public slots:
     void slot_DeviceAdded(QByteArray objPath);
     void slot_DeviceRemoved(QByteArray objPath);
 
-    // From inputlistener.h
-    void slot_keyInput(quint16 keycode, bool isPress, bool autoRepeat);
-
 private:
 
     /** Long polling HTTP response */
