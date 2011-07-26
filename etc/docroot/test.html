@@ -21,12 +21,12 @@
 
 	.service_header_row {
 		background-color: #000000;
-		border: 1px solid #00BBFF;
+		border: 2px solid #00BBFF;
 	}
 
 	.service_row {
 		background-color: #0077DD;
-		border-top: 1px dotted #0033DD;
+		border-top: 2px dotted #0033DD;
 	}
 
 	.service_done {
@@ -159,20 +159,21 @@
 		</tr>
 		</form>
 		
-		<!-- GetBase64 -->
-		<form name="form_GetBase64" method="POST" action="">
+		<!-- GetUrl -->
+		<form name="form_GetUrl" method="POST" action="">
 		<tr class="service_row">
 			<td class="service_done">
 				done
 			</td>
 			<td>
-				GetBase64
+				GetUrl
 			</td>
 			<td>
-				<input type="text" size="256" name="inputField" value="http://s3movies.chumby.com/cdn/xmlthumbnail/86976CD4-C50E-11DF-91A6-001B24E044BE" >
+				<input type="text" size="256" name="inputField" value="http://s3movies.chumby.com/cdn/xmlthumbnail/86976CD4-C50E-11DF-91A6-001B24E044BE" > (url)
+				<input type="text" size="128" name="inputField2" value="param1=value1&param2=value2" > (post)
 			</td>
 			<td class="td_button">
-				<input type="button" value="GO!" onclick="GetBase64()">
+				<input type="button" value="GO!" onclick="GetUrl()">
 			</td>
 		</tr>
 		</form>

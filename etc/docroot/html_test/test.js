@@ -91,18 +91,20 @@ function GetXML()
 	}
 }
 
-function GetBase64()
+function GetUrl()
 {
-	var dataString = document.form_GetBase64.inputField.value;
+	var dataString1 = document.form_GetUrl.inputField.value;
+	var dataString2 = document.form_GetUrl.inputField2.value;
+	var dataArray = { url:dataString1, post:dataString2 };
 	
-	if (dataString == '') 
+	if (dataString1 == '' || dataString2 == '') 
 	{
-		alert('Input field is required');
-		console.log('Input field is empty');
+		alert('Input field(s) are required');
+		console.log('Input field(s) are empty');
 	}
 	else
 	{
-		sendSingleValueCommand('GetBase64', dataString);
+		sendMultiValueCommand('GetUrl', dataArray);
 	}
 }
 

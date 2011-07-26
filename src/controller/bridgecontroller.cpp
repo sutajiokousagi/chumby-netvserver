@@ -105,6 +105,19 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         buffer = QByteArray();
     }
 
+    else if (cmdString == "GETURL")
+    {
+        QByteArray urlString = request.getParameter("url");
+        QByteArray postString = request.getParameter("post");
+        QStringList argsList;
+        if (urlString.length() > 0)     argsList.append(QString(urlString));
+        if (postString.length() > 0)    argsList.append(QString(postString));
+
+        QByteArray buffer = this->Execute(docroot + "/scripts/curl.sh", argsList);
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+        buffer = QByteArray();
+    }
+
     else if (cmdString == "GETJPG" || cmdString == "GETJPEG")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/tmp_download.sh", QStringList(dataString));
