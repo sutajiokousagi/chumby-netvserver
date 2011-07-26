@@ -6,6 +6,7 @@
 #include <QProcess>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QDateTime>
 
 #define BRIDGE_RETURN_STATUS_UNIMPLEMENTED  "0"
 #define BRIDGE_RETURN_STATUS_SUCCESS        "1"
@@ -901,36 +902,75 @@ bool BridgeController::filter( int unicode, int keycode, int modifiers, bool isP
 {
     //Return 'true' if a given key event should be stopped from being processed any further; otherwise it should return false.
 
-    if (!isPress)
-        return true;
+    static qint64 up = 0,down = 0,left = 0,right = 0,center = 0,cpanel = 0,widget = 0,hidden1 = 0, hidden2 = 0;
+    static qint64 longClickThresholdMs1 = 3000;
+    qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
 
-    switch (keycode)
+    //autoRepeat doesn't work with current IR driver
+
+    //Normal press down
+    if (isPress && !autoRepeat)
     {
-        case Qt::Key_Up:
-            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>up</value></data></xml>"), "netvbrowser");
-            return true;
-        case Qt::Key_Down:
-            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>down</value></data></xml>"), "netvbrowser");
-            return true;
-        case Qt::Key_Left:
-            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>left</value></data></xml>"), "netvbrowser");
-            return true;
-        case Qt::Key_Right:
-            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>right</value></data></xml>"), "netvbrowser");
-            return true;
-        case Qt::Key_Enter:
-        case Qt::Key_Return:
-            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>center</value></data></xml>"), "netvbrowser");
-            return true;
-        case Qt::Key_PageUp:
-            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>cpanel</value></data></xml>"), "netvbrowser");
-            return true;
-        case Qt::Key_PageDown:
-            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>widget</value></data></xml>"), "netvbrowser");
-            return true;
-        default:
-            qDebug("BridgeController: [keyboard filter] ignored  0x%x", keycode);
-            break;
+        switch (keycode)
+        {
+            case Qt::Key_Up:                up = currentEpochMs;
+                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>up</value></data></xml>"), "netvbrowser");
+                return true;
+            case Qt::Key_Down:              down = currentEpochMs;
+                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>down</value></data></xml>"), "netvbrowser");
+                return true;
+            case Qt::Key_Left:              left = currentEpochMs;
+                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>left</value></data></xml>"), "netvbrowser");
+                return true;
+            case Qt::Key_Right:             right = currentEpochMs;
+                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>right</value></data></xml>"), "netvbrowser");
+                return true;
+
+            case Qt::Key_Enter:
+            case Qt::Key_Return:            center = currentEpochMs;
+                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>center</value></data></xml>"), "netvbrowser");
+                return true;
+            case Qt::Key_PageUp:            cpanel = currentEpochMs;
+                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>cpanel</value></data></xml>"), "netvbrowser");
+                return true;
+            case Qt::Key_PageDown:          widget = currentEpochMs;
+                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>widget</value></data></xml>"), "netvbrowser");
+                return true;
+
+            case Qt::Key_1:                 hidden1 = currentEpochMs;
+                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>reset</value></data></xml>"), "netvbrowser");
+                return true;
+            case Qt::Key_2:                 hidden2 = currentEpochMs;
+                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>reset</value></data></xml>"), "netvbrowser");
+                return true;
+
+            default:
+                qDebug("BridgeController: [keyboard filter] ignored  0x%x", keycode);
+                break;
+        }
+    }
+
+    //Normal release (check for long-press)
+    if (!isPress && !autoRepeat)
+    {
+        switch (keycode)
+        {
+            case Qt::Key_PageUp:
+                if (cpanel >= 0 && currentEpochMs - cpanel > longClickThresholdMs1) {
+                    qDebug("BridgeController: [keyboard filter] long-press ControlPanel key (%lldms)", currentEpochMs-cpanel);
+                    Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>reset</value></data></xml>"), "netvbrowser");
+                }
+                cpanel = 0;
+                return true;
+
+            case Qt::Key_PageDown:
+                if (widget >= 0 && currentEpochMs - widget > longClickThresholdMs1) {
+                    qDebug("BridgeController: [keyboard filter] long-press Widget key (%lldms)", currentEpochMs-cpanel);
+                    Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>reset</value></data></xml>"), "netvbrowser");
+                }
+                widget = 0;
+                return true;
+        }
     }
 
     return false;
