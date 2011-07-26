@@ -3,7 +3,8 @@
 
 case "$1" in
 	start)
-		#export QWS_KEYBOARD=chumbyirkb
+		# use irkb driver as a normal keyboard		
+		export QWS_KEYBOARD=chumbyirkb
 
 		# hide the ugly initialization sequence
 		setbox 0 0 1 1
