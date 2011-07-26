@@ -91,7 +91,7 @@ void InputListener::readKeycode()
         if (buffer[i].type != EV_KEY)
             continue;
 
-        Qt::Key code = (Qt::Key)buffer[i].code;
+        quint16 code = buffer[i].code;
         qint32 value = buffer[i].value;
 
         //QWSKeyboardHandler::KeycodeAction ka;

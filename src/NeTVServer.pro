@@ -7,7 +7,6 @@ QT = core network gui
 TARGET = NeTVServer
 TEMPLATE = app
 CONFIG += CONSOLE
-CONFIG += qdbus
 
 DESTDIR = $$PWD
 
@@ -88,6 +87,7 @@ include(../lib/bfInputListener/src/bfInputListener.pri)
 
 # QDBus
 contains( QT, dbus ) {
+    CONFIG += qdbus
     DEFINES += ENABLE_DBUS_STUFF
     include(../lib/bfDBusMonitor/src/bfDBusMonitor.pri)
 }

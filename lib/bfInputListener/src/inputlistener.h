@@ -22,7 +22,7 @@ private Q_SLOTS:
 
 signals:
 
-    void signal_keyInput(Qt::Key keycode, bool isPress, bool autoRepeat);
+    void signal_keyInput(quint16 keycode, bool isPress, bool autoRepeat);
 
 private:
     int                           m_fd;

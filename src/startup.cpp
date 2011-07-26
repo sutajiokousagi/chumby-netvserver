@@ -82,7 +82,7 @@ void Startup::start()
     // Input listener
     InputListener *inputListener = new InputListener(this, "/dev/input/event1");
     Static::inputListener = inputListener;
-    QObject::connect(inputListener, SIGNAL(signal_keyInput(Qt::Key,bool,bool)), Static::bridgeController, SLOT(slot_keyInput(Qt::Key,bool,bool)));
+    QObject::connect(inputListener, SIGNAL(signal_keyInput(quint16,bool,bool)), Static::bridgeController, SLOT(slot_keyInput(quint16,bool,bool)));
 
     printf("NeTVServer has started");
 }

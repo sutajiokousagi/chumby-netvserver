@@ -885,29 +885,38 @@ void BridgeController::slot_DeviceRemoved(QByteArray objPath)
 }
 
 // From inputlistener.h
-void BridgeController::slot_keyInput(Qt::Key keycode, bool /* isPress */, bool /* autoRepeat */)
+void BridgeController::slot_keyInput(quint16 keycode, bool isPress, bool /* autoRepeat */)
 {
+    if (!isPress)
+        return;
+
+    qDebug() << "BridgeController: [slot_keyInput] " << keycode;
+
     switch (keycode)
     {
-        case Qt::Key_Up:
+        case 103:   //Qt::Key_Up:
             Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>up</value></data></xml>"), "netvbrowser");
             break;
-        case Qt::Key_Down:
+        case 108:   //Qt::Key_Down:
             Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>down</value></data></xml>"), "netvbrowser");
             break;
-        case Qt::Key_Left:
+        case 105:   //Qt::Key_Left:
             Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>left</value></data></xml>"), "netvbrowser");
             break;
-        case Qt::Key_Right:
+        case 106:   //Qt::Key_Right:
             Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>right</value></data></xml>"), "netvbrowser");
             break;
-        case Qt::Key_Enter:
+        case 28:    //Qt::Key_Enter:
             Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>center</value></data></xml>"), "netvbrowser");
             break;
-        case Qt::Key_Space:
+        case 360:
             Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>widget</value></data></xml>"), "netvbrowser");
             break;
+        case 171:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>cpanel</value></data></xml>"), "netvbrowser");
+            break;
         default:
+            qDebug() << "BridgeController: [slot_keyInput] ignored. " << keycode;
             break;
     }
 }
