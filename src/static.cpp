@@ -13,7 +13,6 @@ TcpSocketServer* Static::tcpSocketServer=0;
 UdpSocketServer* Static::udpSocketServer=0;
 BridgeController* Static::bridgeController=0;
 FramebufferController* Static::framebufferController=0;
-InputListener* Static::inputListener=0;
 
 #ifdef ENABLE_DBUS_STUFF
     DBusMonitor* Static::dbusMonitor=0;

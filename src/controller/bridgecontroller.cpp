@@ -6,7 +6,6 @@
 #include <QProcess>
 #include <QApplication>
 #include <QDesktopWidget>
-#include <QWSServer>
 
 #define BRIDGE_RETURN_STATUS_UNIMPLEMENTED  "0"
 #define BRIDGE_RETURN_STATUS_SUCCESS        "1"
@@ -919,4 +918,44 @@ void BridgeController::slot_keyInput(quint16 keycode, bool isPress, bool /* auto
             qDebug() << "BridgeController: [slot_keyInput] ignored. " << keycode;
             break;
     }
+}
+
+/** Custom keyboard filter */
+bool BridgeController::filter( int unicode, int keycode, int modifiers, bool isPress, bool autoRepeat )
+{
+    //Return 'true' if a given key event should be stopped from being processed any further; otherwise it should return false.
+
+    if (!isPress)
+        return true;
+
+    switch (keycode)
+    {
+        case Qt::Key_Up:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>up</value></data></xml>"), "netvbrowser");
+            return true;
+        case Qt::Key_Down:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>down</value></data></xml>"), "netvbrowser");
+            return true;
+        case Qt::Key_Left:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>left</value></data></xml>"), "netvbrowser");
+            return true;
+        case Qt::Key_Right:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>right</value></data></xml>"), "netvbrowser");
+            return true;
+        case Qt::Key_Enter:
+        case Qt::Key_Return:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>center</value></data></xml>"), "netvbrowser");
+            return true;
+        case Qt::Key_PageUp:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>cpanel</value></data></xml>"), "netvbrowser");
+            return true;
+        case Qt::Key_PageDown:
+            Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>widget</value></data></xml>"), "netvbrowser");
+            return true;
+        default:
+            qDebug("BridgeController: [keyboard filter] ignored  0x%x", keycode);
+            break;
+    }
+
+    return false;
 }

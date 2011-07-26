@@ -83,7 +83,6 @@ include(../lib/qtsingleapplication-2.6_1-opensource/src/qtsingleapplication.pri)
 include(../lib/bfHttpServer/src/bfHttpServer.pri)
 include(../lib/bfFlashPolicyServer/src/bfFlashpolicyserver.pri)
 include(../lib/bfSocketServer/src/bfSocketserver.pri)
-include(../lib/bfInputListener/src/bfInputListener.pri)
 
 # QDBus
 contains( QT, dbus ) {

@@ -1,10 +1,11 @@
 #ifndef BridgeController_H
 #define BridgeController_H
 
+#include <QWSServer>
 #include "httprequesthandler.h"
 #include "socketrequesthandler.h"
 
-class BridgeController : public QObject, public HttpRequestHandler, public SocketRequestHandler
+class BridgeController : public QObject, public HttpRequestHandler, public SocketRequestHandler, public QWSServer::KeyboardFilter
 {
     Q_OBJECT
     //Q_DISABLE_COPY(BridgeController);
@@ -55,6 +56,9 @@ private:
     bool SetFileContents(const QString &fullPath, QByteArray data);
     bool SetFileExecutable(const QString &fullPath);
     bool UnlinkFile(const QString &fullPath);
+
+    /** Custom keyboard filter */
+    bool filter( int unicode, int keycode, int modifiers, bool isPress, bool autoRepeat );
 };
 
 #endif // BridgeController_H

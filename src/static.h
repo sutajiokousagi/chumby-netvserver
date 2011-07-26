@@ -5,7 +5,6 @@
 #include "httpsessionstore.h"
 #include "tcpsocketserver.h"
 #include "udpsocketserver.h"
-#include "inputlistener.h"
 #include "controller/staticfilecontroller.h"
 #include "controller/scriptcontroller.h"
 #include "controller/bridgecontroller.h"
@@ -76,9 +75,6 @@ public:
 #ifdef ENABLE_DBUS_STUFF
     static DBusMonitor* dbusMonitor;
 #endif
-
-    /** Input device listener */
-    static InputListener* inputListener;
 
     /** Controller for input device */
 #ifdef CURSOR_CONTROLLER

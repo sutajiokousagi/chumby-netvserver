@@ -71,20 +71,16 @@ void Startup::start()
 
     // DBus monitor
 #ifdef ENABLE_DBUS_STUFF
-    DBusMonitor *dbusMonitor = new DBusMonitor(this);
-    Static::dbusMonitor = dbusMonitor;
-    QObject::connect(dbusMonitor, SIGNAL(signal_StateChanged(uint)), Static::bridgeController, SLOT(slot_StateChanged(uint)));
-    QObject::connect(dbusMonitor, SIGNAL(signal_PropertiesChanged(QByteArray,QByteArray)), Static::bridgeController, SLOT(slot_PropertiesChanged(QByteArray,QByteArray)));
-    QObject::connect(dbusMonitor, SIGNAL(signal_DeviceAdded(QByteArray)), Static::bridgeController, SLOT(slot_DeviceAdded(QByteArray)));
-    QObject::connect(dbusMonitor, SIGNAL(signal_DeviceRemoved(QByteArray)), Static::bridgeController, SLOT(slot_DeviceRemoved(QByteArray)));
+    Static::dbusMonitor = new DBusMonitor(this);
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_StateChanged(uint)), Static::bridgeController, SLOT(slot_StateChanged(uint)));
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_PropertiesChanged(QByteArray,QByteArray)), Static::bridgeController, SLOT(slot_PropertiesChanged(QByteArray,QByteArray)));
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceAdded(QByteArray)), Static::bridgeController, SLOT(slot_DeviceAdded(QByteArray)));
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceRemoved(QByteArray)), Static::bridgeController, SLOT(slot_DeviceRemoved(QByteArray)));
 #endif
 
-    // Input listener
-    InputListener *inputListener = new InputListener(this, "/dev/input/event1");
-    Static::inputListener = inputListener;
-    QObject::connect(inputListener, SIGNAL(signal_keyInput(quint16,bool,bool)), Static::bridgeController, SLOT(slot_keyInput(quint16,bool,bool)));
-
-    printf("NeTVServer has started");
+    // Keyboard filter
+    QWSServer::instance()->addKeyboardFilter(Static::bridgeController);
+    qDebug() << "NeTVServer: Custom keyboard filter installed";
 }
 
 void Startup::receiveArgs(const QString &argsString)
