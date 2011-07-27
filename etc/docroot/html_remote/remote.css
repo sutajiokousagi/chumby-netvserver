@@ -1,0 +1,106 @@
+/*-----------------------------
+RESET STYLES
+-----------------------------*/
+
+html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6
+{
+	margin:0;
+	padding:0;
+	-webkit-text-size-adjust:none;
+}
+body
+{
+	font-size: 10px;
+}
+ul, li, ol, dl, dd, dt
+{
+	list-style:none;
+	padding:0;
+	margin:0;
+}
+a
+{
+	text-decoration:none;
+}
+
+/*-----------------------------
+	BASIC PAGE STYLING
+-----------------------------*/
+
+body
+{
+	background-color: #444444;
+	font-family: Helvetica;
+	color:#CCCCCC;
+}
+p
+{
+	font-size:12px;
+	padding-bottom:8px;
+}
+a
+{
+	color:#fff000;
+	text-decoration:none;
+}
+
+/*-----------------------------
+	BASIC LAYOUT
+-----------------------------*/
+
+#page_wrapper
+{
+	width: 100%;
+	height: 100%;
+	background-image: url("grey_bg.png");
+	background-repeat: repeat;
+}
+
+#breadcumb
+{
+	width: 100%;
+	text-align: center;
+	position:  absolute;
+	bottom:  5;
+}
+
+#loadframe
+{
+	width: 0;
+	height: 0;
+	border: 0;
+	visibility: hidden;
+	overflow: hidden;
+}
+
+/*-----------------------------
+	ORIENTATION CLEVERNESS
+-----------------------------*/
+
+#content_left,
+#content_right,
+#content_normal,
+#content_flipped
+{
+	display:none;
+}
+
+.show_normal,
+.show_flipped
+{
+	width: 100%;
+}
+.show_left,
+.show_right
+{
+	width: 100%;
+}
+
+/* .show_flipped #content_flipped */
+.show_left #content_left,
+.show_right #content_right,
+.show_normal #content_normal,
+.show_flipped #content_normal
+{
+	display: block;
+}

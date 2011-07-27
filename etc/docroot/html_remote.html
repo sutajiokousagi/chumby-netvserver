@@ -1,77 +1,58 @@
 <html>
 <head>
 <title>NeTV Remote Control</title>
-<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
-<meta name="viewport" content="height=device-height; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+<meta name="viewport" content="width=device-width; initial-scale=1; maximum-scale=1; user-scalable=0;">
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <link rel="apple-touch-icon" href="../webapp_icon.png" />
-<script type='text/javascript' src='./html_remote/browser_detect.js'></script>
-<script type='text/javascript' src='../html_remote/remote.js'></script>
-<script language="javascript">
-	function onLoad()
-	{
-		document.all.browserDetect_browser.innerHTML = "Browser: " + BrowserDetect.browser;
-		document.all.browserDetect_version.innerHTML = "Version: " + BrowserDetect.version;
-		document.all.browserDetect_os.innerHTML = "OS: " + BrowserDetect.OS;
-		
-		if((navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i)))
-		{
-			addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false);
-			webview.scalesPageToFit = YES;
-		}
-	}
-	function BlockMove(event)
-	{
-		// Tell Safari not to move the window.
-		event.preventDefault() ;
-	}
-	
-	function hideURLbar()
-	{
-		window.scrollTo(0, 1);
-	}
-</script>
-<style>
-	body {
-		font-family: Verdana;
-		margin: 0px;
-		background-color: #444444;
-		color: #EEEEEE;
-	}
-	.mainRemoteTable {
-		background-image: url("html_remote/grey_bg.png");
-		background-attachment: fixed;
-		background-position: center top;
-		background-repeat: no-repeat;"
-	}
-</style>
+<link rel="stylesheet" href="html_remote/remote.css" type="text/css">
+<script type='text/javascript' src='html_remote/jquery-1.6.1.min.js'></script>
+<script type='text/javascript' src='html_remote/utils.js'></script>
+<script type='text/javascript' src='html_remote/cRemote.js'></script>
+<script type='text/javascript' src='html_remote/fastButton.js'></script>
+<script type='text/javascript' src='html_remote/html.js'></script>
 </head>
-<body>
-	<table width="100%" cellpadding=0 cellspacing=0 >
-	<tr><td align="center" valign="top">
-		<table class="mainRemoteTable" width="320px" height="360px" cellpadding=0 cellspacing=0> 
-			<tr>
-				<td width="33%" align="right"><img src="html_remote/btn_controlpanel.png" onClick="RemoteControl('cpanel')"></td>
-				<td width="34%"></td>
-				<td width="33%" align="left"><img src="html_remote/btn_widget.png" onClick="RemoteControl('widget')"></td>
-			</tr>
-			<tr>
-				<td width="100%" colspan=3 align="center"><img src="html_remote/up.png" onClick="RemoteControl('up')"></td>
-			</tr>
-			<tr>
-				<td align="right"><img src="html_remote/left.png" onClick="RemoteControl('left')"></td>
-				<td align="center"><img src="html_remote/center.png" onClick="RemoteControl('center')"></td>
-				<td align="left"><img src="html_remote/right.png" onClick="RemoteControl('right')"></td>
-			</tr>
-			<tr>
-				<td width="100%" colspan=3 align="center"><img src="html_remote/down.png" onClick="RemoteControl('down')"></td>
-			</tr>
-		</table>
-	</td></tr>
-	</table>
+<body onload="onLoad();" onorientationchange="updateOrientation();" >
+	<div id="page_wrapper">
+	
+        <div id="content_normal">
+            <table width='100%' id='mainRemoteDiv' cellpadding=0 cellspacing=0 >
+				<tr>
+					<td width="33%" id="btn_cpanel" align="right"><img src="html_remote/btn_controlpanel.png"></td>
+					<td width="34%"></td>
+					<td width="33%" id="btn_widget" align="left"><img src="html_remote/btn_widget.png"></td>
+				</tr>
+				<tr>
+					<td width="100%" id="btn_up" colspan=3 align="center"><img src="html_remote/up.png"></td>
+				</tr>
+				<tr>
+					<td align="right" id="btn_left"><img src="html_remote/left.png"></td>
+					<td align="center" id="btn_center"><img src="html_remote/center.png"></td>
+					<td align="left" id="btn_right"><img src="html_remote/right.png"></td>
+				</tr>
+				<tr>
+					<td width="100%" id="btn_down" colspan=3 align="center"><img src="html_remote/down.png"></td>
+				</tr>
+			</table>
+        </div>
+		
+		<div id="content_left">  
+			<p>You are now holding your phone to the left</p>  
+		</div>  
+		<div id="content_right">  
+			<p>You are now holding your phone to the right</p>  
+		</div>
+		<div id="content_flipped">  
+			<p>This doesn't work yet.</p>  
+		</div>  
 
-	<iframe style="visibility:hidden;" width=0 height=0 name="loadframe" border="0px"></iframe>
+		<div id='breadcumb'>
+			<div id='statusinfo' width='100%'></div>		<!-- HW: ...; FW: ... -->
+			<div id='recommendation' width='100%'></div>	<!-- For better experience... -->
+		</div>
+		
+    </div>
+	<iframe style="visibility:hidden;" width=0 height=0 name="loadframe" id="loadframe" border="0px"></iframe>
 
 </body>
 </html>
