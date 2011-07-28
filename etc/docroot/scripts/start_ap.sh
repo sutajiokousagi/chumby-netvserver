@@ -19,14 +19,27 @@ SCRIPTPATH=`dirname $SCRIPT`
 if [ ! -e ${CONFPATH} ];
 then
 	echo "hostapd Configuration file not found"
-	return
+	exit
 fi
 
 # Stop previous AP
 echo "Stopping previous AP"
-killall hostapd
-killall dnsmasq
-/etc/init.d/NetworkManager stop
+if ps ax | grep -v grep | grep hostapd > /dev/null
+	killall hostapd
+fi
+if ps ax | grep -v grep | grep dnsmasq > /dev/null
+	killall dnsmasq
+fi
+if ps ax | grep -v grep | grep NetworkManager > /dev/null
+then
+	/etc/init.d/NetworkManager stop
+fi
+
+# Already in AP mode
+if ps ax | grep -v grep | grep hostapd > /dev/null
+then
+	exit
+fi
 
 # Bring down the interface
 ifconfig ${INTIF} down
@@ -43,7 +56,7 @@ sleep 1
 WIFIUP=$(/sbin/ifconfig ${INTIF} | grep 'UP')
 if [ ${#WIFIUP} -lt 4 ];
 then
-	echo "start.sh: Failed to bring up "${INTIF}
+	echo "start.sh: failed to bring up "${INTIF}
 	exit
 fi
 
@@ -53,7 +66,7 @@ ifconfig ${INTIF} 192.168.100.1
 IP=$(/sbin/ifconfig ${INTIF} | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 if [ "x${IP}" != "x192.168.100.1" ];
 then
-	echo "start.sh: Failed to set IP address "${INTIF}
+	echo "start.sh: failed to set IP address "${INTIF}
 	exit
 fi
 

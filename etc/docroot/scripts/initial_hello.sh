@@ -18,19 +18,19 @@ fi
 
 # DCID
 DCID=$(dcid -o | grep -v "xml version=")
-if [ -z $DCID ]; then
+if [ -z "${DCID}" ]; then
 	DCID='a long string of 1024 bytes'
 fi
 
 # Hardware version
 hwver=$(chumby_version -h)
-if [ -z $hwver ]; then
+if [ -z "${hwver}" ]; then
 	hwver='10.1'
 fi
 
 # Software version
 fwver=$(chumby_version -f)
-if [ -z $fwver ]; then
+if [ -z "${fwver}" ]; then
 	fwver='1.0'
 fi
 
@@ -54,30 +54,41 @@ MAC=$(ifconfig | grep ${INTIF} | tr -s ' ' | cut -d ' ' -f5)
 IP=$(/sbin/ifconfig ${INTIF} | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 
 # Network manager state
-nmstate=$(dbus-send --system --print-reply --dest='org.freedesktop.NetworkManager' /org/freedesktop/NetworkManager org.freedesktop.DBus.Properties.Get string:'' string:'State' | grep uint32 | awk '{print $3}')
+nmstate="4"
+if ps ax | grep -v grep | grep NetworkManager > /dev/null
+then
+	nmstate=$(dbus-send --system --print-reply --dest='org.freedesktop.NetworkManager' /org/freedesktop/NetworkManager org.freedesktop.DBus.Properties.Get string:'' string:'State' | grep uint32 | awk '{print $3}')
+fi
 if [ "$nmstate" == "2" ]; then
 	internet='connecting'
-elif [ "$nmstate" == "4" -o "$nmstate" == "1" ]; then
+elif [ "$nmstate" == "4" -o "$nmstate" == "1" -o $? -ne 0 ]; then
 	internet='false'
 fi
-
-#
-# Print them out
-#
-echo "<guid>$GUID</guid>"
-echo "<dcid>$DCID</dcid>"
-echo "<hwver>$hwver</hwver>"
-echo "<fwver>$fwver</fwver>"
-echo "<flashplugin>$flashplugin</flashplugin>"
-echo "<flashver>$flashver</flashver>"
-echo "<internet>$internet</internet>"
-echo "<mac>$MAC</mac>"
-echo "<ip>$IP</ip>"
-echo "$network_status"
 
 #
 # Start Access Point mode if neccesary
 #
 if [ "$internet" == "false" ]; then
-	${SCRIPTPATH}/start_ap.sh
+        ap_status=$(${SCRIPTPATH}/start_ap.sh)
+
+	# if called too early, encounter "nl80211 driver failed to initialize" error
+	if [ ! -z "$(echo $ap_status | awk '/failed/')" ]; then
+		internet='connecting'
+	fi
 fi
+
+#
+# Print them out
+#
+echo "<guid>${GUID}</guid>"
+echo "<dcid>${DCID}</dcid>"
+echo "<hwver>${hwver}</hwver>"
+echo "<fwver>${fwver}</fwver>"
+echo "<flashplugin>${flashplugin}</flashplugin>"
+echo "<flashver>${flashver}</flashver>"
+echo "<internet>${internet}</internet>"
+echo "<mac>${MAC}</mac>"
+echo "<ip>${IP}</ip>"
+echo "${network_status}"
+
+
