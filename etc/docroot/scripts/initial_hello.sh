@@ -61,7 +61,9 @@ then
 fi
 if [ "$nmstate" == "2" ]; then
 	internet='connecting'
-elif [ "$nmstate" == "4" -o "$nmstate" == "1" -o $? -ne 0 ]; then
+elif [ "$nmstate" == "3" ]; then
+	internet='true'
+elif [ "$nmstate" == "4" -o "$nmstate" == "1" ]; then
 	internet='false'
 fi
 

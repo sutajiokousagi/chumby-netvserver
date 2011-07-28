@@ -25,20 +25,16 @@ fi
 # Stop previous AP
 echo "Stopping previous AP"
 if ps ax | grep -v grep | grep hostapd > /dev/null
+then
 	killall hostapd
 fi
 if ps ax | grep -v grep | grep dnsmasq > /dev/null
+then
 	killall dnsmasq
 fi
 if ps ax | grep -v grep | grep NetworkManager > /dev/null
 then
 	/etc/init.d/NetworkManager stop
-fi
-
-# Already in AP mode
-if ps ax | grep -v grep | grep hostapd > /dev/null
-then
-	exit
 fi
 
 # Bring down the interface

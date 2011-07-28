@@ -12,19 +12,19 @@ fi
 
 # DCID
 DCID=$(dcid -o | grep -v "xml version=")
-if [ -z $DCID ]; then
+if [ -z "${DCID}" ]; then
 	DCID='a long string of 1024 bytes'
 fi
 
 # Hardware version
 hwver=$(chumby_version -h)
-if [ -z $hwver ]; then
+if [ -z "${hwver}" ]; then
 	hwver='10.1'
 fi
 
 # Software version
 fwver=$(chumby_version -f)
-if [ -z $fwver ]; then
+if [ -z "${fwver}" ]; then
 	fwver='1.0'
 fi
 
@@ -55,7 +55,9 @@ then
 fi
 if [ "$nmstate" == "2" ]; then
 	internet='connecting'
-elif [ "$nmstate" == "4" -o "$nmstate" == "1" -o $? -ne 0 ]; then
+elif [ "$nmstate" == "3" ]; then
+	internet='true'
+elif [ "$nmstate" == "4" -o "$nmstate" == "1" ]; then
 	internet='false'
 fi
 
