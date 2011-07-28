@@ -11,15 +11,18 @@ then
 fi
 
 # Stop the AP
-killall hostapd
-killall dnsmasq
+echo "Stopping previous AP"
+if ps ax | grep -v grep | grep hostapd > /dev/null
+then
+	killall hostapd
+fi
+if ps ax | grep -v grep | grep dnsmasq > /dev/null
+then
+	killall dnsmasq
+fi
 
-# Reset network interface
+# Bring up network interface
 ifconfig $(ls -1 /sys/class/net/ | grep wlan | head -1) up
 
 # Start NetworkManager
 /etc/init.d/NetworkManager restart
-
-# We must find a way to check if NetworkManager connects succesfully,
-# otherwise, revert to AP mode
-

@@ -48,6 +48,7 @@ private:
 
     /** File Utilities */
     bool FileExists(const QString &fullPath);
+    bool FileExecutable(const QString &fullPath);
     qint64  GetFileSize(const QString &fullPath);
     QByteArray GetFileContents(const QString &fullPath);
     bool SetFileContents(const QString &fullPath, QByteArray data);

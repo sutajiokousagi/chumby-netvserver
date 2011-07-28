@@ -78,9 +78,11 @@ void Startup::start()
     QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceRemoved(QByteArray)), Static::bridgeController, SLOT(slot_DeviceRemoved(QByteArray)));
 #endif
 
+#ifdef ENABLE_QWS_STUFF
     // Keyboard filter
     QWSServer::instance()->addKeyboardFilter(Static::bridgeController);
     qDebug() << "NeTVServer: Custom keyboard filter installed";
+#endif
 }
 
 void Startup::receiveArgs(const QString &argsString)

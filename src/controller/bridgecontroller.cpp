@@ -54,6 +54,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     //-----------
 
+    /* Deprecated. Use generic command at the bottom
     if (cmdString == "HELLO")
     {
         //Returning GUID, DCID, HWver, SWver, etc.Z
@@ -65,7 +66,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         buffer = QByteArray();
     }
 
-    if (cmdString == "INITIALHELLO")
+    else if (cmdString == "INITIALHELLO")
     {
         //This is identical to 'Hello' command except that it will switch to Acces Point mode if necessary
         //To be called only once by JavaScriptCore
@@ -78,8 +79,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data>" + buffer.trimmed() + "</data>", true);
         buffer = QByteArray();
     }
+    */
 
-    else if (cmdString == "SETURL")
+    if (cmdString == "SETURL")
     {
         //Send it straight to browser
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "netvbrowser");
@@ -99,12 +101,14 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     }
 #endif
 
+    /* Deprecated. Use generic command at the bottom
     else if (cmdString == "GETXML")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/wget.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
         buffer = QByteArray();
     }
+    */
 
     else if (cmdString == "GETURL")
     {
@@ -113,10 +117,16 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         QStringList argsList;
         if (urlString.length() > 0)     argsList.append(QString(urlString));
         if (postString.length() > 0)    argsList.append(QString(postString));
-
-        QByteArray buffer = this->Execute(docroot + "/scripts/curl.sh", argsList);
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
-        buffer = QByteArray();
+        if (argsList.length() < 1)
+        {
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>no arguments received</value></data>", true);
+        }
+        else
+        {
+            QByteArray buffer = this->Execute(docroot + "/scripts/geturl.sh", argsList);
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+            buffer = QByteArray();
+        }
     }
 
     else if (cmdString == "GETJPG" || cmdString == "GETJPEG")
@@ -124,6 +134,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         QByteArray buffer = this->Execute(docroot + "/scripts/tmp_download.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
     }
+
+    //-----------
 
     else if (cmdString == "HASFLASHPLUGIN")
     {
@@ -144,12 +156,14 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     //-----------
 
+    /* Deprecated. Use generic command at the bottom
     else if (cmdString == "SETBOX")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/setbox.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
         buffer = QByteArray();
     }
+    */
 
     else if (cmdString == "SETCHROMAKEY")
     {
@@ -396,6 +410,19 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     //-----------
 
+    //A generic command to execute name-alike scripts
+    else if (FileExists(docroot + "/scripts/" + cmdString.toLower() + ".sh"))
+    {
+        QByteArray buffer = this->Execute(docroot + "/scripts/" + cmdString.toLower() + ".sh", QStringList(dataString));
+        if (buffer.length() > 5)
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data>" + buffer.trimmed() + "</data>", true);
+        else
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data>" + buffer.trimmed() + "</data>", true);
+        buffer = QByteArray();
+    }
+
+    //-----------
+
     else
     {
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_UNIMPLEMENTED + "</status><data><value>" + cmdString + "</value></data>", true);
@@ -408,7 +435,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     QByteArray cmdString = request.getCommand().toUpper();
     QByteArray dataString = request.getParameter("value").trimmed();
 
-
+    /* Deprecated. Use generic command at the bottom
     if (cmdString == "HELLO")
     {
         //The type of connection is already handled by the TcpSocketServer, but we do post-processing here
@@ -432,8 +459,9 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.setParameter("data", buffer.trimmed());
         response.write();
     }
+    */
 
-    else if (cmdString == "SETURL")
+    if (cmdString == "SETURL")
     {
         //Send it straight to browser
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "netvbrowser");
@@ -461,6 +489,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     //-----------
     //Mostly from Android/iOS devices
 
+    /* Deprecated. Use generic command at the bottom
     else if (cmdString == "WIDGETENGINE")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/widget_engine.sh", QStringList(dataString));
@@ -479,6 +508,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
         buffer = QByteArray();
     }
+    */
 
     else if (cmdString == "REMOTECONTROL")
     {
@@ -713,6 +743,17 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
     //-----------
 
+    //A generic command to execute name-alike scripts
+    else if (FileExists(docroot + "/scripts/" + cmdString.toLower() + ".sh"))
+    {
+        QByteArray buffer = this->Execute(docroot + "/scripts/" + cmdString.toLower() + ".sh", QStringList(dataString));
+        response.setCommand(cmdString);
+        response.setParameter("data", buffer.trimmed());
+        response.write();
+    }
+
+    //-----------
+
     else
     {
         response.setStatus(BRIDGE_RETURN_STATUS_UNIMPLEMENTED);
@@ -815,6 +856,14 @@ bool BridgeController::FileExists(const QString &fullPath)
     return file.exists();
 }
 
+bool BridgeController::FileExecutable(const QString &fullPath)
+{
+    QFile file(fullPath);
+    if (!file.exists())
+        return false;
+    return ((file.permissions() & QFile::ExeOwner) || (file.permissions() & QFile::ExeOther));
+}
+
 qint64 BridgeController::GetFileSize(const QString &fullPath)
 {
     QFile file(fullPath);
@@ -862,6 +911,8 @@ bool BridgeController::SetFileExecutable(const QString &fullPath)
     QFile file(fullPath);
     if (!file.exists())                         //doesn't exist
         return false;
+    if (FileExecutable(fullPath))
+        return true;
     return file.setPermissions(file.permissions() | QFile::ExeUser | QFile::ExeOther);
 }
 
