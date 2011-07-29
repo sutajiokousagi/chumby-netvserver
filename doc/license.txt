@@ -1,6 +1,0 @@
-This program and its source is distributed under the
-General Public License v3.
-http://www.gnu.org/licenses/gpl.html
-
-Author: Stefan Frings
-http://www.stefanfrings.de
