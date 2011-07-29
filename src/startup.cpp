@@ -1,5 +1,3 @@
-#include <QScreen>
-#include <QColor>
 #include <QDir>
 #include "startup.h"
 #include "static.h"
@@ -40,9 +38,11 @@ void Startup::start()
 #endif
 
     // Configure framebuffer controller
+    /*
     QSettings* fbSettings=new QSettings(configFileName,QSettings::IniFormat);
     fbSettings->beginGroup("framebuffer-controller");
     Static::framebufferController=new FramebufferController(fbSettings);
+    */
 
     // Configure bridge controller
     Static::bridgeController=new BridgeController(fileSettings,this);
@@ -77,12 +77,6 @@ void Startup::start()
     QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceAdded(QByteArray)), Static::bridgeController, SLOT(slot_DeviceAdded(QByteArray)));
     QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceRemoved(QByteArray)), Static::bridgeController, SLOT(slot_DeviceRemoved(QByteArray)));
 #endif
-
-#ifdef ENABLE_QWS_STUFF
-    // Keyboard filter
-    QWSServer::instance()->addKeyboardFilter(Static::bridgeController);
-    qDebug() << "NeTVServer: Custom keyboard filter installed";
-#endif
 }
 
 void Startup::receiveArgs(const QString &argsString)
@@ -105,27 +99,6 @@ void Startup::receiveArgs(const QString &argsString)
     else                                    printf("NeTVServer: Invalid argument");
 }
 
-void Startup::windowEvent ( QWSWindow * window, QWSServer::WindowEvent eventType )
-{
-    Q_UNUSED(window);
-    Q_UNUSED(eventType);
-
-#ifdef ENABLE_QWS_STUFF
-    QWSServer *qserver = QWSServer::instance();
-    const QList<QWSWindow *> winList = qserver->clientWindows();
-    if (winList.count() > 0)
-    {
-        qDebug("NeTVServer: painting is enabled [%d windows]", winList.count());
-        qserver->enablePainting(true);
-    }
-    else
-    {
-        qDebug("NeTVServer: painting is disabled [%d windows]", winList.count());
-        qserver->enablePainting(false);
-    }
-#endif
-}
-
 QByteArray Startup::processStatelessCommand(QByteArray command, QStringList argsList)
 {
     //command name
@@ -143,65 +116,6 @@ QByteArray Startup::processStatelessCommand(QByteArray command, QStringList args
     }
 
     //----------------------------------------------------
-
-#ifdef ENABLE_QWS_STUFF
-    else if (command == "REFRESH")
-    {
-        //redraw the entire screen
-        QWSServer::instance()->refresh();
-    }
-
-    else if (command == "SETRESOLUTION" && argCount == 1)
-    {
-        //comma-separated arguments
-        QString args = argsList[0];
-        QStringList argsLs = args.split(",");
-        if (argsLs.count() < 3)
-            return UNIMPLEMENTED;
-
-        int w = argsLs[0].toInt();
-        int h = argsLs[1].toInt();
-        int depth = argsLs[2].toInt();
-
-        //resize the screen driver
-        QWSServer *qserver = QWSServer::instance();
-        qserver->enablePainting(false);
-        QScreen::instance()->setMode(w,h,depth);
-        qserver->enablePainting(true);
-
-        //forward to browser
-        if (Static::tcpSocketServer != NULL)
-            Static::tcpSocketServer->broadcast("<xml><cmd>Show</cmd></xml>", "netvbrowser");
-
-        //redraw the entire screen
-        qserver->refresh();
-
-        return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
-    }
-
-    else if (command == "SETRESOLUTION" && argCount >= 3)
-    {
-        //space-separated arguments
-        int w = argsList[0].toInt();
-        int h = argsList[1].toInt();
-        int depth = argsList[2].toInt();
-
-        //resize the screen driver
-        QWSServer *qserver = QWSServer::instance();
-        qserver->enablePainting(false);
-        QScreen::instance()->setMode(w,h,depth);
-        qserver->enablePainting(true);
-
-        //forward to browser
-        if (Static::tcpSocketServer != NULL)
-            Static::tcpSocketServer->broadcast("<xml><cmd>Show</cmd></xml>", "netvbrowser");
-
-        //redraw the entire screen
-        qserver->refresh();
-
-        return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
-    }
-#endif
 
     return UNIMPLEMENTED;
 }

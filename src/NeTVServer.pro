@@ -3,7 +3,7 @@
 # by adding 'controllers' classes
 #
 
-QT = core network gui
+QT = core network
 TARGET = NeTVServer
 TEMPLATE = app
 CONFIG += CONSOLE
@@ -32,30 +32,22 @@ SOURCES = main.cpp \
 message("DBus enabled")
 QT += dbus
 
-# QWSServer
-message("ENABLE_QWS_STUFF enabled")
-DEFINES += ENABLE_QWS_STUFF
-
 # Shell script execution (cgi-like)
 HEADERS += $$PWD/controller/scriptcontroller.h
 SOURCES += $$PWD/controller/scriptcontroller.cpp
-
-# Framebuffer capture
-HEADERS += $$PWD/controller/framebuffercontroller.h
-SOURCES += $$PWD/controller/framebuffercontroller.cpp
 
 # Hardware bridge
 HEADERS += $$PWD/controller/bridgecontroller.h
 SOURCES += $$PWD/controller/bridgecontroller.cpp
 
 # UDP cursor from Android/iOS
-unix:!mac:DEFINES += CURSOR_CONTROLLER
-unix:!mac:CONFIG += CURSOR_CONTROLLER
-contains(DEFINES, CURSOR_CONTROLLER)
-{
-    HEADERS += $$PWD/controller/cursorcontroller.h
-    SOURCES += $$PWD/controller/cursorcontroller.cpp
-}
+#unix:!mac:DEFINES += CURSOR_CONTROLLER
+#unix:!mac:CONFIG += CURSOR_CONTROLLER
+#contains(DEFINES, CURSOR_CONTROLLER)
+#{
+#    HEADERS += $$PWD/controller/cursorcontroller.h
+#    SOURCES += $$PWD/controller/cursorcontroller.cpp
+#}
 
 OTHER_FILES += \
     ../etc/NeTVServer.ini \
@@ -75,10 +67,6 @@ OTHER_FILES += \
     ../doc/example-response-chunked.txt \
     ../doc/example-request-get.txt \
     ../doc/example-request-file-upload.txt
-
-
-# Singleton & command line argument passing
-include(../lib/qtsingleapplication-2.6_1-opensource/src/qtsingleapplication.pri)
 
 include(../lib/bfHttpServer/src/bfHttpServer.pri)
 include(../lib/bfFlashPolicyServer/src/bfFlashpolicyserver.pri)

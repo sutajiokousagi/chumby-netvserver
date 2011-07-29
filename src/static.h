@@ -8,7 +8,6 @@
 #include "controller/staticfilecontroller.h"
 #include "controller/scriptcontroller.h"
 #include "controller/bridgecontroller.h"
-#include "controller/framebuffercontroller.h"
 
 #ifdef CURSOR_CONTROLLER
     #include "controller/cursorcontroller.h"
@@ -67,9 +66,6 @@ public:
 
     /** Controller for hardware bridge */
     static BridgeController* bridgeController;
-
-    /** Controller for framebuffer */
-    static FramebufferController* framebufferController;
 
     /** DBus monitor */
 #ifdef ENABLE_DBUS_STUFF

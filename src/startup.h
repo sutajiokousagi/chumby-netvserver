@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QByteArray>
 #include <QStringList>
-#include <QWSWindow>
 
 /** Name of this application */
 #define APPNAME "NeTVServer"
@@ -30,7 +29,6 @@ public:
 public slots:
 
     void receiveArgs(const QString &argsString);
-    void windowEvent ( QWSWindow * window, QWSServer::WindowEvent eventType );
 
 protected:
 

@@ -4,8 +4,8 @@
 #include <QDir>
 #include <QDebug>
 #include <QProcess>
-#include <QApplication>
-#include <QDesktopWidget>
+//#include <QApplication>
+//#include <QDesktopWidget>
 #include <QDateTime>
 
 #define BRIDGE_RETURN_STATUS_UNIMPLEMENTED  "0"
@@ -948,6 +948,7 @@ void BridgeController::slot_DeviceRemoved(QByteArray objPath)
     Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMDeviceRemoved</cmd><data><value>") + objPath + "</value></data></xml>", "netvbrowser");
 }
 
+#ifdef ENABLE_QWS_STUFF
 /** Custom keyboard filter */
 bool BridgeController::filter( int unicode, int keycode, int modifiers, bool isPress, bool autoRepeat )
 {
@@ -1026,3 +1027,4 @@ bool BridgeController::filter( int unicode, int keycode, int modifiers, bool isP
 
     return false;
 }
+#endif

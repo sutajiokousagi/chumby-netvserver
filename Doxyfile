@@ -4,8 +4,6 @@ OUTPUT_DIRECTORY       = doc
 JAVADOC_AUTOBRIEF      = YES
 QUIET                  = YES
 INPUT                  = src \
-                         lib/bfTemplateEngine/src \
-                         lib/bfLogging/src \
                          lib/bfHttpServer/src
 INPUT_ENCODING         = UTF-8
 RECURSIVE              = YES

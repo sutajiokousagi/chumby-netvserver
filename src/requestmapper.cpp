@@ -1,6 +1,5 @@
 #include "requestmapper.h"
 #include "static.h"
-#include "controller/templatecontroller.h"
 #include "controller/fileuploadcontroller.h"
 #include "controller/sessioncontroller.h"
 
@@ -26,10 +25,6 @@ void RequestMapper::service(HttpRequest& request, HttpResponse& response)
 
     else if (path.startsWith("/session")) {
         SessionController().service(request, response);
-    }
-
-    else if (path.startsWith("/framebuffer")) {
-        Static::framebufferController->service(request, response);
     }
 
     else if (path.startsWith("/scripts/")) {
