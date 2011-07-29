@@ -2,9 +2,12 @@
 
 
 case "$1" in
-	start)		
+	start)
+		# [Temp]
+		$(ifconfig lo up)
+
 		# start in the background so we don't hog the console
-		NeTVServer 2>&1 2> /dev/null&
+		NeTVServer 2> /dev/null &
 		;;
 
 	stop)
