@@ -93,23 +93,6 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No browser found</value></data>", true);
     }
 
-#ifdef ENABLE_QWS_STUFF
-    else if (cmdString == "REFRESH")
-    {
-        QWSServer::instance()->refresh();
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data></data>", true);
-    }
-#endif
-
-    /* Deprecated. Use generic command at the bottom
-    else if (cmdString == "GETXML")
-    {
-        QByteArray buffer = this->Execute(docroot + "/scripts/wget.sh", QStringList(dataString));
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
-        buffer = QByteArray();
-    }
-    */
-
     else if (cmdString == "GETURL")
     {
         QByteArray urlString = request.getParameter("url");
@@ -477,15 +460,6 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-#ifdef ENABLE_QWS_STUFF
-    else if (cmdString == "REFRESH")
-    {
-        QWSServer::instance()->refresh();
-        response.setCommand(cmdString);
-        response.write();
-    }
-#endif
-
     //-----------
     //Mostly from Android/iOS devices
 
@@ -580,7 +554,6 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     else if (cmdString == "SETNETWORK")
     {
         /*
-        qDebug() << "    wifi_ssid = " << request.getParameter("wifi_ssid");
         qDebug() << "    wifi_password = " << request.getParameter("wifi_password");
         qDebug() << "    wifi_authentication = " << request.getParameter("wifi_authentication");
         qDebug() << "    wifi_encryption = " << request.getParameter("wifi_encryption");
@@ -600,9 +573,11 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         bool fileOK = SetNetworkConfig(params);
         params.clear();
 
+        qDebug("NeTVServer: Receive network config for '%s'", request.getParameter("wifi_ssid").constData());
+
         QByteArray buffer;
-        if (!fileOK)        fprintf(stderr,"Error writing network config file\n");
-        else                fprintf(stderr,"Writing network config file OK\n");
+        if (!fileOK)        qDebug("Error writing network config file");
+        else                qDebug("Writing network config file OK");
         if (!fileOK)        buffer = this->GetFileContents(BRIDGE_NETWORK_CONFIG);
         else                buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
         response.setCommand(cmdString);
@@ -947,84 +922,3 @@ void BridgeController::slot_DeviceRemoved(QByteArray objPath)
     qDebug() << "BridgeController: [NMDeviceRemoved] " << objPath;
     Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMDeviceRemoved</cmd><data><value>") + objPath + "</value></data></xml>", "netvbrowser");
 }
-
-#ifdef ENABLE_QWS_STUFF
-/** Custom keyboard filter */
-bool BridgeController::filter( int unicode, int keycode, int modifiers, bool isPress, bool autoRepeat )
-{
-    //Return 'true' if a given key event should be stopped from being processed any further; otherwise it should return false.
-
-    static qint64 up = 0,down = 0,left = 0,right = 0,center = 0,cpanel = 0,widget = 0,hidden1 = 0, hidden2 = 0;
-    static qint64 longClickThresholdMs1 = 3000;
-    qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
-
-    //autoRepeat doesn't work with current IR driver
-
-    //Normal press down
-    if (isPress && !autoRepeat)
-    {
-        switch (keycode)
-        {
-            case Qt::Key_Up:                up = currentEpochMs;
-                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>up</value></data></xml>"), "netvbrowser");
-                return true;
-            case Qt::Key_Down:              down = currentEpochMs;
-                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>down</value></data></xml>"), "netvbrowser");
-                return true;
-            case Qt::Key_Left:              left = currentEpochMs;
-                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>left</value></data></xml>"), "netvbrowser");
-                return true;
-            case Qt::Key_Right:             right = currentEpochMs;
-                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>right</value></data></xml>"), "netvbrowser");
-                return true;
-
-            case Qt::Key_Enter:
-            case Qt::Key_Return:            center = currentEpochMs;
-                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>center</value></data></xml>"), "netvbrowser");
-                return true;
-            case Qt::Key_PageUp:            cpanel = currentEpochMs;
-                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>cpanel</value></data></xml>"), "netvbrowser");
-                return true;
-            case Qt::Key_PageDown:          widget = currentEpochMs;
-                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>widget</value></data></xml>"), "netvbrowser");
-                return true;
-
-            case Qt::Key_1:                 hidden1 = currentEpochMs;
-                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>reset</value></data></xml>"), "netvbrowser");
-                return true;
-            case Qt::Key_2:                 hidden2 = currentEpochMs;
-                Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>reset</value></data></xml>"), "netvbrowser");
-                return true;
-
-            default:
-                qDebug("BridgeController: [keyboard filter] ignored  0x%x", keycode);
-                break;
-        }
-    }
-
-    //Normal release (check for long-press)
-    if (!isPress && !autoRepeat)
-    {
-        switch (keycode)
-        {
-            case Qt::Key_PageUp:
-                if (cpanel >= 0 && currentEpochMs - cpanel > longClickThresholdMs1) {
-                    qDebug("BridgeController: [keyboard filter] long-press ControlPanel key (%lldms)", currentEpochMs-cpanel);
-                    Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>reset</value></data></xml>"), "netvbrowser");
-                }
-                cpanel = 0;
-                return true;
-
-            case Qt::Key_PageDown:
-                if (widget >= 0 && currentEpochMs - widget > longClickThresholdMs1) {
-                    qDebug("BridgeController: [keyboard filter] long-press Widget key (%lldms)", currentEpochMs-cpanel);
-                    Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>RemoteControl</cmd><data><value>reset</value></data></xml>"), "netvbrowser");
-                }
-                widget = 0;
-                return true;
-        }
-    }
-
-    return false;
-}
-#endif
