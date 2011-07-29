@@ -1,4 +1,4 @@
 #!/bin/sh
 
 content=$(wget $1 -q -O - )
-echo $content
+echo "<value>${content}</value>"
