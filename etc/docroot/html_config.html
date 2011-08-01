@@ -1,26 +1,71 @@
 <html>
 <head>
 <title>NeTV Configuration</title>
-<script type='text/javascript' src='./html_remote/browser_detect.js'></script>
-<script type='text/javascript' src='./html_remote/remote.js'></script>
-<script language="javascript">
-	function onLoad()
-	{
-		document.all.browserDetect_browser.innerHTML = "Browser: " + BrowserDetect.browser;
-		document.all.browserDetect_version.innerHTML = "Version: " + BrowserDetect.version;
-		document.all.browserDetect_os.innerHTML = "OS: " + BrowserDetect.OS;
-	}
-</script>
-<style>
-	body {
-		font-family: Verdana;
-		margin: 0px;
-		background-color: #444444;
-		color: #EEEEEE;
-	}
-</style>
+<link rel="stylesheet" href="html_config/config.css" type="text/css">
+<script type='text/javascript' src='html_config/jquery-1.6.1.min.js'></script>
+<script type='text/javascript' src='html_config/utils.js'></script>
+<script type='text/javascript' src='html_config/cNetConfig.js'></script>
+<script type='text/javascript' src='html_config/html.js'></script>
 </head>
-<body>
-		
+<body onload="onLoad();">
+				
+<div id="div_all" style="width: 100%; height: 100%; overflow: hidden;">
+
+	<div class="div_center_wrapper">
+		<div class="div_center_container">
+			
+			<!-- ------------------------ header ----------------------- -->
+			<div style="float: top; width: 48px; height: 48px; background-image: url('./images/chumby_logo_48x48.png'); background-repeat: no-repeat;"></div>
+			
+			<!-- ----------------------- loading icon ---------------------- -->
+			<div id="div_loadingMain">
+				<div style="float: top;">Scanning for wifi networks...</div>
+				<img src="./images/gif-loading.gif">
+			</div>
+			
+			<!-- ----------------------- wifi list module ---------------------- -->
+			<div id="div_wifiListMain">
+				<div style="float: left;">Select a wifi network</div>
+				<div id="div_wifiListMain_list">
+					<!-- wifi list elements will be inserted here -->
+				</div>				
+			</div>
+
+			<!-- ----------------------- wifi credentials module ---------------------- -->
+			<div id="div_wifiDetailsMain">
+				<div style="float: top;">Enter wifi credentials</div>
+				<div style="float: top;">SSID <input type="text" id="wifi_ssid"></div>
+				<div style="float: top;">Password <input type="text" id="wifi_password"></div>
+				<div style="float: top; clear: both;">
+					<div style="float: left;"><img src="html_config/back.png"></div>
+					<div style="float: right;"><img src="html_config/next.png"></div>
+				</div>
+			</div>
+			
+			<!-- ----------------------- loading icon ---------------------- -->
+			<div id="div_activationMain">
+				<div style="float: top;">Configuring the network. Please wait...</div>
+				<img src="./images/gif-loading.gif">
+			</div>
+
+			<!-- ----------------------- chumby account module ---------------------- -->
+			<!--
+			<div id="div_startup" style="width: 800px; height: 600px; background-color: #EEEEFF; overflow: hidden; margin: 0px auto;">
+				<div id="div_startup_logo" style="position: absolute; top: 250px; left: 240px; width: 300px; height: 98px;">
+					<img src="./images/chumby_logo_300x98.png" width="100%" height="100%">
+				</div>
+				
+				<div style="position: absolute; top: 300px; left: 320px;">
+
+				
+				</div>
+			</div>
+			-->
+			
+		</div>
+    </div>
+
+</div>
+
 </body>
 </html>

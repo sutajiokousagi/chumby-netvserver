@@ -1,0 +1,133 @@
+/*-----------------------------
+RESET STYLES
+-----------------------------*/
+
+html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6
+{
+	margin:0;
+	padding:0;
+	-webkit-text-size-adjust:none;
+}
+body
+{
+	font-size: 10px;
+}
+ul, li, ol, dl, dd, dt
+{
+	list-style:none;
+	padding:0;
+	margin:0;
+}
+a
+{
+	text-decoration:none;
+}
+
+/*-----------------------------
+	BASIC PAGE STYLING
+-----------------------------*/
+
+body
+{
+	/*background-color: #F000F0;	//browser background will take care of this*/
+}
+input
+{
+	background-color: #EEEEFF;
+}
+p
+{
+	font-size:12px;
+	padding-bottom:8px;
+}
+a
+{
+	color:#fff000;
+	text-decoration:none;
+}
+
+/*-----------------------------
+	BASIC LAYOUT
+-----------------------------*/
+
+.div_center_wrapper, .div_center_container {
+	width: 400px;
+	height: 500px;
+}
+.div_center_wrapper {
+	bottom: 50%;
+	right: 50%;
+	position: absolute;
+}
+.div_center_container {
+	left: 50%;
+	position: relative;
+	top: 50%;
+	border: 2px solid #000000;
+	background-color: #EEEEFF;
+}
+
+/*-----------------------------
+	Wifi List
+-----------------------------*/
+
+#div_wifiListMain, #div_wifiDetailsMain, #div_accountDetailsMain, #div_activationMain
+{
+	position:absolute;
+}
+
+.div_wifiListItem_normal , .div_wifiListItem_selected {
+	height: 30px;
+	width: 320px;
+	margin: 0 auto;
+	float:top;
+	clear: both;
+	text-align: center;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+.div_wifiListItem_ssid {
+	float:left;
+	font-size: 14px;
+	font-weight: bold;
+	margin-top: 8px;
+}
+.div_wifiListItem_normal {
+	border-top: 1px solid #CCCCCC;
+}
+.div_wifiListItem_selected {
+	border: 1px solid #00b0f0;
+	background-color: #00b0f0;
+}
+
+/*-----------------------------
+	ORIENTATION CLEVERNESS
+-----------------------------*/
+
+#content_left,
+#content_right,
+#content_normal,
+#content_flipped
+{
+	display:none;
+}
+
+.show_normal,
+.show_flipped
+{
+	width: 100%;
+}
+.show_left,
+.show_right
+{
+	width: 100%;
+}
+
+/* .show_flipped #content_flipped */
+.show_left #content_left,
+.show_right #content_right,
+.show_normal #content_normal,
+.show_flipped #content_normal
+{
+	display: block;
+}
