@@ -29,8 +29,8 @@ SOURCES = main.cpp \
     controller/sessioncontroller.cpp
 
 # DBus support
-#message("DBus enabled")
-#QT += dbus
+message("DBus enabled")
+QT += dbus
 
 # Shell script execution (cgi-like)
 HEADERS += $$PWD/controller/scriptcontroller.h
