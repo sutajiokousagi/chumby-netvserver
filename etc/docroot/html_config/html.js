@@ -1,14 +1,22 @@
 var mNetConfig;
 var selectedSSID;
 var currentWifiList;
+var wifiScanTimer;
+
+var activationState;
+var activationTimer;
+var activationTime;
 
 function onLoad()
 {
 	mNetConfig = cNetConfig.fGetInstance();
 	mNetConfig.fInit();
 	mNetConfig.wifiScanCallback = updateWifiList;
+	mNetConfig.helloCallback = helloCallback;
 	
 	selectedSSID = 'ChumbyTest';
+	activationState = '';
+	activationTimer = null;
 	
 	$("#div_loadingMain").fadeIn(0);
 	$("#div_wifiListMain").fadeOut(0);
@@ -16,13 +24,40 @@ function onLoad()
 	$("#div_activationMain").fadeOut(0);
 
 	//Load later
-	setTimeout("onLoadLater()", 300);	
+	wifiScanTimer = setTimeout("onLoadLater()", 300);	
 }
 
 function onLoadLater()
 {
 	mNetConfig.WifiScan();
+	resetWifiScanTimer();
 }
+
+function resetWifiScanTimer()
+{
+	clearTimeout(wifiScanTimer);
+	wifiScanTimer = setTimeout("onLoadLater()", 30000);
+}
+
+function startActivation()
+{
+	activationTime = new Date();
+	activationState = 'waiting';
+	resetActivationTimer();
+}
+
+function stopActivation()
+{
+	activationState = '';
+	clearTimeout(activationTimer);
+}
+
+function resetActivationTimer()
+{
+	clearTimeout(activationTimer);
+	activationTimer = setTimeout("onActivationTimer()", 5000);
+}
+
 
 //-----------------------------------------------------------
 
@@ -39,6 +74,8 @@ function updateWifiList(wifiListArray)
 	otherWifi['ch'] = "";
 	otherWifi['encryption'] = "NONE";
 	otherWifi['auth'] = "OPEN";
+	otherWifi['lvl'] = "";
+	otherWifi['qty'] = "";
 	currentWifiList['Other...'] = otherWifi;
 	
 	refreshWifiList();
@@ -51,12 +88,14 @@ function refreshWifiList()
 	//Clear the list
 	$('#div_wifiListMain_list').html('');
 	
-	for (var ssid in currentWifiList)
+	for (var objectIndex in currentWifiList)
 	{
-		var oneWifiData = currentWifiList[ssid];
+		var oneWifiData = currentWifiList[objectIndex];
 		if (oneWifiData == null)
 			continue;
-
+		var ssid = oneWifiData['ssid'];
+		
+		//Select one by default
 		if (selectedSSID == '')
 			selectedSSID = ssid;
 		
@@ -70,9 +109,20 @@ function refreshWifiList()
 		
 		//the rest
 		div_string += '<div style="float:right">';
-		if (oneWifiData['ch'] != '')				div_string += 'Channel ' + oneWifiData['ch'];
-		if (oneWifiData['encryption'] != 'NONE')	div_string += '<img src="html_config/lock.png">';
+		//if (oneWifiData['ch'] != '')				div_string += 'Channel ' + oneWifiData['ch'];	
+
+		//encryption
 		if (oneWifiData['encryption'] != 'NONE')	div_string += oneWifiData['encryption'];
+		if (oneWifiData['encryption'] != 'NONE')	div_string += '<img src="html_config/lock.png">';
+		
+		//signal level (magic number)
+		if (oneWifiData['lvl'] != '')
+		{
+			var lvl = 3 - Math.round( (parseInt(oneWifiData['lvl'])+19) / (-20) );
+			if (lvl < 0) 		lvl = 0;
+			div_string += '<img src="html_config/wifi' + lvl + '.png">';
+		}
+		
 		div_string += '</div></div>';
 		$("#div_wifiListMain_list").append(div_string);
 	}
@@ -83,11 +133,13 @@ function onRemoteControl(vButtonName)
 	if (vButtonName == "up")
 	{
 		var previousSSID = "";
-		for (var ssid in currentWifiList)
+		for (var objectIndex in currentWifiList)
 		{
-			var oneWifiData = currentWifiList[ssid];
+			var oneWifiData = currentWifiList[objectIndex];
 			if (oneWifiData == null)
 				continue;
+			var ssid = oneWifiData['ssid'];
+			
 			if (ssid == selectedSSID)
 				break;
 			previousSSID = ssid;
@@ -96,15 +148,17 @@ function onRemoteControl(vButtonName)
 			selectedSSID = previousSSID;
 			
 		refreshWifiList();
+		resetWifiScanTimer();
 	}
 	else if (vButtonName == "down")
 	{
 		var found = false;
-		for (var ssid in currentWifiList)
+		for (var objectIndex in currentWifiList)
 		{
-			var oneWifiData = currentWifiList[ssid];
+			var oneWifiData = currentWifiList[objectIndex];
 			if (oneWifiData == null)
 				continue;
+			var ssid = oneWifiData['ssid'];
 
 			if (found == true) {
 				selectedSSID = ssid;
@@ -116,14 +170,17 @@ function onRemoteControl(vButtonName)
 				found = true;
 		}
 		refreshWifiList();
+		resetWifiScanTimer();
 	}
 	else if (vButtonName == "center")
 	{
 		if (selectedSSID == "")
 			return;
-		var oneWifiData = currentWifiList[selectedSSID];
+		var oneWifiData = mNetConfig.getWifiData(selectedSSID);
 		if (oneWifiData == null)
 			return;
+			
+		clearTimeout(wifiScanTimer);
 				
 		$("#div_wifiListMain").fadeOut(800);
 		if (selectedSSID == "Other...")
@@ -136,6 +193,8 @@ function onRemoteControl(vButtonName)
 		else if (oneWifiData['encryption'] == 'NONE')
 		{
 			$("#div_activationMain").fadeIn(800);
+			mNetConfig.SetNetwork(selectedSSID, '');
+			startActivation();
 		}
 		else
 		{
@@ -147,7 +206,53 @@ function onRemoteControl(vButtonName)
 	}
 }
 
+function onActivationTimer()
+{
+	//not performing activation
+	if (activationState == '') {
+		stopActivation();
+		return;
+	}
+	
+	resetActivationTimer();
+	if (activationState == "waiting")
+		mNetConfig.Hello();
+}
 
+function helloCallback(helloData)
+{
+	//not performing activation
+	if (activationState == '' || helloData == null)
+		return;
+	
+	var internet = helloData['internet'];
+	var ip = helloData['ip'];
+	var secondsSinceActivation = ((new Date()).getTime() - activationTime.getTime())/1000;
+	
+	//Taking too long
+	if (secondsSinceActivation > 60)
+	{
+		stopActivation();
+		$("#div_activationStatus").append("<br>Taking too long. Give up!");
+		//Revert to ap_mode. How?
+		return;
+	}
+	
+	if (ip == '')
+	{
+		$("#div_activationStatus").append("<br>still waiting...");
+	}
+	else if (activationState == "waiting")
+	{
+		if (internet != 'true' && internet != true)
+			return;
+			
+		$("#div_activationStatus").append("<br>Network configured!");
+		$("#div_activationStatus").append("<br>" + ip);
+		stopActivation();
+		location.href="http://localhost/";
+	}
+}
 
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -170,13 +275,53 @@ function fServerReset()
 function fButtonPress( vButtonName )
 {
 	onRemoteControl(vButtonName);
-	mNetConfig.onRemoteControl(vButtonName);
+	//mNetConfig.onRemoteControl(vButtonName);
 }
 
-function fNetworkEvent(	vEventName )
+// -------------------------------------------------------------------------------------------------
+//	events from HDMI/FPGA
+// -------------------------------------------------------------------------------------------------
+function fHDMIEvents( vEventName )
 {
+	//To be decided
+	if (vEventName == "unsupported");
+	if (vEventName == "attach");
+	if (vEventName == "detach");
+	if (vEventName == "trigger");
+}
+
+// -------------------------------------------------------------------------------------------------
+//	events from DBus/NetworkManager
+// -------------------------------------------------------------------------------------------------
+function fNMStateChanged( vEventName )
+{
+	//not performing activation, don't care
+	if (activationState == '')
+		return;
+	$("#div_activationStatus").append("<br>" + vEventName);
+	
 	switch (vEventName)
 	{
-		case "disconnected": mNetConfig.fOnSignal(cConst.SIGNAL_NETWORKEVENT_DISCONNECTED); break;
+		case "unknown":			break;
+		case "sleeping":		break;
+		case "connecting":		break;
+		case "disconnected":	break;
+		case "connected":		break;
 	}
+}
+
+function fNMDeviceAdded(  )
+{
+	//Switching back FROM Access Point mode
+	//not performing activation, don't care
+	if (activationState == '')
+		return;
+}
+
+function fNMDeviceRemoved(  )
+{
+	//Switching TO Access Point mode
+	//not performing activation, don't care
+	if (activationState == '')
+		return;
 }

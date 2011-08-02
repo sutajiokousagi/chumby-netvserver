@@ -20,7 +20,12 @@
 			<!-- ----------------------- loading icon ---------------------- -->
 			<div id="div_loadingMain">
 				<div style="float: top;">Scanning for wifi networks...</div>
-				<img src="./images/gif-loading.gif">
+				
+				<div class="div_center_wrapper" style="width:100px; height:100px; border: 0px;">
+					<div class="div_center_container" style="width:100px; height:100px; border: 0px;">
+						<img src="./images/gif-loading.gif">
+					</div>
+				</div>
 			</div>
 			
 			<!-- ----------------------- wifi list module ---------------------- -->
@@ -42,10 +47,18 @@
 				</div>
 			</div>
 			
-			<!-- ----------------------- loading icon ---------------------- -->
+			<!-- ----------------------- activation module ---------------------- -->
 			<div id="div_activationMain">
-				<div style="float: top;">Configuring the network. Please wait...</div>
-				<img src="./images/gif-loading.gif">
+				<div style="float: top;">Configuring the network.</div>
+				<div style="float: top;" id="div_activationStatus">Please wait...</div>
+				
+				<!--
+				<div class="div_center_wrapper" style="width:100px; height:100px; border: 0px;">
+					<div class="div_center_container" style="width:100px; height:100px; border: 0px;">
+						<img src="./images/gif-loading.gif">
+					</div>
+				</div>
+				-->
 			</div>
 
 			<!-- ----------------------- chumby account module ---------------------- -->

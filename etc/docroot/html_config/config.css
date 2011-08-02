@@ -34,6 +34,7 @@ body
 input
 {
 	background-color: #EEEEFF;
+	border: 1px solid #00b0f0
 }
 p
 {
@@ -63,7 +64,6 @@ a
 	left: 50%;
 	position: relative;
 	top: 50%;
-	border: 2px solid #000000;
 	background-color: #EEEEFF;
 }
 
