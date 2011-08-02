@@ -7,11 +7,11 @@ case "$1" in
 		$(ifconfig lo up)
 
 		# start in the background so we don't hog the console
-		NeTVServer 2> /dev/null &
+		NeTVServer > /dev/null 2>&1 &
 		;;
 
 	stop)
-		killall NeTVServer 2> /dev/null
+		killall NeTVServer > /dev/null 2>&1 &
 		;;
 
 	restart)
