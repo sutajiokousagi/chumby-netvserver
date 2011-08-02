@@ -134,7 +134,7 @@ sub handleQuality ()
     @qualArr = split(" ", $qual);
 
     $quality = (split("=", $qualArr[0]))[1];
-    $sigLvl = (split("=", $qualArr[2]))[1] . "dBm";
+    $sigLvl = (split("=", $qualArr[2]))[1];
 }
 
 sub handleKey ()
