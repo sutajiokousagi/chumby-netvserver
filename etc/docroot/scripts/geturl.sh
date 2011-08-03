@@ -6,9 +6,9 @@
 #
 
 content=''
-if [ -z $2 ]; then
+if [ -z "${2}" ]; then
 	content=$(curl $1)
 else
-	content=$(curl -d $2 $1)
+	content=$(curl -d "$2" $1)
 fi
 echo $content
