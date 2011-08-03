@@ -1,0 +1,41 @@
+/*-----------------------------
+RESET STYLES
+-----------------------------*/
+
+html, body
+{
+	margin:0;
+	padding:0;
+}
+
+/*-----------------------------
+	BASIC LAYOUT
+-----------------------------*/
+
+.header_logo_chumby {
+	float: top;
+	width: 180px;
+	height: 119px;
+	padding: 30px;
+	background-image: url('../images/chumby_logo_180x119.jpg');
+	background-repeat: no-repeat;
+	background-position:center; 
+}
+
+.div_center_wrapper, .div_center_container {
+	width: 240px;
+	height: 340px;
+}
+.div_center_wrapper {
+	bottom: 50%;
+	right: 50%;
+	position: absolute;
+	text-align: center;
+}
+.div_center_container {
+	left: 50%;
+	position: relative;
+	top: 50%;
+	background-color: #FFFFFF;
+	text-align: center;
+}
