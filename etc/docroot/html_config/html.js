@@ -9,6 +9,8 @@ var activationTime;
 
 function onLoad()
 {
+	keyboard_init();
+	
 	mNetConfig = cNetConfig.fGetInstance();
 	mNetConfig.fInit();
 	mNetConfig.wifiScanCallback = updateWifiList;
@@ -130,6 +132,8 @@ function refreshWifiList()
 
 function onRemoteControl(vButtonName)
 {
+	keyboard_onRemoteControl(vButtonName);
+	
 	if (vButtonName == "up")
 	{
 		var previousSSID = "";

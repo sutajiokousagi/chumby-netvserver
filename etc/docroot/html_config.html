@@ -2,9 +2,11 @@
 <head>
 <title>NeTV Configuration</title>
 <link rel="stylesheet" href="html_config/config.css" type="text/css">
+<link rel="stylesheet" href="html_config/keyboard.css" type="text/css">
 <script type='text/javascript' src='html_config/jquery-1.6.1.min.js'></script>
 <script type='text/javascript' src='html_config/utils.js'></script>
 <script type='text/javascript' src='html_config/cNetConfig.js'></script>
+<script type='text/javascript' src='html_config/keyboard.js'></script>
 <script type='text/javascript' src='html_config/html.js'></script>
 </head>
 <body onload="onLoad();">
@@ -41,9 +43,59 @@
 				<div style="float: top;">Enter wifi credentials</div>
 				<div style="float: top;">SSID <input type="text" id="wifi_ssid"></div>
 				<div style="float: top;">Password <input type="text" id="wifi_password"></div>
-				<div style="float: top; clear: both;">
-					<div style="float: left;"><img src="html_config/back.png"></div>
-					<div style="float: right;"><img src="html_config/next.png"></div>
+				<div style="float: top;" id="keyboard">
+					<div style="float: top;">
+						<div class="mac_key" id="key_a">a</div>
+						<div class="mac_key" id="key_b">b</div>
+						<div class="mac_key" id="key_c">c</div>
+						<div class="mac_key" id="key_d">d</div>
+						<div class="mac_key" id="key_e">e</div>
+						<div class="mac_key" id="key_f">f</div>
+						<div class="mac_key" id="key_g">g</div>
+						<div class="mac_key" id="key_h">h</div>
+						<div class="mac_key" id="key_i">i</div>					
+					</div>
+					<div style="float: top;">
+						<div class="mac_key" id="key_j">j</div>
+						<div class="mac_key" id="key_k">k</div>
+						<div class="mac_key" id="key_l">l</div>
+						<div class="mac_key" id="key_m">m</div>
+						<div class="mac_key" id="key_n">n</div>
+						<div class="mac_key" id="key_o">o</div>
+						<div class="mac_key" id="key_p">p</div>
+						<div class="mac_key" id="key_q">q</div>
+						<div class="mac_key" id="key_r">r</div>					
+					</div>
+					<div style="float: top;">
+						<div class="mac_key" id="key_s">s</div>
+						<div class="mac_key" id="key_t">t</div>
+						<div class="mac_key" id="key_u">u</div>
+						<div class="mac_key" id="key_v">v</div>
+						<div class="mac_key" id="key_w">w</div>
+						<div class="mac_key" id="key_x">x</div>
+						<div class="mac_key" id="key_y">y</div>
+						<div class="mac_key" id="key_z">z</div>
+						<div class="mac_key" id="key_0">0</div>					
+					</div>
+					<div style="float: top;">
+						<div class="mac_key" id="key_1">1</div>
+						<div class="mac_key" id="key_2">2</div>
+						<div class="mac_key" id="key_3">3</div>
+						<div class="mac_key" id="key_4">4</div>
+						<div class="mac_key" id="key_5">5</div>
+						<div class="mac_key" id="key_6">6</div>
+						<div class="mac_key" id="key_7">7</div>
+						<div class="mac_key" id="key_8">8</div>					
+						<div class="mac_key" id="key_9">9</div>
+					</div>
+					<div style="float: top;">
+						<div class="mac_key" id="key_back">Back</div>
+						<div class="mac_key" id="key_special">.@#</div>
+						<div class="mac_key" id="key_shift">sh</div>
+						<div class="mac_key" id="key_space">space</div>
+						<div class="mac_key" id="key_backspace"><--</div>
+						<div class="mac_key" id="key_next">Next</div>
+					</div>
 				</div>
 			</div>
 			

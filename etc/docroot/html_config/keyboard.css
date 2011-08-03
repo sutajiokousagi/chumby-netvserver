@@ -1,0 +1,24 @@
+/*-----------------------------
+	Keyboard
+-----------------------------*/
+
+.mac_key , .mac_key_selected {
+	width: 54px;
+	height: 53px;
+	float:left;
+	line-height: 50px;
+	text-align: center;
+	background-repeat: no-repeat;
+	border: 0;
+	font-size: 18;
+	font-weight: bold;
+	font-family: Dejavu;		/* default Qt font */
+}
+.mac_key {
+	background-image: url('key.png');
+	color: #808080
+}
+.mac_key_selected {
+	background-image: url('key_selected.png');
+	color: #000000
+}
