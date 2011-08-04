@@ -34,7 +34,15 @@ body
 input
 {
 	background-color: #EEEEFF;
-	border: 1px solid #00b0f0
+	border: 2px solid #808080
+}
+.input_focus
+{
+	border: 2px solid #00b0f0
+}
+.input_focus_error
+{
+	border: 2px solid #ff0000
 }
 p
 {
@@ -97,6 +105,21 @@ a
 }
 .div_wifiListItem_selected {
 	border: 1px solid #00b0f0;
+	background-color: #00b0f0;
+}
+
+.div_wifiDetailsItem_normal , .div_wifiDetailsItem_selected {
+	margin: 0 auto;
+	float:top;
+	text-align: center;
+	padding-left: 5px;
+	padding-right: 5px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+.div_wifiDetailsItem_normal {
+}
+.div_wifiDetailsItem_selected {
 	background-color: #00b0f0;
 }
 

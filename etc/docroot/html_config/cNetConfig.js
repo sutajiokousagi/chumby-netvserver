@@ -58,6 +58,18 @@ cNetConfig.prototype.Hello = function ()
 	xmlhttpPost("", "post", { 'cmd' : 'Hello' }, cNetConfig.instance.rawHelloCallback );
 }
 
+cNetConfig.prototype.StartAP = function ()
+{
+	fDbg2("Starting Access Point mode...");
+	xmlhttpPost("", "post", { 'cmd' : 'start_ap' }, null );
+}
+
+cNetConfig.prototype.StopAP = function ()
+{
+	fDbg2("Stopping Access Point mode...");
+	xmlhttpPost("", "post", { 'cmd' : 'stop_ap' }, null );
+}
+
 cNetConfig.prototype.SetNetwork = function (ssid, key, encryption, auth)
 {
 	var param = [];
@@ -78,6 +90,7 @@ cNetConfig.prototype.SetNetwork = function (ssid, key, encryption, auth)
 		param['wifi_auth'] = oneWifiData['auth'];
 		param['wifi_encryption'] = oneWifiData['encryption'];
 		param['wifi_password'] = oneWifiData['ssid'];
+		if (key != null && key != '')					param['wifi_password'] = key;
 	}
 	
 	fDbg2("Setting network config...");

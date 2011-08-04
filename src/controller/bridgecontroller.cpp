@@ -375,32 +375,6 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     QByteArray cmdString = request.getCommand().toUpper();
     QByteArray dataString = request.getParameter("value").trimmed();
 
-    /* Deprecated. Use generic command at the bottom
-    if (cmdString == "HELLO")
-    {
-        //The type of connection is already handled by the TcpSocketServer, but we do post-processing here
-        //QByteArray hardwareType = request.getParameter("value");
-
-        //Returning GUID, DCID, HWver, SWver, etc.
-        QByteArray buffer = this->Execute(docroot + "/scripts/hello.sh", QStringList(dataString));
-        response.setCommand(cmdString);
-        response.setParameter("data", buffer.trimmed());
-        response.write();
-    }
-
-    else if (cmdString == "INITIALHELLO")
-    {
-        //This is identical to 'Hello' command except that it will switch to Acces Point mode if necessary
-        //To be called only once by JavaScriptCore
-
-        //Returning GUID, DCID, HWver, SWver, etc.
-        QByteArray buffer = this->Execute(docroot + "/scripts/initial_hello.sh", QStringList(dataString));
-        response.setCommand(cmdString);
-        response.setParameter("data", buffer.trimmed());
-        response.write();
-    }
-    */
-
     if (cmdString == "SETURL")
     {
         //Send it straight to browser
@@ -419,27 +393,6 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
     //-----------
     //Mostly from Android/iOS devices
-
-    /* Deprecated. Use generic command at the bottom
-    else if (cmdString == "WIDGETENGINE")
-    {
-        QByteArray buffer = this->Execute(docroot + "/scripts/widget_engine.sh", QStringList(dataString));
-        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
-        response.setParameter("value", buffer.trimmed());
-        response.write();
-        buffer = QByteArray();
-    }
-
-    else if (cmdString == "CONTROLPANEL")
-    {
-        QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
-
-        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
-        response.setParameter("value", buffer.trimmed());
-        response.write();
-        buffer = QByteArray();
-    }
-    */
 
     else if (cmdString == "REMOTECONTROL")
     {

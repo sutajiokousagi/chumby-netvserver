@@ -7,6 +7,9 @@ var activationState;
 var activationTimer;
 var activationTime;
 
+var selection_currentX;
+var selection_currentY;
+
 function onLoad()
 {
 	keyboard_init();
@@ -16,7 +19,7 @@ function onLoad()
 	mNetConfig.wifiScanCallback = updateWifiList;
 	mNetConfig.helloCallback = helloCallback;
 	
-	selectedSSID = 'ChumbyTest';
+	selectedSSID = '';
 	activationState = '';
 	activationTimer = null;
 	
@@ -29,6 +32,14 @@ function onLoad()
 	wifiScanTimer = setTimeout("onLoadLater()", 300);	
 }
 
+function initWifiDetails()
+{
+	selection_currentX = 0;
+	selection_currentY = 0;
+}
+
+//-----------------------------------------------------------
+
 function onLoadLater()
 {
 	mNetConfig.WifiScan();
@@ -37,8 +48,13 @@ function onLoadLater()
 
 function resetWifiScanTimer()
 {
-	clearTimeout(wifiScanTimer);
+	stopWifiScan();
 	wifiScanTimer = setTimeout("onLoadLater()", 30000);
+}
+
+function stopWifiScan()
+{
+	clearTimeout(wifiScanTimer);
 }
 
 function startActivation()
@@ -71,6 +87,7 @@ function updateWifiList(wifiListArray)
 	}
 	currentWifiList = wifiListArray;
 	
+	/*
 	var otherWifi = new Array();
 	otherWifi['ssid'] = "Other...";
 	otherWifi['ch'] = "";
@@ -79,6 +96,7 @@ function updateWifiList(wifiListArray)
 	otherWifi['lvl'] = "";
 	otherWifi['qty'] = "";
 	currentWifiList['Other...'] = otherWifi;
+	*/
 	
 	refreshWifiList();
 	$("#div_loadingMain").fadeOut(800);
@@ -130,10 +148,17 @@ function refreshWifiList()
 	}
 }
 
+//-----------------------------------------------------------
+
 function onRemoteControl(vButtonName)
 {
-	keyboard_onRemoteControl(vButtonName);
-	
+	if ( $("#div_wifiListMain").is(":visible") )				onRemoteControlWifiList(vButtonName);
+	else if ( $("#div_wifiDetailsMain").is(":visible") )		onRemoteControlWifiDefails(vButtonName);
+	else if ( $("#div_activationMain").is(":visible") )			onRemoteControlActivation(vButtonName);
+}
+
+function onRemoteControlWifiList(vButtonName)
+{
 	if (vButtonName == "up")
 	{
 		var previousSSID = "";
@@ -166,7 +191,6 @@ function onRemoteControl(vButtonName)
 
 			if (found == true) {
 				selectedSSID = ssid;
-				//$("#wifi_item_'"+ssid+"'")
 				break;
 			}
 		
@@ -184,15 +208,16 @@ function onRemoteControl(vButtonName)
 		if (oneWifiData == null)
 			return;
 			
-		clearTimeout(wifiScanTimer);
+		stopWifiScan();
 				
 		$("#div_wifiListMain").fadeOut(800);
 		if (selectedSSID == "Other...")
 		{
 			$("#div_wifiDetailsMain").fadeIn(800);
-			$("#wifi_ssid").val('');
 			$("#wifi_password").val('');
-			$("#wifi_ssid").focus();
+			$("#wifi_ssid").val('');
+			selection_currentY = 0;
+			onRemoteControlWifiDefails("center");
 		}
 		else if (oneWifiData['encryption'] == 'NONE')
 		{
@@ -202,12 +227,95 @@ function onRemoteControl(vButtonName)
 		}
 		else
 		{
+			$("#div_wifiDetailsMain").fadeIn(800);
 			$("#wifi_ssid").val(selectedSSID);
 			$("#wifi_password").val('');
-			$("#wifi_password").focus();
-			$("#div_wifiDetailsMain").fadeIn(800);
+			selection_currentY = 1;
+			onRemoteControlWifiDefails("center");
 		}
 	}
+}
+
+function onRemoteControlWifiDefails(vButtonName)
+{
+	var newY = selection_currentY;
+	if (newY == 0)
+	{
+		if (vButtonName == "up")			newY = 0;
+		else if (vButtonName == "down")		newY++;
+		else if (vButtonName == "center")
+		{
+			$("#wifi_password").blur();
+			$("#wifi_password").removeClass("input_focus");
+			$("#wifi_ssid").focus();
+			$("#wifi_ssid").addClass("input_focus");
+		}
+	}
+	else if (newY == 1)
+	{
+		if (vButtonName == "up")			newY--;
+		else if (vButtonName == "down")		newY++;
+		else if (vButtonName == "center")
+		{
+			$("#wifi_ssid").blur();
+			$("#wifi_ssid").removeClass("input_focus");
+			$("#wifi_password").focus();
+			$("#wifi_password").addClass("input_focus");
+		}
+	}
+	else if (newY == 2)
+	{
+		var focusElement = $("#wifi_ssid").hasClass("input_focus") ? "wifi_ssid" : "wifi_password";
+		var returnFocus = keyboard_onRemoteControl(vButtonName, focusElement);
+		if (returnFocus)
+		{
+			if (vButtonName == "down")			newY++;
+			else if (vButtonName == "up")		newY--;
+		}
+	}
+	else if (newY == 3)
+	{
+		if (vButtonName == "down")			newY = 3;
+		else if (vButtonName == "up")		newY--;
+		else if (vButtonName == "center")
+		{
+			selectedSSID = $("#wifi_ssid").val();
+			var password = $("#wifi_password").val();
+			
+			//Validate input fields
+			if (selectedSSID == "") {
+				selection_currentY = 0;
+				onRemoteControlWifiDefails("center");
+				$("#wifi_password").addClass("input_focus_error");
+				return;
+			}
+			if (password == "") {
+				selection_currentY = 1;
+				onRemoteControlWifiDefails("center");
+				$("#wifi_password").addClass("input_focus_error");
+				return;
+			}
+			var oneWifiData = mNetConfig.getWifiData(selectedSSID);
+												
+			$("#div_wifiDetailsMain").fadeOut(800);
+			$("#div_activationMain").fadeIn(800);
+			mNetConfig.SetNetwork(selectedSSID, password);
+			startActivation();
+		}
+	}
+	
+	//Highlight new item, avoid 2
+	$("#div_wifiListDetails"+selection_currentY).removeClass("div_wifiDetailsItem_selected").addClass("div_wifiDetailsItem_normal");
+	if (newY != 2)
+	{
+		$("#div_wifiListDetails"+newY).removeClass("div_wifiDetailsItem_normal").addClass("div_wifiDetailsItem_selected");
+	}
+	else if (selection_currentY != 2)
+	{
+		var focusElement = $("#wifi_ssid").hasClass("input_focus") ? "wifi_ssid" : "wifi_password";
+		var returnFocus = keyboard_onRemoteControl(vButtonName, focusElement);
+	}
+	selection_currentY = newY;
 }
 
 function onActivationTimer()
@@ -238,7 +346,15 @@ function helloCallback(helloData)
 	{
 		stopActivation();
 		$("#div_activationStatus").append("<br>Taking too long. Give up!");
-		//Revert to ap_mode. How?
+		//Revert to ap_mode.
+		mNetConfig.StartAP();
+		
+		//Check error. How?
+		
+		//Back to wifi list
+		$("#div_activationMain").fadeOut(800);
+		$("#div_wifiListMain").fadeIn(800);
+		resetWifiScanTimer();
 		return;
 	}
 	
