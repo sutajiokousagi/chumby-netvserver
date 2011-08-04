@@ -54,33 +54,6 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     //-----------
 
-    /* Deprecated. Use generic command at the bottom
-    if (cmdString == "HELLO")
-    {
-        //Returning GUID, DCID, HWver, SWver, etc.Z
-        QByteArray buffer = this->Execute(docroot + "/scripts/hello.sh", QStringList(dataString));
-        if (buffer.length() > 5)
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data>" + buffer.trimmed() + "</data>", true);
-        else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data>" + buffer.trimmed() + "</data>", true);
-        buffer = QByteArray();
-    }
-
-    else if (cmdString == "INITIALHELLO")
-    {
-        //This is identical to 'Hello' command except that it will switch to Acces Point mode if necessary
-        //To be called only once by JavaScriptCore
-
-        //Returning GUID, DCID, HWver, SWver, etc.
-        QByteArray buffer = this->Execute(docroot + "/scripts/initial_hello.sh", QStringList(dataString));
-        if (buffer.length() > 5)
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data>" + buffer.trimmed() + "</data>", true);
-        else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data>" + buffer.trimmed() + "</data>", true);
-        buffer = QByteArray();
-    }
-    */
-
     if (cmdString == "SETURL")
     {
         //Send it straight to browser
@@ -138,15 +111,6 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     }
 
     //-----------
-
-    /* Deprecated. Use generic command at the bottom
-    else if (cmdString == "SETBOX")
-    {
-        QByteArray buffer = this->Execute(docroot + "/scripts/setbox.sh", QStringList(dataString));
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
-        buffer = QByteArray();
-    }
-    */
 
     else if (cmdString == "SETCHROMAKEY")
     {
@@ -232,21 +196,13 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to browser</value></data>", true);
         else
             response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No browser running</value></data>", true);
-
-        /*
-        QByteArray buffer = this->Execute(docroot + "/scripts/remote_control.sh", QStringList(dataString));
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
-        buffer = QByteArray();
-        */
     }
 
     //-----------
 
     else if (cmdString == "CONTROLPANEL")
     {
-        //Send it straight to browser
-        //int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "netvbrowser");
-
+        //This is simply passed directly to NeTVBrowser
         QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
         response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
         buffer = QByteArray();
@@ -254,14 +210,14 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "KEY")
     {
-        //Forward to browser
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "all");
+        //Forward to all clients
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataString + "</data></xml>", "all");
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to browser</value></data>", true);
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to client</value></data>", true);
         else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No browser running</value></data>", true);
+            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No client running</value></data>", true);
     }
 
     //-----------
@@ -296,6 +252,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         bool fileOK = SetNetworkConfig(params);
         params.clear();
 
+        //Stop AP Mode & start NetworkManager
         QByteArray buffer;
         if (!fileOK)        buffer = this->GetFileContents(BRIDGE_NETWORK_CONFIG);
         else                buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
@@ -508,10 +465,10 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         //Reply to socket client (Android/iOS)
         if (numClient > 0) {
             response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
-            response.setParameter("value", "Command forwarded to browser");
+            response.setParameter("value", "Command forwarded to client");
         }else{
             response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
-            response.setParameter("value", "No browser running");
+            response.setParameter("value", "No client running");
         }
         response.write();
     }

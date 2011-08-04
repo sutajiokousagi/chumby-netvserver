@@ -3,11 +3,6 @@
 #include "controller/fileuploadcontroller.h"
 #include "controller/sessioncontroller.h"
 
-#if defined CURSOR_CONTROLLER
-    #include "controller/cursorcontroller.h"
-#endif
-
-
 //Constructor
 RequestMapper::RequestMapper() : HttpRequestHandler(), SocketRequestHandler()
 {
@@ -34,13 +29,6 @@ void RequestMapper::service(HttpRequest& request, HttpResponse& response)
     else if (path.startsWith("/bridge")) {
         Static::bridgeController->service(request, response);
     }
-
-//Only available on Linux system
-#if defined (CURSOR_CONTROLLER)
-    else if (path.startsWith("/cursor")) {
-        Static::cursorController->service(request, response);
-    }
-#endif
 
     // All other pathes are mapped to the static file controller
     else {

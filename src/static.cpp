@@ -17,10 +17,6 @@ BridgeController* Static::bridgeController=0;
     DBusMonitor* Static::dbusMonitor=0;
 #endif
 
-#ifdef CURSOR_CONTROLLER
-    CursorController* Static::cursorController=0;
-#endif
-
 QString Static::getConfigFileName()
 {
     return QString("%1/%2.ini").arg(getConfigDir()).arg(QCoreApplication::applicationName());
@@ -42,7 +38,7 @@ QString Static::getConfigDir()
     searchList.append(QDir::rootPath()+"etc");
     searchList.append(QDir::cleanPath(binDir));
     searchList.append(QDir::cleanPath(binDir+"/../etc"));
-    searchList.append(QDir::cleanPath(binDir+"/../../etc")); // for development under windows
+    searchList.append(QDir::cleanPath(binDir+"/../../etc")); // for development under Windows
 
     foreach (QString dir, searchList)
     {

@@ -9,10 +9,6 @@
 #include "controller/scriptcontroller.h"
 #include "controller/bridgecontroller.h"
 
-#ifdef CURSOR_CONTROLLER
-    #include "controller/cursorcontroller.h"
-#endif
-
 #ifdef ENABLE_DBUS_STUFF
     #include "dbusmonitor.h"
 #endif
@@ -70,11 +66,6 @@ public:
     /** DBus monitor */
 #ifdef ENABLE_DBUS_STUFF
     static DBusMonitor* dbusMonitor;
-#endif
-
-    /** Controller for input device */
-#ifdef CURSOR_CONTROLLER
-    static CursorController* cursorController;
 #endif
 
     /** Controller for static files */

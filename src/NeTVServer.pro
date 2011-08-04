@@ -40,14 +40,6 @@ SOURCES += $$PWD/controller/scriptcontroller.cpp
 HEADERS += $$PWD/controller/bridgecontroller.h
 SOURCES += $$PWD/controller/bridgecontroller.cpp
 
-# UDP cursor from Android/iOS
-#unix:!mac:DEFINES += CURSOR_CONTROLLER
-#unix:!mac:CONFIG += CURSOR_CONTROLLER
-#contains(DEFINES, CURSOR_CONTROLLER)
-#{
-#    HEADERS += $$PWD/controller/cursorcontroller.h
-#    SOURCES += $$PWD/controller/cursorcontroller.cpp
-#}
 
 OTHER_FILES += \
     ../etc/NeTVServer.ini \
@@ -59,14 +51,7 @@ OTHER_FILES += \
     ../etc/docroot/images/chumby.png \
     ../etc/docroot/scripts/hello.sh \
     ../etc/docroot/scripts/test_param.sh \
-    ../etc/docroot/scripts/xmlbridge.sh \
-    ../Doxyfile \
-    ../doc/license.txt \
-    ../doc/releasenotes.txt \
-    ../doc/example-response-normal.txt \
-    ../doc/example-response-chunked.txt \
-    ../doc/example-request-get.txt \
-    ../doc/example-request-file-upload.txt
+    ../etc/docroot/scripts/xmlbridge.sh
 
 include(../lib/bfHttpServer/src/bfHttpServer.pri)
 include(../lib/bfFlashPolicyServer/src/bfFlashpolicyserver.pri)

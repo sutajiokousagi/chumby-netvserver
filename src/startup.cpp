@@ -32,18 +32,6 @@ void Startup::start()
     // Configure script controller
     Static::scriptController=new ScriptController(fileSettings);
 
-    // Configure cursor controller
-#ifdef CURSOR_CONTROLLER
-    Static::cursorController=new CursorController(fileSettings);
-#endif
-
-    // Configure framebuffer controller
-    /*
-    QSettings* fbSettings=new QSettings(configFileName,QSettings::IniFormat);
-    fbSettings->beginGroup("framebuffer-controller");
-    Static::framebufferController=new FramebufferController(fbSettings);
-    */
-
     // Configure bridge controller
     Static::bridgeController=new BridgeController(fileSettings,this);
 

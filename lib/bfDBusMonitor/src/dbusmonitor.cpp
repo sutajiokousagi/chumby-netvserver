@@ -7,7 +7,7 @@ DBusMonitor::DBusMonitor(QObject *parent) : QObject(parent)
 
     if (!nm_interface->isValid())
     {
-        qDebug("DBusMonitor: error");
+        qDebug("DBusMonitor: failed to start");
         qDebug("%s", qPrintable(nm_interface->connection().lastError().message()));
     }
     else

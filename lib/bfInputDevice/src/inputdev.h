@@ -1,5 +1,5 @@
-#ifndef CURSORCONTROLLER_H
-#define CURSORCONTROLLER_H
+#ifndef InputDevice_H
+#define InputDevice_H
 
 #include "httprequesthandler.h"
 
@@ -12,24 +12,19 @@
 #include <linux/input.h>
 #include <linux/uinput.h>
 
-#if defined (Q_WS_QWS)
-    #define INPUT_DEV_ABS_PATH "/dev/input/by-id/soc-noserial-event-ts"
-    #define INPUT_DEV_REL_PATH "/dev/input/mice"
-#else
-    #define INPUT_DEV_ABS_PATH "/dev/uinput"
-    #define INPUT_DEV_REL_PATH "/dev/uinput"
-#endif
+#define INPUT_DEV_PATH "/dev/input/event1"
 
-class CursorController : public HttpRequestHandler
+class InputDevice : public QObject
 {
-
+    Q_OBJECT
+    Q_DISABLE_COPY(InputDevice)
 public:
 
     /** Constructor */
-    CursorController(QSettings* settings);
+    InputDevice(QObject* parent = 0);
 
-    /** Generates the response */
-    void service(HttpRequest& request, HttpResponse& response);
+    /** Desctructor */
+    virtual ~InputDevice();
 
 public:
 
@@ -65,6 +60,12 @@ private:
     int     resY;
 
     int     setup_uinput_device(int maxX, int maxY, bool isRelative, const char * device = NULL);
+
+
+private slots:
+
+    void slot_sendKey(int keyCode, bool isPressed, bool autoRepeat);
+    void slot_sendKey(QByteArray keyName, bool isPressed, bool autoRepeat);
 };
 
-#endif // CURSORCONTROLLER_H
+#endif // InputDevice_H

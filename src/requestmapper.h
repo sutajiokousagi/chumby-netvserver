@@ -1,9 +1,3 @@
-/**
-  @file
-  @author Stefan Frings
-  @version $Id: requestmapper.h 938 2010-12-05 14:29:58Z stefan $
-*/
-
 #ifndef REQUESTMAPPER_H
 #define REQUESTMAPPER_H
 

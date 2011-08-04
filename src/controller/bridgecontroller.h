@@ -27,6 +27,11 @@ public slots:
     void slot_DeviceAdded(QByteArray objPath);
     void slot_DeviceRemoved(QByteArray objPath);
 
+signals:
+
+    // To InputDevice module
+    void signal_SendKeyEvent(QByteArray keyName, bool isPressed, bool autoRepeat);
+
 private:
 
     /** Long polling HTTP response */
