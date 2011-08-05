@@ -16,43 +16,67 @@
 </head>
 <body onload="onLoad();">
 				
-<div id="div_all" style="width: 100%; height: 100%; overflow: hidden;">
+<div id="div_full_page">
 
 	<div id="div_center" style="visibility:hidden;" class="div_center_wrapper">
 		<div class="div_center_container">
 			
 			<!-- ------------------------ header ----------------------- -->
-			<div style="float: top; width: 48px; height: 48px; background-image: url('../images/chumby_logo_48x48.png'); background-repeat: no-repeat;"></div>
+			<div class="div_header" style="float: top;">
+				<div class="spacer">&nbsp;</div>
+					<div style="float: left; width: 80px; height: 48px; background-image: url('../images/chumby_logo_48x48.png'); background-repeat: no-repeat; background-position:center"></div>
+					<div style="float: left; height: 48px; line-height:48px; font-size: 18px; font-weight:bold;">NeTV Network Configuration</div>
+				<div class="spacer">&nbsp;</div>
+			</div>
 			
 			<!-- ----------------------- loading icon ---------------------- -->
 			<div id="div_loadingMain">
-				<div style="float: top;">Scanning for wifi networks...</div>
-				
-				<div class="div_center_wrapper" style="width:100px; height:100px; border: 0px;">
-					<div class="div_center_container" style="width:100px; height:100px; border: 0px;">
-						<img src="../images/gif-loading.gif">
-					</div>
+				<div class="div_title_wrapper">
+					<div class="div_title">Scanning for wifi networks...</div>
 				</div>
+				
+				<div style="text-align:center; margin-top:130px">
+					<img width="62" height="62" src="images/loading_black.gif">
+				</div>
+				<div style="text-align: center; margin-top: 15px;">Please wait...</div>
 			</div>
 			
 			<!-- ----------------------- wifi list module ---------------------- -->
 			<div id="div_wifiListMain">
-				<div style="float: left;">Select a wifi network</div>
+				<div class="div_title_wrapper">
+					<div class="div_title">Select a WiFi network</div>
+				</div>
+				
+				<div style="height: 30px; margin:0 auto; padding-bottom: 6px;">
+					<div id="div_wifiListMain_moretop" style="text-align:center;"><img src="images/more_top.png"></div>
+				</div>
 				<div id="div_wifiListMain_list">
 					<!-- wifi list elements will be inserted here -->
-				</div>				
+				</div>
+				<div style="height: 30px; margin:0 auto; padding-top: 6px;">
+					<div id="div_wifiListMain_morebottom" style="text-align:center;"><img src="images/more_bottom.png"></div>
+				</div>
 			</div>
 
 			<!-- ----------------------- wifi credentials module ---------------------- -->
 			<div id="div_wifiDetailsMain">
-				<div style="float: top;">Enter wifi credentials</div>
+				<div class="div_title_wrapper">
+					<div class="div_title">Enter WiFi credentials</div>
+				</div>
+
 				<div id="div_wifiListDetails0" class="div_wifiDetailsItem_normal">
-					<div>SSID <input type="text" id="wifi_ssid"></div>
+					<div class="spacer">&nbsp;</div>
+						<div style="float:left; text-align: right; width: 100px;">SSID</div>
+						<div id="wifi_ssid_wrapper" class="input_wrapper"><input type="text" id="wifi_ssid"></div>
+					<div class="spacer">&nbsp;</div>
 				</div>
 				<div id="div_wifiListDetails1" class="div_wifiDetailsItem_normal">
-					<div>Password <input type="text" id="wifi_password"></div>
+					<div class="spacer">&nbsp;</div>
+						<div style="float:left; text-align: right; width: 100px;">Password</div>
+						<div id="wifi_password_wrapper" class="input_wrapper"><input type="text" id="wifi_password"></div>
+					<div class="spacer">&nbsp;</div>
 				</div>
-				<div id="div_wifiListDetails2" class="div_wifiDetailsItem_normal" style="height:220">
+				<div id="div_wifiListDetails2" class="div_wifiDetailsItem_normal">
 					<div id="keyboard">
 						<div style="float: top;">
 							<div class="mac_key" id="key_a">a</div>
@@ -99,48 +123,39 @@
 							<div class="mac_key" id="key_9">9</div>
 						</div>
 						<div style="float: top;">
-							<div class="mac_key" id="key_special">.@#</div>
-							<div class="mac_key" id="key_shift">sh</div>
-							<div class="mac_key" id="key_space">space</div>
-							<div class="mac_key" id="key_backspace"><--</div>
+							<div class="mac_key" id="key_special" style="width: 80px">.@#</div>
+							<div class="mac_key" id="key_shift" style="width: 80px">sh</div>
+							<div class="mac_key" id="key_space" style="width: 114px">space</div>
+							<div class="mac_key" id="key_backspace" style="width: 80px">--</div>
 						</div>
 					</div>
+					<div class="spacer">&nbsp;</div>
 				</div>
-				<div id="div_wifiListDetails3" class="div_wifiDetailsItem_normal">
+				<div id="div_wifiListDetails3" class="div_wifiDetailsItem_normal" style="text-align: center;">
 					<div>Next</div>
 				</div>
-				<div id="div_wifiListDetails4" class="div_wifiDetailsItem_normal">
+				<div id="div_wifiListDetails4" class="div_wifiDetailsItem_normal" style="text-align: center;">
 					<div>Select another WiFi</div>
 				</div>
 			</div>
 			
 			<!-- ----------------------- activation module ---------------------- -->
 			<div id="div_configuringMain">
-				<div style="float: top;">Configuring the network.</div>
-				<div style="float: top;" id="div_activationStatus">Please wait...</div>
-				
-				<!--
-				<div class="div_center_wrapper" style="width:100px; height:100px; border: 0px;">
-					<div class="div_center_container" style="width:100px; height:100px; border: 0px;">
-						<img src="./images/gif-loading.gif">
-					</div>
+				<div class="div_title_wrapper">
+					<div class="div_title">Configuring the network...</div>
+				</div>				
+				<div style="text-align:center; margin-top:130px">
+					<img width="62" height="62" src="images/loading_black.gif">
 				</div>
-				-->
+				<div id="div_activationStatus">Please wait...</div>
 			</div>
 
 			<!-- ----------------------- chumby account module ---------------------- -->
-			<!--
-			<div id="div_startup" style="width: 800px; height: 600px; background-color: #EEEEFF; overflow: hidden; margin: 0px auto;">
-				<div id="div_startup_logo" style="position: absolute; top: 250px; left: 240px; width: 300px; height: 98px;">
-					<img src="./images/chumby_logo_300x98.png" width="100%" height="100%">
-				</div>
-				
-				<div style="position: absolute; top: 300px; left: 320px;">
-
-				
+			<div id="div_accountMain">
+				<div class="div_title_wrapper">
+					<div class="div_title">Enter your Chumby account</div>
 				</div>
 			</div>
-			-->
 			
 		</div>
     </div>

@@ -39,7 +39,7 @@ function fNMStateChanged( vEventName )
 	//not performing activation, don't care
 	if (activationState == '')
 		return;
-	$("#div_activationStatus").append("<br>" + vEventName);
+	//$("#div_activationStatus").append("<br>" + vEventName);
 	
 	switch (vEventName)
 	{

@@ -179,7 +179,7 @@ cNetConfig.prototype.sortWifiList = function ()
 		{
 			var oneWifiData1 = theList[i];
 			var oneWifiData2 = theList[i+1];
-			if (oneWifiData2['lvl'] < oneWifiData1['lvl'])
+			if (oneWifiData2['qty'] > oneWifiData1['qty'])
 			{
 				var temp = oneWifiData1;
 				theList[i] = oneWifiData2;

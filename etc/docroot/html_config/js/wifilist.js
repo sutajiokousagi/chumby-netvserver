@@ -1,12 +1,20 @@
 var selectedSSID;
+var selectedIndex;
+var startingIndex;
+var maxWifiDisplay;
 var wifiScanTimer;
 var currentWifiList;
 
 function wifilist_init()
 {
 	selectedSSID = '';
+	startingIndex = 0;
+	selectedIndex = 0;
+	maxWifiDisplay = 10;
 	wifiScanTimer = null;
 	currentWifiList = null;
+	
+	mNetConfig.wifiScanCallback = wifilist_updateWifiList;
 	
 	//Start scanning
 	onWifiScanTimer();
@@ -25,12 +33,14 @@ function onWifiScanTimer()
 
 function wifilist_resetWifiScanTimer(duration)
 {
-	wifilist_stopWifiScanTimer();	
+	wifilist_stopWifiScanTimer();
+	mNetConfig.wifiScanCallback = wifilist_updateWifiList;
 	wifiScanTimer = setTimeout("onWifiScanTimer()", !duration ? 30000 : duration);
 }
 
 function wifilist_stopWifiScanTimer()
 {
+	mNetConfig.wifiScanCallback = null;
 	if (wifiScanTimer != null)
 		clearTimeout(wifiScanTimer);
 }
@@ -43,6 +53,7 @@ function wifilist_updateWifiList(wifiListArray)
 		fDbg2("Wifi list is null");
 		return;
 	}
+	currentWifiList = [];
 	currentWifiList = wifiListArray;
 	
 	//Last item is "Other..."
@@ -53,7 +64,7 @@ function wifilist_updateWifiList(wifiListArray)
 	otherWifi['ch'] = "";
 	otherWifi['lvl'] = "";
 	otherWifi['qty'] = "";
-	currentWifiList['Other...'] = otherWifi;
+	currentWifiList.push( otherWifi );
 	
 	refreshWifiList(true);
 	if (main_currentState() == "loading")
@@ -78,8 +89,23 @@ function fadeInWifiList(animated)
 {
 	//Clear the list
 	$('#div_wifiListMain_list').html('');
+	
+	//Adjust the display list
+	if (selectedSSID == 'Other...')
+		selectedIndex = currentWifiList.length-1;
 		
-	for (var objectIndex in currentWifiList)
+	if (selectedIndex < startingIndex)
+		startingIndex = selectedIndex;
+	if (selectedIndex >= startingIndex + maxWifiDisplay - 1)
+		startingIndex = selectedIndex - maxWifiDisplay + 1;
+		
+	//more... arrow indicator
+	if (startingIndex > 0)												$("#div_wifiListMain_moretop").fadeIn(400);
+	else																$("#div_wifiListMain_moretop").fadeOut(400);
+	if (startingIndex+maxWifiDisplay < currentWifiList.length-1)		$("#div_wifiListMain_morebottom").fadeIn(400);
+	else																$("#div_wifiListMain_morebottom").fadeOut(400);
+		
+	for (var objectIndex=startingIndex; objectIndex < startingIndex+maxWifiDisplay; objectIndex++)
 	{
 		var oneWifiData = currentWifiList[objectIndex];
 		if (oneWifiData == null)
@@ -99,18 +125,18 @@ function fadeInWifiList(animated)
 		div_string += '"><div class="div_wifiListItem_ssid">'+ssid+'&nbsp;</div> ';
 		
 		//the rest
-		div_string += '<div style="float:right">';
-		//if (oneWifiData['ch'] != '')				div_string += 'Channel ' + oneWifiData['ch'];	
+		div_string += '<div class="div_wifiListItem_info">';
 
 		//encryption
-		if (oneWifiData['encryption'] != 'NONE')	div_string += oneWifiData['encryption'];
+		//if (oneWifiData['encryption'] != 'NONE')	div_string += oneWifiData['encryption'];
 		if (oneWifiData['encryption'] != 'NONE')	div_string += '<img src="images/lock.png">';
 		
 		//signal level (magic number)
 		if (oneWifiData['lvl'] != '')
 		{
-			var lvl = 3 - Math.round( (parseInt(oneWifiData['lvl'])+19) / (-20) );
-			if (lvl < 0) 		lvl = 0;
+			var lvl = Math.round( parseInt(oneWifiData['qty']) / 20.0 );
+			if (lvl > 3) 			lvl = 3;
+			else if (lvl < 0) 		lvl = 0;
 			div_string += '<img src="images/wifi' + lvl + '.png">';
 		}
 		
@@ -138,10 +164,12 @@ function wifilist_onRemoteControl(vButtonName)
 				break;
 			previousSSID = ssid;
 		}
-		if (previousSSID != "")
+		if (previousSSID != "") {
 			selectedSSID = previousSSID;
+			selectedIndex = objectIndex-1;
+		}
 			
-		refreshWifiList();
+		fadeInWifiList(false);
 		wifilist_resetWifiScanTimer();
 	}
 	else if (vButtonName == "down")
@@ -156,13 +184,14 @@ function wifilist_onRemoteControl(vButtonName)
 
 			if (found == true) {
 				selectedSSID = ssid;
+				selectedIndex = objectIndex;
 				break;
 			}
 		
 			if (ssid == selectedSSID)
 				found = true;
 		}
-		refreshWifiList();
+		fadeInWifiList(false);
 		wifilist_resetWifiScanTimer();
 	}
 	else if (vButtonName == "center")
@@ -177,13 +206,13 @@ function wifilist_onRemoteControl(vButtonName)
 				
 		if (selectedSSID == "Other...")
 		{
-			main_showState("wifidetails", true);
 			wifidetails_highlightItem("ssid");
+			main_showState("wifidetails", true);
 		}
 		else if (oneWifiData['encryption'] == 'NONE')
 		{
-			main_showState("configuring", true);
 			mNetConfig.SetNetwork(selectedSSID, '');
+			main_showState("configuring", true);
 		}
 		else
 		{

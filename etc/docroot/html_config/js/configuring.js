@@ -8,7 +8,8 @@ function configuring_init()
 	activationTime = null;
 	activationTimer = null;
 	mNetConfig.helloCallback = configuring_helloCallback;
-		
+	
+	$("#div_activationStatus").removeClass('div_activationStatus_success').removeClass('div_activationStatus_error');
 	startActivation();
 }
 
@@ -63,27 +64,30 @@ function configuring_helloCallback(helloData)
 	
 	var internet = helloData['internet'];
 	var ip = helloData['ip'];
-	var secondsSinceActivation = ((new Date()).getTime() - activationTime.getTime())/1000;
+	var secondsSinceActivation = ((new Date()).getTime() - activationTime.getTime()) / 1000;
 
 	//Taking too long
 	if (secondsSinceActivation > 60)
 	{
 		stopActivation();
-		$("#div_activationStatus").append("<br>Taking too long. Give up!");
+		$("#div_activationStatus").removeClass('div_activationStatus_success').addClass('div_activationStatus_error');
+		$("#div_activationStatus").html("<br>Error connecting to <br>" + selectedSSID + " network.<br>Please try again.");
 		//Revert to ap_mode.
 		mNetConfig.StartAP();
 		
 		//Check error. How?
 		
 		//Back to wifi list
-		main_showState("wifilist", true);
+		setTimeout("main_showState('wifilist', true);", 3200);
 		return;
 	}
 	
-	//Fail to connect or connecting?
+	//Failed to connect or trying connecting
 	if (ip == '')
 	{
-		//$("#div_activationStatus").append("<br>still waiting...");
+		if (secondsSinceActivation > 45)			$("#div_activationStatus").html("Be patient...");
+		else if (secondsSinceActivation > 35)		$("#div_activationStatus").html("Hold on...");
+		else if (secondsSinceActivation > 20)		$("#div_activationStatus").html("Keep waiting...");
 		return;
 	}
 	
@@ -93,12 +97,12 @@ function configuring_helloCallback(helloData)
 		if (internet != 'true' && internet != true)
 			return;
 			
-		$("#div_activationStatus").append("<br>" + ip);
-		$("#div_activationStatus").append("<br>Network configured!");
+		$("#div_activationStatus").removeClass('div_activationStatus_error').addClass('div_activationStatus_success');
+		$("#div_activationStatus").html("<br>Network successfully configured!<br><strong>" + ip + "</strong>");
 		stopActivation();
 		
-		setTimeout("doneConfiguring()", 5000);
-		setTimeout("main_hideMainPanel()", 3200);
+		setTimeout("doneConfiguring();", 5000);
+		setTimeout("main_hideMainPanel();", 3200);
 	}
 }
 

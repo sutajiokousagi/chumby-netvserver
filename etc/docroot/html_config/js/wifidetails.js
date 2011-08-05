@@ -48,8 +48,10 @@ function wifidetails_onRemoteControl(vButtonName)
 		{
 			$("#wifi_password").blur();
 			$("#wifi_password").removeClass("input_focus");
+			$("#wifi_password_wrapper").removeClass("input_wrapper_focus").addClass("input_focus");
 			$("#wifi_ssid").focus();
 			$("#wifi_ssid").addClass("input_focus");
+			$("#wifi_ssid_wrapper").removeClass("input_focus").addClass("input_wrapper_focus");
 		}
 	}
 	else if (newY == 1)
@@ -60,8 +62,10 @@ function wifidetails_onRemoteControl(vButtonName)
 		{
 			$("#wifi_ssid").blur();
 			$("#wifi_ssid").removeClass("input_focus");
+			$("#wifi_ssid_wrapper").removeClass("input_wrapper_focus").addClass("input_focus");
 			$("#wifi_password").focus();
 			$("#wifi_password").addClass("input_focus");
+			$("#wifi_password_wrapper").removeClass("input_focus").addClass("input_wrapper_focus");
 		}
 	}
 	else if (newY == 2)
@@ -89,12 +93,14 @@ function wifidetails_onRemoteControl(vButtonName)
 				//wifidetails_highlightItem("ssid");
 				newY = 0;
 				$("#wifi_ssid").addClass("input_focus_error");
+				$("#wifi_ssid_wrapper").addClass("input_focus_error");
 			}
 			else if (password == "")
 			{
 				//wifidetails_highlightItem("password");
 				newY = 1;
 				$("#wifi_password").addClass("input_focus_error");
+				$("#wifi_password_wrapper").addClass("input_focus_error");
 			}
 			else
 			{

@@ -17,28 +17,28 @@ function keyboard_init()
 	var row2 = ['j','k','l','m','n','o','p','q','r'];
 	var row3 = ['s','t','u','v','w','x','y','z','0'];
 	var row4 = ['1','2','3','4','5','6','7','8','9'];
-	var row5 = ['special','shift','space','backspace','---','---','---','---','---'];
+	var row5 = ['special','special','shift','shift','space','space','space','backspace','backspace'];
 	keyboard_keysIDArray = [ row1, row2, row3, row4, row5 ];
 	
 	row1 = ['a','b','c','d','e','f','g','h','i'];
 	row2 = ['j','k','l','m','n','o','p','q','r'];
 	row3 = ['s','t','u','v','w','x','y','z','0'];
 	row4 = ['1','2','3','4','5','6','7','8','9'];
-	row5 = ['.@#','sh','space','<--','---','---','---','---','---'];
+	row5 = ['.@#','.@#','shift','shift','space','space','space','<--','<--'];
 	keyboard_keysArray0 = [ row1, row2, row3, row4, row5 ];
 	
 	row1 = ['A','B','C','D','E','F','G','H','I'];
 	row2 = ['J','K','L','M','N','O','P','Q','R'];
 	row3 = ['S','T','U','V','W','X','Y','Z','0'];
 	row4 = ['1','2','3','4','5','6','7','8','9'];
-	row5 = ['.@#','sh','space','<--','---','---','---','---','---'];
+	row5 = ['.@#','.@#','shift','shift','space','space','space','<--','<--'];
 	keyboard_keysArray1 = [ row1, row2, row3, row4, row5 ];
 	
-	row1 = ['$','\&','\<','>','{','}','~','`','^'];
+	row1 = ['$','&amp;','&lt;','&gt;','{','}','~','`','^'];
 	row2 = ['#','?','[',']','%','|','+','-',''];
 	row3 = ['@','!','(',')',':',';','*','=',''];
 	row4 = ['.',',','\\','/','\'','"','_','',''];
-	row5 = ['abc','sh','space','<--','---','---','---','---','---'];
+	row5 = ['abc','abc','shift','shift','space','space','space','<--','<--'];
 	keyboard_keysArray2 = [ row1, row2, row3, row4, row5 ];
 	
 	keyboard_currentX = 0;
@@ -46,6 +46,7 @@ function keyboard_init()
 	keyboard_wrapXMode = 0;
 	keyboard_wrapYMode = 2;
 	keyboard_clearHighlight();
+	keyboard_setLayout(0);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -169,6 +170,10 @@ function keyboard_applyCurrentKey(elementID)
 	var currentKeyValue = $("#key_" + currentKeyID).html();
 	if (currentKeyID == '' || currentKeyValue == '')
 		return;
+
+	if (currentKeyValue == "&amp;")				currentKeyValue = "&";
+	else if (currentKeyValue == "&lt;")			currentKeyValue = "<";
+	else if (currentKeyValue == "&gt;")			currentKeyValue = ">";
 		
 	var currentValue = $("#"+elementID).val();
 	switch (currentKeyID)

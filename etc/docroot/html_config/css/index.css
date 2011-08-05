@@ -1,5 +1,5 @@
 /*-----------------------------
-RESET STYLES
+	BASIC PAGE STYLING
 -----------------------------*/
 
 html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6
@@ -10,54 +10,62 @@ html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6
 }
 body
 {
-	font-size: 10px;
-}
-ul, li, ol, dl, dd, dt
-{
-	list-style:none;
-	padding:0;
-	margin:0;
-}
-a
-{
-	text-decoration:none;
-}
-
-/*-----------------------------
-	BASIC PAGE STYLING
------------------------------*/
-
-body
-{
-	/*background-color: #F000F0;	//browser background will take care of this*/
-}
-input
-{
-	background-color: #EEEEFF;
-	border: 2px solid #aaaaaa
-}
-.input_focus
-{
-	border: 2px solid #00b0f0
-}
-.input_focus_error
-{
-	border: 2px solid #ff0000
-}
-p
-{
-	font-size:12px;
-	padding-bottom:8px;
+	font-size: 14px;
+	color: #FFFFFF;
 }
 a
 {
 	color:#fff000;
 	text-decoration:none;
 }
+input
+{
+	background-color: #808080;
+	border: 0px;
+}
+.input_focus
+{
+	background-color: #FFFFFF;
+}
+.input_focus_error
+{
+	background-color: #FF0000;
+}
+.input_wrapper, .input_wrapper_focus
+{
+	float:left;
+	text-align: left;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-left: 15px;
+	border-radius:20px;
+}
+.input_wrapper
+{
+	background-color: #808080;
+}
+.input_wrapper_focus
+{
+	background-color: #FFFFFF;
+}
+
 
 /*-----------------------------
 	BASIC LAYOUT
 -----------------------------*/
+
+div.spacer
+{
+	clear: both;
+	height: 1px;
+}
+  
+#div_full_page 
+{
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
 
 .div_center_wrapper, .div_center_container {
 	width: 400px;
@@ -72,17 +80,46 @@ a
 	left: 50%;
 	position: relative;
 	top: 50%;
-	background-color: #EEEEFF;
+	background-color: #000000;
+	overflow: hidden;
+}
+
+.div_header {
+	float: top;
+	background-color: #232B36;
+	padding-top: 15px;
+	padding-bottom: 15px;
+}
+
+.div_title_wrapper {
+	background-color: #303030;
+	padding-top:2px;
+	padding-bottom:2px;
+	margin-bottom: 8px;
+}
+.div_title {
+	text-align: center;
+	background-color: #434B56;
+	padding: 7px;
+	border-top: 1px dashed #535B66;
+	border-bottom: 1px dashed #535B66;
+	font-weight: bold;
+	color: #6598EB;
+}
+
+/*-----------------------------
+	Loading
+-----------------------------*/
+
+#div_loadingMain
+{
+	float: top;
+	text-align: center;
 }
 
 /*-----------------------------
 	Wifi List
 -----------------------------*/
-
-#div_wifiListMain, #div_wifiDetailsMain, #div_accountDetailsMain, #div_activationMain
-{
-	position:absolute;
-}
 
 .div_wifiListItem_normal , .div_wifiListItem_selected {
 	height: 30px;
@@ -90,67 +127,70 @@ a
 	margin: 0 auto;
 	float:top;
 	clear: both;
-	text-align: center;
-	padding-left: 10px;
-	padding-right: 10px;
+	padding-left: 15px;
+	padding-right: 15px;
+	line-height: 30px;
 }
 .div_wifiListItem_ssid {
 	float:left;
 	font-size: 14px;
 	font-weight: bold;
-	margin-top: 8px;
+	line-height: 30px;
+}
+.div_wifiListItem_info {
+	float:right;
+	line-height: 30px;
 }
 .div_wifiListItem_normal {
-	border-top: 1px solid #CCCCCC;
+	color: #646464;
 }
 .div_wifiListItem_selected {
-	border: 1px solid #00b0f0;
-	background-color: #00b0f0;
+	color: #FFFFFF;
+	background-color: #6598EB;
+	border-radius: 20px;
 }
+
+/*-----------------------------
+	Wifi Details
+-----------------------------*/
 
 .div_wifiDetailsItem_normal , .div_wifiDetailsItem_selected {
 	margin: 0 auto;
 	float:top;
-	text-align: center;
+	clear: both;
 	padding-left: 5px;
 	padding-right: 5px;
-	padding-top: 10px;
-	padding-bottom: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	color: #FFFFFF;
 }
 .div_wifiDetailsItem_normal {
+	background-color: #000000;
 }
 .div_wifiDetailsItem_selected {
-	background-color: #00b0f0;
+	background-color: #6598EB;
+	border-radius: 20px;
 }
 
 /*-----------------------------
-	ORIENTATION CLEVERNESS
+	Configuring
 -----------------------------*/
 
-#content_left,
-#content_right,
-#content_normal,
-#content_flipped
-{
-	display:none;
+#div_configuringMain {
 }
 
-.show_normal,
-.show_flipped
-{
-	width: 100%;
-}
-.show_left,
-.show_right
-{
-	width: 100%;
+#div_activationStatus {
+	float: top;
+	text-align: center;
+	margin-top: 15px;
 }
 
-/* .show_flipped #content_flipped */
-.show_left #content_left,
-.show_right #content_right,
-.show_normal #content_normal,
-.show_flipped #content_normal
-{
-	display: block;
+.div_activationStatus_error {
+	color: #FF0000;
+	font-size: 18px;
+}
+
+.div_activationStatus_success {
+	color: #00FF00;
+	font-size: 18px;
 }
