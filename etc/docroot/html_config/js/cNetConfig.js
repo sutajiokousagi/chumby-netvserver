@@ -8,8 +8,7 @@
 // -------------------------------------------------------------------------------------------------
 //	constructor
 // -------------------------------------------------------------------------------------------------
-function cNetConfig(
-)
+function cNetConfig()
 {
 	this.wifiListArray = new Array();
 	this.wifiParamNamesArray = new Array('ssid', 'qty', 'lvl', 'ch', 'mode', 'encryption', 'auth');
@@ -87,7 +86,7 @@ cNetConfig.prototype.SetNetwork = function (ssid, key, encryption, auth)
 	else
 	{
 		param['wifi_ssid'] = oneWifiData['ssid'];
-		param['wifi_auth'] = oneWifiData['auth'];
+		param['wifi_authentication'] = oneWifiData['auth'];
 		param['wifi_encryption'] = oneWifiData['encryption'];
 		param['wifi_password'] = oneWifiData['ssid'];
 		if (key != null && key != '')					param['wifi_password'] = key;

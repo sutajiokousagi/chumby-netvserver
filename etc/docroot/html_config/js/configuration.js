@@ -133,14 +133,14 @@ function refreshWifiList()
 
 		//encryption
 		if (oneWifiData['encryption'] != 'NONE')	div_string += oneWifiData['encryption'];
-		if (oneWifiData['encryption'] != 'NONE')	div_string += '<img src="html_config/lock.png">';
+		if (oneWifiData['encryption'] != 'NONE')	div_string += '<img src="images/lock.png">';
 		
 		//signal level (magic number)
 		if (oneWifiData['lvl'] != '')
 		{
 			var lvl = 3 - Math.round( (parseInt(oneWifiData['lvl'])+19) / (-20) );
 			if (lvl < 0) 		lvl = 0;
-			div_string += '<img src="html_config/wifi' + lvl + '.png">';
+			div_string += '<img src="images/wifi' + lvl + '.png">';
 		}
 		
 		div_string += '</div></div>';
