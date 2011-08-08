@@ -24,7 +24,7 @@ foreach (@myLines)
 		if ($currNum > 0)
 		{
 			cleanUpCurrentWifi();
-			printOneLine($name, $quality, $sigLvl, $channel, $mode, $encryption, $auth);
+			printOneLine($essid, $quality, $sigLvl, $channel, $mode, $encryption, $auth);
 			varInit();
 		}
 		$currNum++;
@@ -54,12 +54,20 @@ foreach (@myLines)
     }
     elsif($_ =~ "IE: WPA .+ [0-9]")
     {
-		handleEncryption($_);
+		handleAuth($_);
     }
-    elsif($_ =~ "Authentication Suites")
+	elsif($_ =~ "IE: IEEE 802.11i/WPA2")
     {
 		handleAuth($_);
+    }
+	elsif($_ =~ "Pairwise Ciphers")
+    {
+		handleCipher($_);
     }   
+    elsif($_ =~ "Authentication Suites")
+    {
+		handleAuthSuite($_);
+    }
 }
 
 
@@ -67,7 +75,7 @@ if ($currNum > 0)
 {
 	#last one
 	cleanUpCurrentWifi();
-    printOneLine($name, $quality, $sigLvl, $channel, $mode, $encryption, $auth);
+    printOneLine($essid, $quality, $sigLvl, $channel, $mode, $encryption, $auth);
 }
 else
 {
@@ -80,17 +88,19 @@ else
 
 sub printOneLine()
 {
-    printf("<wifi><ssid>%s</ssid><qty>%s</qty><lvl>%s</lvl><ch>%s</ch><mode>%s</mode><encryption>%s</encryption><auth>%s</auth></wifi>\n", $_[0], $_[1], $_[2], $_[3], $_[4], $_[5], $_[6] );
+    printf("<wifi><ssid>%s</ssid><qty>%s</qty><lvl>%s</lvl><ch>%s</ch><mode>%s</mode><encryption>%s</encryption><auth>%s</auth></wifi>\n", $_[0], $_[1], $_[2], $_[3], $_[4], $_[5], $_[6]);
 }
 
 sub varInit()
 {
-    $name = "";
+    $essid = "";
     $quality = "";
     $sigLvl = "";
     $keyonoff = "";
-    $encryption = "NONE";
-    $auth = "123456";
+    $auth = "";
+	$authSuite = "";
+    $encryption = "";
+	$cipher = "";
 	$mode = "";
 	$channel = "";
 }
@@ -99,14 +109,19 @@ sub cleanUpCurrentWifi ()
 {
     if ($keyonoff eq "on")
 	{
-		if ($auth eq "123456")
+		if ($auth eq "")
 		{
 			$encryption = "WEP";
 			$auth = "WEPAUTO";
 		}
 		else
 		{
-			$auth = $encryption . $auth;		#WPA, WPA2	#WPAPSK, WPAEAP, WPA2PSK, WPA2EAP
+			$encryption = $auth;			#WPA, WPA2
+			if($cipher =~ /CCMP/)
+			{
+				$encryption = "AES";		#Change encryprtion to AES
+			}
+			$auth = $auth . $authSuite;		#WPAPSK, WPAEAP, WPA2PSK, WPA2EAP
 		}
 	}
 	else
@@ -118,13 +133,9 @@ sub cleanUpCurrentWifi ()
 
 ###########################################################################
 
-sub handleEncryption ()
+sub handleCipher ()
 {
-    $encryption = "WPA".($_ =~ ".*[0-9]");
-	if ($encryption eq "WPA1")
-	{
-		$encryption = "WPA";
-	}
+    $cipher = (split(":", $_[0]))[1];
 }
 
 sub handleQuality ()
@@ -139,18 +150,33 @@ sub handleQuality ()
 
 sub handleKey ()
 {
+	#Eg.: Encryption key:on
     $keyonoff = (split(":", $_[0]))[1];
 }
 
 sub handleESSID ()
 {
-    $name = (split(":", $_[0]))[1];
-	$name =  substr $name, 1, -1;
+	#Eg.: ESSID:"ChumbyWPA"
+    $essid = (split(":", $_[0]))[1];
+	$essid =  substr $essid, 1, -1;
 }
 
 sub handleAuth ()
 {
-    $auth = (split(" ", $_[0]))[4];
+	if($_ =~ "IE: WPA")
+    {
+		$auth = "WPA";
+    }
+	elsif($_ =~ "IE: IEEE 802.11i/WPA2")
+    {
+		$auth = "WPA2";
+    }
+}
+
+sub handleAuthSuite ()
+{
+	#Eg.: Authentication Suites (1) : PSK
+    $authSuite = (split(" ", $_[0]))[4];
 }
 
 sub handleMode ()
