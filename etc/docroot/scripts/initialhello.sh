@@ -71,7 +71,12 @@ fi
 # Start Access Point mode if neccesary
 #
 if [ "$internet" == "false" ]; then
-    ap_status=$(${SCRIPTPATH}/start_ap.sh)
+
+	# Perform very first WifiScan before going to AP mode
+	# Wifilist is saved to /tmp/wifilist.xml
+	wifilist=$(${SCRIPTPATH}/wifiscan.sh -f)
+
+	ap_status=$(${SCRIPTPATH}/start_ap.sh)
 
 	# if called too early, encounter "nl80211 driver failed to initialize" error
 	if [ ! -z "$(echo $ap_status | awk '/failed/')" ]; then
