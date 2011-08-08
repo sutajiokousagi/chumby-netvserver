@@ -1,16 +1,7 @@
 <html>
 <head>
 <title>NeTVServer HTTP Interface Test</title>
-<script type='text/javascript' src='./html_test/browser_detect.js'></script>
 <script type='text/javascript' src='./html_test/test.js'></script>
-<script language="javascript">
-	function onLoad()
-	{
-		document.all.browserDetect_browser.innerHTML = "Browser: " + BrowserDetect.browser;
-		document.all.browserDetect_version.innerHTML = "Version: " + BrowserDetect.version;
-		document.all.browserDetect_os.innerHTML = "OS: " + BrowserDetect.OS;
-	}
-</script>
 <style>
 	body {
 		font-family: Verdana;
@@ -119,6 +110,24 @@
 			</td>
 			<td class="td_button">
 				<input type="button" value="GO!" onclick="Hello()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- WifiScan -->
+		<form name="form_WifiScan" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				WifiScan
+			</td>
+			<td>
+				(no input required)
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="WifiScan()">
 			</td>
 		</tr>
 		</form>
@@ -567,20 +576,14 @@
 			</td>
 		</tr>
 		</form>
-
+		
 		
 	</table>
 	
 </td>
 <td>&nbsp;</td>
 </tr>
-<tr>
-	<td colspan="3" align="center" style="padding:10px;">
-		<div id="browserDetect_browser" style="color:white;" >Some user agent name here</div>
-		<div id="browserDetect_version" style="color:white;" >Some user agent name here</div>
-		<div id="browserDetect_os" style="color:white;" >Some user agent name here</div>
-	</td>
-</tr>
+
 </table>
 		
 </body>

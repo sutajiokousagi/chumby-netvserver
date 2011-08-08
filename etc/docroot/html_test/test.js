@@ -61,6 +61,11 @@ function Hello()
 	sendSingleValueCommand('Hello', '');
 }
 
+function WifiScan()
+{
+	sendSingleValueCommand('WifiScan', '');
+}
+
 function SetUrl()
 {
 	var dataString = document.form_SetUrl.inputField.value;
