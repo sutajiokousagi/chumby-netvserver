@@ -25,15 +25,17 @@ void Startup::start()
     Static::sessionStore=new HttpSessionStore(sessionSettings, this);
 
     // Configure static file controller
-    QSettings* fileSettings=new QSettings(configFileName,QSettings::IniFormat);
-    fileSettings->beginGroup("docroot");
-    Static::staticFileController=new StaticFileController(fileSettings);
+    QSettings* docrootSettings=new QSettings(configFileName,QSettings::IniFormat);
+    docrootSettings->beginGroup("docroot");
+    Static::staticFileController=new StaticFileController(docrootSettings);
 
     // Configure script controller
-    Static::scriptController=new ScriptController(fileSettings);
+    Static::scriptController=new ScriptController(docrootSettings);
 
     // Configure bridge controller
-    Static::bridgeController=new BridgeController(fileSettings,this);
+    QSettings* bridgeSettings=new QSettings(configFileName,QSettings::IniFormat);
+    bridgeSettings->beginGroup("bridge-controller");
+    Static::bridgeController=new BridgeController(bridgeSettings,this);
 
     // Configure Flash policy server
     QSettings* flashpolicySettings=new QSettings(configFileName,QSettings::IniFormat);

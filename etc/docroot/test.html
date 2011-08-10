@@ -12,12 +12,17 @@
 
 	.service_header_row {
 		background-color: #000000;
-		border: 2px solid #00BBFF;
 	}
 
 	.service_row {
-		background-color: #0077DD;
-		border-top: 2px dotted #0033DD;
+		background: #3591e8;
+		background: -moz-linear-gradient(top, #3591e8 0%, #207ce5 5%, #207ce5 95%, #3591e8 100%);
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#3591e8), color-stop(5%,#207ce5), color-stop(95%,#207ce5), color-stop(100%,#3591e8));
+		background: -webkit-linear-gradient(top, #3591e8 0%,#207ce5 5%,#207ce5 95%,#3591e8 100%);
+		background: -o-linear-gradient(top, #3591e8 0%,#207ce5 5%,#207ce5 95%,#3591e8 100%);
+		background: -ms-linear-gradient(top, #3591e8 0%,#207ce5 5%,#207ce5 95%,#3591e8 100%);
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3591e8', endColorstr='#3591e8',GradientType=0 );
+		background: linear-gradient(top, #3591e8 0%,#207ce5 5%,#207ce5 95%,#3591e8 100%);
 	}
 
 	.service_done {
@@ -280,8 +285,8 @@
 		<!-- SetChromaKey -->
 		<form name="form_SetChromaKeyOnOff" method="POST" action="">
 		<tr class="service_row">
-			<td class="service_in_progress">
-				In Testing
+			<td class="service_done">
+				done
 			</td>
 			<td>
 				SetChromaKey
@@ -298,8 +303,8 @@
 		<!-- SetChromaKey -->
 		<form name="form_SetChromaKeyColor" method="POST" action="">
 		<tr class="service_row">
-			<td class="service_in_progress">
-				In Testing
+			<td class="service_done">
+				done
 			</td>
 			<td>
 				SetChromaKey
@@ -348,30 +353,12 @@
 			</td>
 		</tr>
 		</form>
-		
-		<!-- LongPoll -->
-		<form name="form_LongPoll" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_in_progress">
-				In Testing
-			</td>
-			<td>
-				LongPoll
-			</td>
-			<td>
-				(no input required)
-			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="LongPoll()">
-			</td>
-		</tr>
-		</form>
-		
+			
 		<!-- GetAllParams -->
 		<form name="form_GetAllParams" method="POST" action="">
 		<tr class="service_row">
-			<td class="service_pending">
-				pending
+			<td class="service_done">
+				done
 			</td>
 			<td>
 				GetAllParams
@@ -388,8 +375,8 @@
 		<!-- GetParam -->
 		<form name="form_GetParam" method="POST" action="">
 		<tr class="service_row">
-			<td class="service_pending">
-				pending
+			<td class="service_done">
+				done
 			</td>
 			<td>
 				GetParam
@@ -404,10 +391,10 @@
 		</form>
 		
 		<!-- SetParam -->
-		<form name="form_GetParam" method="POST" action="">
+		<form name="form_SetParam" method="POST" action="">
 		<tr class="service_row">
-			<td class="service_pending">
-				pending
+			<td class="service_done">
+				done
 			</td>
 			<td>
 				SetParam

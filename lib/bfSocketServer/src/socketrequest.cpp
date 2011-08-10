@@ -86,7 +86,7 @@ void SocketRequest::ParseMessageXML(const char* data)
     xml->addData(data);
 
     //Input format is similar to this https://internal.chumby.com/wiki/index.php/JavaScript/HTML_-_Hardware_Bridge_protocol
-    //Example: <cmd>PlayWidget</cmd><data><value>1234567890</value></data>
+    //Example: <xml><cmd>PlayWidget</cmd><data><value>1234567890</value></data></xml>
 
     QString currentTag;
     bool isFirstElement = true;

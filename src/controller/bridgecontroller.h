@@ -13,6 +13,8 @@ public:
     /** Constructor */
     BridgeController(QSettings* settings, QObject* parent = 0);
 
+    ~BridgeController();
+
     /** Receive & response to HTTP requests */
     void service(HttpRequest& request, HttpResponse& response);
 
@@ -34,14 +36,11 @@ signals:
 
 private:
 
-    /** Long polling HTTP response */
-    QList<HttpResponse*> longPollResponses;
-
-    /** Encoding of text files */
-    QString encoding;
-
-    /** Root directory of documents */
+    /** Variables from NeTVServer.ini */
     QString docroot;
+    QString paramsFile;
+    QString networkConfigFile;
+    QString accountConfigFile;
 
     /** Process Utilities */
     QByteArray Execute(const QString &fullPath);
@@ -49,6 +48,14 @@ private:
 
     /** Helper */
     bool SetNetworkConfig(QHash<QString, QString> parameters);
+
+    /** Parameters */
+    QSettings * parameters;
+    QByteArray GetParameter(QString name);
+    QByteArray GetAllParameters();
+    void SetParameter(QString name, QString value);
+    void LoadParameters(QString * filename = NULL);
+    void SaveParameters(QString * filename = NULL);
 
     /** File Utilities */
     bool FileExists(const QString &fullPath);

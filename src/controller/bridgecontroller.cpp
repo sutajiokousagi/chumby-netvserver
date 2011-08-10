@@ -4,39 +4,36 @@
 #include <QDir>
 #include <QDebug>
 #include <QProcess>
-//#include <QApplication>
-//#include <QDesktopWidget>
 #include <QDateTime>
 
 #define BRIDGE_RETURN_STATUS_UNIMPLEMENTED  "0"
 #define BRIDGE_RETURN_STATUS_SUCCESS        "1"
 #define BRIDGE_RETURN_STATUS_ERROR          "2"
 
-#define BRIDGE_NETWORK_CONFIG               "/psp/network_config"
-#define BRIDGE_ACCOUNT_CONFIG               "/psp/chumby_account"
-
 #define ARGS_SPLIT_TOKEN    "|~|"
 
 BridgeController::BridgeController(QSettings* settings, QObject* parent) : QObject(parent), HttpRequestHandler(), SocketRequestHandler()
 {
-    longPollResponses.clear();
-
-    encoding=settings->value("encoding","UTF-8").toString();
+    //Settings from NeTVServer.ini
     docroot=settings->value("path",".").toString();
+    paramsFile=settings->value("paramsFile",".").toString();
+    networkConfigFile=settings->value("networkConfigFile",".").toString();
+    accountConfigFile=settings->value("accountConfigFile",".").toString();
 
-    // Convert relative path to absolute, based on the directory of the config file.
-#ifdef Q_OS_WIN32
-    if (QDir::isRelativePath(docroot) && settings->format()!=QSettings::NativeFormat)
-#else
-    if (QDir::isRelativePath(docroot))
-#endif
-    {
-        QFileInfo configFile(settings->fileName());
-        docroot=QFileInfo(configFile.absolutePath(),docroot).absoluteFilePath();
-    }
-    qDebug("BridgeController: docroot=%s, encoding=%s",qPrintable(docroot),qPrintable(encoding));
+    //Load non-volatile parameters
+    parameters = NULL;
+    LoadParameters();
+
+    qDebug("BridgeController: path=%s",qPrintable(docroot));
+    qDebug("BridgeController: paramsFile=%s",qPrintable(paramsFile));
 }
 
+BridgeController::~BridgeController()
+{
+    SaveParameters();
+    delete parameters;
+    parameters = NULL;
+}
 
 void BridgeController::service(HttpRequest& request, HttpResponse& response)
 {
@@ -44,13 +41,18 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     //https://internal.chumby.com/wiki/index.php/JavaScript/HTML_-_Hardware_Bridge_protocol
 
     QByteArray cmdString = request.getParameter("cmd").toUpper();
+    QByteArray dataString = request.getParameter("value").toUpper();
     QByteArray dataXmlString = request.getParameter("data");
-    QByteArray dataString = "";
 
-    //Strip the XML tag if it is a simple value
-    bool singleValueArg = dataXmlString.startsWith("<value>") && dataXmlString.endsWith("</value>");
-    if (singleValueArg)
-        dataString = dataXmlString.mid(7, dataXmlString.length() - 15).trimmed();
+    //A specialize QHash for received parameters in XML format
+    QHash<QByteArray,QByteArray> xmlparameters;
+    QMapIterator<QByteArray,QByteArray> i(request.getParameterMap());
+    while (i.hasNext())
+    {
+        i.next();
+        if (i.key().startsWith("dataxml_"))
+            xmlparameters.insert( QByteArray(i.key()).remove(0, 8), i.value() );
+    }
 
     //-----------
 
@@ -254,7 +256,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
         //Stop AP Mode & start NetworkManager
         QByteArray buffer;
-        if (!fileOK)        buffer = this->GetFileContents(BRIDGE_NETWORK_CONFIG);
+        if (!fileOK)        buffer = this->GetFileContents(networkConfigFile);
         else                buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
 
         //Reply to JavaScriptCore/ControlPanel
@@ -273,12 +275,12 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         if (device_name == "")  device_name = "NeTV";
 
         QString account_config = QString("<configuration username=\"%1\" password=\"%2\" device_name=\"%3\" />").arg(username).arg(password).arg(device_name);
-        bool fileOK = SetFileContents(BRIDGE_ACCOUNT_CONFIG, account_config.toLatin1());
+        bool fileOK = SetFileContents(accountConfigFile, account_config.toLatin1());
 
         //We should ask the JSCore to do something here.
         //QByteArray buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
         QByteArray buffer;
-        if (!fileOK)        buffer = this->GetFileContents(BRIDGE_ACCOUNT_CONFIG);
+        if (!fileOK)        buffer = this->GetFileContents(accountConfigFile);
         else                activated.toLatin1();
 
         //Reply to JavaScriptCore/ControlPanel
@@ -290,17 +292,24 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "GETALLPARAMS")
     {
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_UNIMPLEMENTED + "</status><data><value>GetAllParams</value></data>", true);
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data>" +  GetAllParameters() + "</data>", true);
     }
 
     else if (cmdString == "GETPARAM")
     {
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_UNIMPLEMENTED + "</status><data><value>GetParam</value></data>", true);
+        QByteArray value = GetParameter(dataString);
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + value + "</value></data>", true);
     }
 
     else if (cmdString == "SETPARAM")
     {
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_UNIMPLEMENTED + "</status><data><value>SetParam</value></data>", true);
+        QHashIterator<QByteArray, QByteArray> i(xmlparameters);
+        while (i.hasNext())
+        {
+            i.next();
+            SetParameter( i.key(), i.value() );
+        }
+        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + QByteArray().setNum(xmlparameters.size()) + "</value></data>", true);
     }
 
     //-----------
@@ -488,7 +497,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         QByteArray buffer;
         if (!fileOK)        qDebug("Error writing network config file");
         else                qDebug("Writing network config file OK");
-        if (!fileOK)        buffer = this->GetFileContents(BRIDGE_NETWORK_CONFIG);
+        if (!fileOK)        buffer = this->GetFileContents(networkConfigFile);
         else                buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
         response.setCommand(cmdString);
         response.setParameter("data", buffer.trimmed());
@@ -508,18 +517,50 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         if (device_name == "")  device_name = "NeTV";
 
         QString account_config = QString("<configuration username=\"%1\" password=\"%2\" device_name=\"%3\" />").arg(username).arg(password).arg(device_name);
-        bool fileOK = SetFileContents(BRIDGE_ACCOUNT_CONFIG, account_config.toLatin1());
+        bool fileOK = SetFileContents(accountConfigFile, account_config.toLatin1());
 
         //We should ask the JSCore to do something here.
         //QByteArray buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
         QByteArray buffer;
         if (!fileOK)        fprintf(stderr,"Error writing account config file\n");
         else                fprintf(stderr,"Writing account config file OK\n");
-        if (!fileOK)        buffer = this->GetFileContents(BRIDGE_ACCOUNT_CONFIG);
+        if (!fileOK)        buffer = this->GetFileContents(accountConfigFile);
         else                activated.toLatin1();
 
         response.setCommand(cmdString);
         response.setParameter("data", buffer.trimmed());
+        response.write();
+    }
+
+    //-----------
+
+    else if (cmdString == "GETALLPARAMS")
+    {
+        response.setCommand(cmdString);
+        response.setParameter("data", GetAllParameters());
+    }
+
+    else if (cmdString == "GETPARAM")
+    {
+        response.setCommand(cmdString);
+        response.setParameter("value", GetParameter(dataString));
+        response.write();
+    }
+
+    else if (cmdString == "SETPARAM")
+    {
+        int count = 0;
+        QMapIterator<QByteArray, QByteArray> i(request.getParameters());
+        while (i.hasNext())
+        {
+            i.next();
+            if (i.key() == "data" || i.key() == "cmd" || i.key() == "status" || i.key() == "value")
+                continue;
+            count++;
+            SetParameter( i.key(), i.value() );
+        }
+        response.setCommand(cmdString);
+        response.setParameter("value", QByteArray().setNum(count));
         response.write();
     }
 
@@ -728,7 +769,7 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
 
     QString network_config = QString("<configuration type=\"%1\" allocation=\"%2\" ssid=\"%3\" auth=\"%4\" encryption=\"%5\" key=\"%6\" encoding=\"%7\" />")
                                                      .arg(type).arg(allocation).arg(ssid).arg(auth).arg(encryption).arg(key).arg(encoding);
-    return SetFileContents(BRIDGE_NETWORK_CONFIG, network_config.toLatin1());
+    return SetFileContents(networkConfigFile, network_config.toLatin1());
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -831,4 +872,47 @@ void BridgeController::slot_DeviceRemoved(QByteArray objPath)
     //Forward it to browser
     qDebug() << "BridgeController: [NMDeviceRemoved] " << objPath;
     Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMDeviceRemoved</cmd><data><value>") + objPath + "</value></data></xml>", "netvbrowser");
+}
+
+
+//----------------------------------------------------------------------------------------------------
+// Non-volatile parameters
+//----------------------------------------------------------------------------------------------------
+
+QByteArray BridgeController::GetParameter(QString name)
+{
+    return parameters->value(name, "").toByteArray();
+}
+
+QByteArray BridgeController::GetAllParameters()
+{
+    QByteArray paramsString = "";
+    QStringList allkeys = parameters->allKeys();
+    for (int i = 0; i < allkeys.size(); ++i)
+    {
+        QByteArray name = allkeys.at(i).toLatin1();
+        QByteArray value = GetParameter(name);
+        paramsString.append("<" + name + ">" + value + "</" + name + ">");
+    }
+    return paramsString;
+}
+
+void BridgeController::SetParameter(QString name, QString value)
+{
+    parameters->setValue(name, value);
+    SaveParameters();
+}
+
+void BridgeController::LoadParameters(QString * filename /* = NULL */)
+{
+    if (parameters != NULL)        parameters->sync();
+    else if (filename == NULL)     parameters = new QSettings(paramsFile, QSettings::IniFormat);
+    else                           parameters = new QSettings(*filename, QSettings::IniFormat);
+}
+
+void BridgeController::SaveParameters(QString * filename /* = NULL */)
+{
+    if (parameters != NULL)        parameters->sync();
+    else if (filename == NULL)     parameters = new QSettings(paramsFile, QSettings::IniFormat);
+    else                           parameters = new QSettings(*filename, QSettings::IniFormat);
 }

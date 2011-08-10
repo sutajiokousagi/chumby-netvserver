@@ -7,6 +7,7 @@
 #include "httprequest.h"
 #include <QList>
 #include <QDir>
+#include <QXmlStreamReader>
 #include "httpcookie.h"
 
 HttpRequest::HttpRequest(QSettings* settings) {
@@ -165,7 +166,8 @@ void HttpRequest::readBody(QTcpSocket& socket) {
     }
 }
 
-void HttpRequest::decodeRequestParams() {
+void HttpRequest::decodeRequestParams()
+{
 #ifdef SUPERVERBOSE
     //qDebug("HttpRequest: extract and decode request parameters");
 #endif
@@ -182,7 +184,8 @@ void HttpRequest::decodeRequestParams() {
     }
     // Split the parameters into pairs of value and name
     QList<QByteArray> list=rawParameters.split('&');
-    foreach (QByteArray part, list) {
+    foreach (QByteArray part, list)
+    {
         int equalsChar=part.indexOf('=');
         if (equalsChar>=0) {
             QByteArray name=part.left(equalsChar).trimmed();
@@ -194,6 +197,55 @@ void HttpRequest::decodeRequestParams() {
             parameters.insert(urlDecode(part),"");
         }
     }
+}
+
+void HttpRequest::decodeXMLParams()
+{
+    //No extra param
+    QByteArray dataXmlString = this->getParameter("data");
+    if (dataXmlString.length() <= 3)
+        return;
+
+    //Strip the XML tag if it contains only a single value
+    bool singleValueArg = dataXmlString.startsWith("<value>") && dataXmlString.endsWith("</value>");
+    if (singleValueArg)
+    {
+        QByteArray dataString = dataXmlString.mid(7, dataXmlString.length() - 15).trimmed();
+        parameters.insert(urlDecode("value"),urlDecode(dataString));
+        return;
+    }
+
+    QXmlStreamReader* xml = new QXmlStreamReader();
+    xml->addData(QByteArray("<xml>") + dataXmlString + QByteArray("</xml>"));
+
+    //Input format is documented here
+    //https://internal.chumby.com/wiki/index.php/JavaScript/HTML_-_Hardware_Bridge_protocol
+    //Example: <xml><cmd>PlayWidget</cmd><data><value>1234567890</value></data></xml>
+
+    QString currentTag;
+    bool isFirstElement = true;
+
+    while (!xml->atEnd())
+    {
+        xml->readNext();
+
+        if (xml->isStartElement() && isFirstElement)
+        {
+            isFirstElement = false;
+        }
+        else if (xml->isStartElement())
+        {
+            currentTag = xml->name().toString().trimmed();
+
+            if (currentTag == "cmd")
+                parameters.insert(QByteArray("cmd"), urlDecode(xml->readElementText().toLatin1()));
+
+            else if (currentTag != "data")
+                parameters.insert(QByteArray("dataxml_")+urlDecode(currentTag.toLatin1()), urlDecode(xml->readElementText().toLatin1()));
+        }
+    }
+    currentTag = "";
+    delete xml;
 }
 
 void HttpRequest::extractCookies() {
@@ -241,6 +293,8 @@ void HttpRequest::readFromSocket(QTcpSocket& socket) {
     if (status==complete) {
         // Extract and decode request parameters from url and body
         decodeRequestParams();
+        // Extract and decode request parameters from XML style message
+        decodeXMLParams();
         // Extract cookies from headers
         extractCookies();
     }

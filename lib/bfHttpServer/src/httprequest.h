@@ -193,7 +193,7 @@ private:
     /** Temp file, that is used to store the multipart/form-data body */
     QTemporaryFile tempFile;
 
-    /** Parset he multipart body, that has been stored in the temp file. */
+    /** Parset the multipart body, that has been stored in the temp file. */
     void parseMultiPartFile();
 
     /** Sub-procedure of readFromSocket(), read the first line of a request. */
@@ -207,6 +207,9 @@ private:
 
     /** Sub-procedure of readFromSocket(), extract and decode request parameters. */
     void decodeRequestParams();
+
+    /** Sub-procedure of decodeXMLParams(), extract and decode request parameters in XML format. */
+    void decodeXMLParams();
 
     /** Sub-procedure of readFromSocket(), extract cookies from headers */
     void extractCookies();
