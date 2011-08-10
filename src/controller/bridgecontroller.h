@@ -47,6 +47,7 @@ private:
     QByteArray Execute(const QString &fullPath, QStringList args);
 
     /** Helper */
+    bool IsAuthorizedCaller(QByteArray headerValue);
     bool SetNetworkConfig(QHash<QString, QString> parameters);
 
     /** Parameters */
