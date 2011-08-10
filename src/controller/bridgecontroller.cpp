@@ -63,9 +63,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to browser</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to browser</value></data></xml>", true);
         else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No browser found</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No browser found</value></data></xml>", true);
     }
 
     else if (cmdString == "GETURL")
@@ -77,12 +77,12 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         if (postString.length() > 0)    argsList.append(QString(postString));
         if (argsList.length() < 1)
         {
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>no arguments received</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>no arguments received</value></data></xml>", true);
         }
         else
         {
             QByteArray buffer = this->Execute(docroot + "/scripts/geturl.sh", argsList);
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
             buffer = QByteArray();
         }
     }
@@ -90,14 +90,14 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "GETJPG" || cmdString == "GETJPEG")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/tmp_download.sh", QStringList(dataString));
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
     }
 
     //-----------
 
     else if (cmdString == "HASFLASHPLUGIN")
     {
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>false</value></data>", true);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>false</value></data></xml>", true);
     }
 
     else if (cmdString == "PLAYWIDGET")
@@ -107,9 +107,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to widget rendering engine</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to widget rendering engine</value></data></xml>", true);
         else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data></xml>", true);
     }
 
     //-----------
@@ -137,12 +137,12 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         //Execute the script
         if (argList.size() <= 0)
         {
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>Invalid arguments</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>Invalid arguments</value></data></xml>", true);
         }
         else
         {
             QByteArray buffer = this->Execute(docroot + "/scripts/chromakey.sh", argList);
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
             buffer = QByteArray();
         }
     }
@@ -156,7 +156,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "widget_engine");
 
         QByteArray buffer = this->Execute(docroot + "/scripts/widget_engine.sh", QStringList(dataString));
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
         buffer = QByteArray();
     }
 
@@ -168,9 +168,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to widget rendering engine</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to widget rendering engine</value></data></xml>", true);
         else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data></xml>", true);
     }
 
     else if (cmdString == "SETWIDGETSIZE")
@@ -183,9 +183,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to widget rendering engine</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to widget rendering engine</value></data></xml>", true);
         else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No widget rendering engine found</value></data></xml>", true);
     }
 
     else if (cmdString == "REMOTECONTROL")
@@ -195,9 +195,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to browser</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to browser</value></data></xml>", true);
         else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No browser running</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No browser running</value></data></xml>", true);
     }
 
     //-----------
@@ -206,7 +206,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     {
         //This is simply passed directly to NeTVBrowser
         QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
         buffer = QByteArray();
     }
 
@@ -217,9 +217,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to client</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>Command forwarded to client</value></data></xml>", true);
         else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No client running</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>No client running</value></data></xml>", true);
     }
 
     //-----------
@@ -237,8 +237,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         QByteArray buffer = this->Execute(docroot + "/scripts/set_time.sh", argsList);
 
         //Reply to JavaScriptCore/ControlPanel
-        if (time == "")    response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>time parameter is required</value></data>", true);
-        else               response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+        if (time == "")    response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>time parameter is required</value></data></xml>", true);
+        else               response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
     }
 
     else if (cmdString == "SETNETWORK")
@@ -260,8 +260,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         else                buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
 
         //Reply to JavaScriptCore/ControlPanel
-        if (!fileOK)        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
-        else                response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+        if (!fileOK)        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+        else                response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
     }
 
     else if (cmdString == "SETACCOUNT")
@@ -284,21 +284,21 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         else                activated.toLatin1();
 
         //Reply to JavaScriptCore/ControlPanel
-        if (!fileOK)        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
-        else                response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data>", true);
+        if (!fileOK)        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+        else                response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
     }
 
     //-----------
 
     else if (cmdString == "GETALLPARAMS")
     {
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data>" +  GetAllParameters() + "</data>", true);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data>" +  GetAllParameters() + "</data></xml>", true);
     }
 
     else if (cmdString == "GETPARAM")
     {
         QByteArray value = GetParameter(dataString);
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + value + "</value></data>", true);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + value + "</value></data></xml>", true);
     }
 
     else if (cmdString == "SETPARAM")
@@ -309,7 +309,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             i.next();
             SetParameter( i.key(), i.value() );
         }
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + QByteArray().setNum(xmlparameters.size()) + "</value></data>", true);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + QByteArray().setNum(xmlparameters.size()) + "</value></data></xml>", true);
     }
 
     //-----------
@@ -318,9 +318,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     {
         QByteArray filedata = GetFileContents(dataString);
         if (filedata == "file not found" || filedata == "no permission")
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>" + filedata + "</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>" + filedata + "</value></data></xml>", true);
         else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + filedata + "</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + filedata + "</value></data></xml>", true);
     }
 
     else if (cmdString == "SETFILECONTENTS")
@@ -329,9 +329,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         QByteArray path = dataXmlString.mid(6, dataXmlString.indexOf("</path>") - 6);
         QByteArray content = dataXmlString.mid(dataXmlString.indexOf("<content>") + 9, dataXmlString.length()-dataXmlString.indexOf("<content>")-9);
         if (!SetFileContents(path,content))
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>0</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>0</value></data></xml>", true);
         else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + QByteArray().setNum(GetFileSize(path)) + "</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + QByteArray().setNum(GetFileSize(path)) + "</value></data></xml>", true);
     }
 
     else if (cmdString == "FILEEXISTS")
@@ -339,22 +339,22 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         QByteArray existStr = "false";
         if (FileExists(dataString))
             existStr = "true";
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + existStr + "</value></data>", true);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + existStr + "</value></data></xml>", true);
     }
 
     else if (cmdString == "GETFILESIZE")
     {
         QByteArray sizeStr = QByteArray().setNum(GetFileSize(dataString));
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + sizeStr + "</value></data>", true);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>" + sizeStr + "</value></data></xml>", true);
     }
 
     else if (cmdString == "UNLINKFILE")
     {
         bool success = UnlinkFile(dataString);
         if (!success)
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>false</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data><value>false</value></data></xml>", true);
         else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>true</value></data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data><value>true</value></data></xml>", true);
     }
 
     //-----------
@@ -364,9 +364,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/" + cmdString.toLower() + ".sh", QStringList(dataString));
         if (buffer.length() > 5)
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data>" + buffer.trimmed() + "</data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><data>" + buffer.trimmed() + "</data></xml>", true);
         else
-            response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data>" + buffer.trimmed() + "</data>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><data>" + buffer.trimmed() + "</data></xml>", true);
         buffer = QByteArray();
     }
 
@@ -374,7 +374,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else
     {
-        response.write(QByteArray("<status>") + BRIDGE_RETURN_STATUS_UNIMPLEMENTED + "</status><data><value>" + cmdString + "</value></data>", true);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNIMPLEMENTED + "</status><data><value>" + cmdString + "</value></data></xml>", true);
     }
 }
 
