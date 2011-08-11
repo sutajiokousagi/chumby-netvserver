@@ -3,7 +3,7 @@ function onLoad()
 	$("#div_loadingMain").fadeIn(0);
 	
 	//Call systemupdate.sh script
-	xmlhttpPost("", "post", { 'cmd' : 'SystemUpdate' }, updateDoneCallback );
+	xmlhttpPost("http://localhost/bridge", "post", { 'cmd' : 'SystemUpdate', 'value' : '' }, updateDoneCallback );
 }
 
 function updateDoneCallback( vData )
@@ -11,9 +11,10 @@ function updateDoneCallback( vData )
 	fDbg2("-------------------------------------------");
 	fDbg2("  Upgrade Done");
 	fDbg2("-------------------------------------------");
-	fDbg2( vData );
+	fDbg2 ( vData );
+	
 	//May not reach here since system reboots itself
-	//location.href="http://localhost/";
+	location.href="http://localhost/";
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -77,13 +78,17 @@ function fNMDeviceRemoved(  )
 // -------------------------------------------------------------------------------------------------
 //	events from system
 // -------------------------------------------------------------------------------------------------
-function fUPDATECOUNTEvent( vEventName )
+function fUPDATECOUNTEvent( vEventData )
 {
 	return "command ignored";
 }
 
-function fUPDATEREADYEvent( vEventName )
+function fUPDATEREADYEvent( vEventData )
 {
-	xmlhttpPost("", "post", { 'cmd' : 'SystemUpdate' }, updateDoneCallback );
+	fDbg2("-------------------------------------------");
+	fDbg2("  Update Ready (" + vEventData + " packages)");
+	fDbg2("-------------------------------------------");
+	
+	xmlhttpPost("", "post", { 'cmd' : 'SystemUpdate', 'value' : '' }, updateDoneCallback );
 	return "upgrading...";
 }
