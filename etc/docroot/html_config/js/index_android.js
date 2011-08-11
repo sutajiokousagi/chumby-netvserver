@@ -10,7 +10,7 @@ function onLoad()
 	
 	//Init loading view
 	main_showState('loading', false);
-	
+		
 	mNetConfig = cNetConfig.fGetInstance();
 	mNetConfig.fInit();
 
@@ -19,9 +19,10 @@ function onLoad()
 
 function onLoadLater()
 {
-	//Start wifi list module
+	//Do not start the internal wifiscan in Android version
+	//WifiScan data will come from Android app event
 	wifilist_init();
-	wifilist_startWifiScan();
+	//wifilist_startWifiScan();
 	
 	main_showMainPanel();
 }
@@ -38,35 +39,6 @@ function main_hideMainPanel(duration)
 {
 	$("#div_center").animate({ top: main_y + $(window).height() }, !duration ? 1600 : duration);
 }
-
-/*
-function slideToLeft(itemName, duration)
-{
-	var width = $("#div_center_container").width();
-	$("#"+itemName).animate({ left: -width * 1.5 }, !duration ? 800 : duration);
-}
-function slideToRight(itemName, duration)
-{
-	var width = $("#div_center_container").width();
-	$("#"+itemName).animate({ left: width * 1.5 }, !duration ? 800 : duration);
-}
-function slideInFromLeft(itemName, duration)
-{
-	var width = $("#div_center_container").width();
-	var offset = $("#"+itemName).offset();
-	offset.left = -width*1.5;
-	$("#"+itemName).offset(offset);
-	$("#"+itemName).animate({ left: 0 }, !duration ? 800 : duration);
-}
-function slideInFromRight(itemName, duration)
-{
-	var width = $("#div_center_container").width();
-	var offset = $("#"+itemName).offset();
-	offset.left = width*1.5;
-	$("#"+itemName).offset(offset);
-	$("#"+itemName).animate({ left: 0 }, !duration ? 800 : duration);
-}
-*/
 
 //-----------------------------------------------------------
 
@@ -92,7 +64,7 @@ function main_showState(vStateName, animated)
 	}
 	else if (vStateName == "wifilist")
 	{
-		wifilist_resetWifiScanTimer();
+		//wifilist_resetWifiScanTimer();
 		$("#div_loadingMain").fadeOut(duration);
 		setTimeout("$('#div_wifiListMain').fadeIn("+(duration+50)+");", duration);
 		$("#div_wifiDetailsMain").fadeOut(duration);
@@ -108,18 +80,9 @@ function main_showState(vStateName, animated)
 		$("#div_accountMain").fadeOut(duration);
 		$("#div_configuringMain").fadeOut(duration);
 	}
-	else if (vStateName == "accountdetails")
-	{
-		//accountdetails_init();
-		$("#div_loadingMain").fadeOut(duration);
-		$("#div_wifiListMain").fadeOut(duration);
-		$("#div_wifiDetailsMain").fadeOut(duration)
-		setTimeout("$('#div_accountMain').fadeIn("+(duration+50)+");", duration);
-		$("#div_configuringMain").fadeOut(duration);
-	}
 	else if (vStateName == "configuring")
 	{
-		configuring_init();
+		//configuring_init();
 		$("#div_loadingMain").fadeOut(duration);
 		$("#div_wifiListMain").fadeOut(duration);
 		$("#div_wifiDetailsMain").fadeOut(duration);
@@ -140,8 +103,10 @@ function main_showState(vStateName, animated)
 
 function main_onRemoteControl(vButtonName)
 {
+	/* // Totally disable IR Remote Control
 	if ( $("#div_wifiListMain").is(":visible") )				wifilist_onRemoteControl(vButtonName);
 	else if ( $("#div_wifiDetailsMain").is(":visible") )		wifidetails_onRemoteControl(vButtonName);
 	//else if ( $("#div_accountMain").is(":visible") )			account_onRemoteControl(vButtonName);
 	else if ( $("#div_configuringMain").is(":visible") )		configuring_onRemoteControl(vButtonName);
+	*/
 }

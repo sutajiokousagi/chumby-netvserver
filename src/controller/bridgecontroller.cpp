@@ -228,6 +228,26 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         buffer = QByteArray();
     }
 
+    else if (cmdString == "TICKEREVENT")
+    {
+        //All these should already be URI encoded
+        QByteArray message = xmlparameters.value("message", "");
+        QByteArray title = xmlparameters.value("title", "");
+        QByteArray image = xmlparameters.value("image", "");
+        QByteArray type = xmlparameters.value("type", "");
+        QByteArray level = xmlparameters.value("level", "");
+        QByteArray javaScriptString = "fTickerEvents(\"" + message + "\",\"" + title + "\",\"" + image + "\",\"" + type + "\",\"" + level + "\");";
+
+        //Forward to browser only
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>JavaScript</cmd><data><value>") + javaScriptString + "</value></data></xml>", "netvbrowser");
+
+        //Reply to JavaScriptCore/ControlPanel
+        if (numClient > 0)
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>OK</value></data></xml>", true);
+        else
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
+    }
+
     else if (cmdString == "KEY")
     {
         //Forward to all clients
@@ -235,7 +255,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>Command forwarded to client</value></data></xml>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", true);
         else
             response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No client running</value></data></xml>", true);
     }
@@ -446,20 +466,68 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    else if (cmdString == "KEY")
+    else if (cmdString == "ANDROID")
     {
-        //Forward to all clients
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "all");
+        QByteArray eventName = request.getParameter("eventname").trimmed();
+        QByteArray eventData = request.getParameter("eventdata").trimmed();     //already URI encoded
+        QByteArray javaScriptString = "fAndroidEvents(\"" + eventName + "\",\"" + eventData + "\");";
+
+        //Forward to browser only
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>JavaScript</cmd><data><value>") + javaScriptString + "</value></data></xml>", "netvbrowser");
 
         //Reply to socket client (Android/iOS)
         if (numClient > 0) {
             response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
             response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "Command forwarded to client");
+            response.setParameter(STRING_VALUE, "Command forwarded to browser");
         }else{
             response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
             response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "No client running");
+            response.setParameter(STRING_VALUE, "No browser running");
+        }
+        response.write();
+    }
+
+    else if (cmdString == "TICKEREVENT")
+    {
+        //All these should already be URI encoded
+        QByteArray message = request.getParameter("message").trimmed();
+        QByteArray title = request.getParameter("title").trimmed();
+        QByteArray image = request.getParameter("image").trimmed();
+        QByteArray type = request.getParameter("type").trimmed();
+        QByteArray level = request.getParameter("level").trimmed();
+        QByteArray javaScriptString = "fTickerEvents(\"" + message + "\",\"" + title + "\",\"" + image + "\",\"" + type + "\",\"" + level + "\");";
+
+        //Forward to browser only
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>JavaScript</cmd><data><value>") + javaScriptString + "</value></data></xml>", "netvbrowser");
+
+        //Reply to socket client (Android/iOS)
+        if (numClient > 0) {
+            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+            response.setCommand(cmdString);
+            response.setParameter(STRING_VALUE, "Command forwarded to browser");
+        }else{
+            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+            response.setCommand(cmdString);
+            response.setParameter(STRING_VALUE, "No browser running");
+        }
+        response.write();
+    }
+
+    else if (cmdString == "KEY")
+    {
+        //Forward to browser only
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "netvbrowser");
+
+        //Reply to socket client (Android/iOS)
+        if (numClient > 0) {
+            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+            response.setCommand(cmdString);
+            response.setParameter(STRING_VALUE, "Command forwarded to browser");
+        }else{
+            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+            response.setCommand(cmdString);
+            response.setParameter(STRING_VALUE, "No browser running");
         }
         response.write();
     }
@@ -764,18 +832,22 @@ QByteArray BridgeController::Execute(const QString &fullPath, QStringList args)
 bool BridgeController::IsAuthorizedCaller(QByteArray headerValue)
 {
     qint64 now = QDateTime::currentMSecsSinceEpoch();
-    qint64 minute1 = (now - 1000) / 1000;
-    qint64 minute2 = now / 1000;
+    qint64 second1 = (now - 1000) / 1000;
+    qint64 second2 = now / 1000;
+    qint64 second3 = (now + 1000) / 1000;
 
-    QCryptographicHash hash1(QCryptographicHash::Md5);
-    hash1.addData(QByteArray().setNum(minute1));
-    hash1.result();
+    QByteArray hashResult1 = QCryptographicHash::hash(QByteArray().setNum(second1),QCryptographicHash::Md5).toHex();
+    QByteArray hashResult2 = QCryptographicHash::hash(QByteArray().setNum(second2),QCryptographicHash::Md5).toHex();
+    QByteArray hashResult3 = QCryptographicHash::hash(QByteArray().setNum(second3),QCryptographicHash::Md5).toHex();
 
-    QCryptographicHash hash2(QCryptographicHash::Md5);
-    hash2.addData(QByteArray().setNum(minute2));
-    hash2.result();
+    qDebug() << "Received hash: " << headerValue;
+    qDebug() << "Calculated hash: " << hashResult1;
+    qDebug() << "Calculated hash: " << hashResult2;
+    qDebug() << "Calculated hash: " << hashResult3;
 
-    if (headerValue == hash1.result() || headerValue == hash2.result())
+    return true;
+
+    if (headerValue == hashResult1 || headerValue == hashResult2 || headerValue == hashResult3)
         return true;
     return false;
 }

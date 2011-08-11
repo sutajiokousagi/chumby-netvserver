@@ -15,9 +15,6 @@ function wifilist_init()
 	currentWifiList = null;
 	
 	mNetConfig.wifiScanCallback = wifilist_updateWifiList;
-	
-	//Start scanning
-	onWifiScanTimer();
 }
 
 //-----------------------------------------------------------
@@ -29,6 +26,12 @@ function onWifiScanTimer()
 	
 	wifiScanTimer = null;
 	wifilist_resetWifiScanTimer();
+}
+
+function wifilist_startWifiScan()
+{
+	useInternalScan = true;
+	onWifiScanTimer();
 }
 
 function wifilist_resetWifiScanTimer(duration)
@@ -46,6 +49,24 @@ function wifilist_stopWifiScanTimer()
 }
 
 //-----------------------------------------------------------
+function wifilist_setSelectedSSID(newSSID)
+{
+	for (var objectIndex in currentWifiList)
+	{
+		var oneWifiData = currentWifiList[objectIndex];
+		if (oneWifiData == null)
+			continue;
+		var ssid = oneWifiData['ssid'];
+		if (ssid != newSSID)
+			continue;
+		
+		selectedSSID = newSSID;
+		selectedIndex = objectIndex;
+		break;
+	}
+
+	fadeInWifiList(false);
+}
 
 function wifilist_updateWifiList(wifiListArray)
 {

@@ -48,7 +48,7 @@ cNetConfig.prototype.helloCallback = function (params) {};
 cNetConfig.prototype.WifiScan = function ()
 {
 	fDbg2("Scanning for wifi...");
-	xmlhttpPost("", "post", { 'cmd' : 'WifiScan' }, cNetConfig.instance.rawWifiScanCallback );
+	xmlhttpPost("", "post", { 'cmd' : 'WifiScan', 'value' : '' }, cNetConfig.instance.rawWifiScanCallback );
 }
 
 cNetConfig.prototype.Hello = function ()
@@ -94,6 +94,11 @@ cNetConfig.prototype.SetNetwork = function (ssid, key, encryption, auth)
 	
 	fDbg2("Setting network config...");
 	xmlhttpPost("", "post", param, cNetConfig.instance.rawSetNetworkCallback );
+}
+
+cNetConfig.prototype.SetWifiScanData = function (vData)
+{
+	cNetConfig.instance.rawWifiScanCallback(vData);
 }
 
 // -------------------------------------------------------------------------------------------------
