@@ -2,40 +2,18 @@ function onLoad()
 {
 	$("#div_loadingMain").fadeIn(0);
 	
-	//Ask NeTVServer to start upgrading
-	fDbg2("Asking NeTVServer to upgrade...");
-	xmlhttpPost("", "post", { 'cmd' : 'SystemUpdate' }, rawSystemUpdateCallback );
+	//Call systemupdate.sh script
+	xmlhttpPost("", "post", { 'cmd' : 'SystemUpdate' }, updateDoneCallback );
 }
 
-function rawSystemUpdateCallback = function (vData)
+function updateDoneCallback( vData )
 {
-	if (vData.split("</status>")[0].split("<status>")[1] != "1")
-		return;
-	
-	fwver = vData.split("</fwver>")[0].split("<fwver>")[1];
-	vLog = vData.split("</log>")[0].split("<log>")[1];
-	
-	//Check if update succeeded
-	var errorTags = [ 'error', 'failed', 'read-only' ];
-	var containsErrorTag = false;
-	for (var i=0; i<errorTags.length; i++)
-	{
-		if (vLog.indexOf(errorTags[i]) == -1)
-			continue;
-		containsErrorTag = true;
-		
-		//Do something about it?
-	}
-	
-	fDbg2("--------------------------------------------------------------------");
-	fDbg2(vLog);
-	fDbg2("--------------------------------------------------------------------");
-	
-	if (containsErrorTag)		fDbg2("Update failed");
-	else						fDbg2("Update successful. FWver: " + fwver);
-		
-	//Redirect to homepage
-	location.href="http://localhost/";
+	fDbg2("-------------------------------------------");
+	fDbg2("  Upgrade Done");
+	fDbg2("-------------------------------------------");
+	fDbg2( vData );
+	//May not reach here since system reboots itself
+	//location.href="http://localhost/";
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -99,12 +77,13 @@ function fNMDeviceRemoved(  )
 // -------------------------------------------------------------------------------------------------
 //	events from system
 // -------------------------------------------------------------------------------------------------
-function fUPDATEEvent( vEventName )
+function fUPDATECOUNTEvent( vEventName )
 {
-	vEventName = vEventName.toLowerCase();
-	switch(vEventName)
-	{
-		case "done":	location.href="http://localhost/";		break;
-		case "large":	/* Do nothing, already updating */		break;
-	}
+	return "command ignored";
+}
+
+function fUPDATEREADYEvent( vEventName )
+{
+	xmlhttpPost("", "post", { 'cmd' : 'SystemUpdate' }, updateDoneCallback );
+	return "upgrading...";
 }

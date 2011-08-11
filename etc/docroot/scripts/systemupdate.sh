@@ -2,6 +2,7 @@
 #
 
 # The downloading should have been done before this is triggered
+echo "executing opkg upgrade...";
 mount -o remount,rw /
 upgradeOuput=$(opkg --cache /var/lib/opkg/tmp upgrade)
 mount -o remount,ro /
@@ -13,5 +14,5 @@ if [ -z "${fwver}" ]; then
 fi
 
 # Output to web service
-echo "<fwver>${fwver}</fwver>"
-echo "<log>${upgradeOuput}</log>"
+#echo "<fwver>${fwver}</fwver>"
+#echo "<log>${upgradeOuput}</log>"

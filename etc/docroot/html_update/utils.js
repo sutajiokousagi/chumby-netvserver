@@ -16,7 +16,7 @@ function fDbg2(v)
 		document.getElementById("div_dbg").scrollTop = document.getElementById("div_dbg").scrollHeight;
 	}
 	*/
-	console.log(v);
+	console.log("|~|" + v);
 }
 
 // -------------------------------------------------------------------------------------------------
