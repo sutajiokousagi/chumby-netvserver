@@ -3,7 +3,7 @@
 
 # The downloading should have been done before this is triggered
 mount -o remount,rw /
-upgradeOuput=$(opkg upgrade)
+upgradeOuput=$(opkg --cache /var/lib/opkg/tmp upgrade)
 mount -o remount,ro /
 
 # Software version
