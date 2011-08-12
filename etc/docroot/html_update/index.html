@@ -1,26 +1,39 @@
 <html>
 <head>
 <title>NeTV Update</title>
-<link rel="stylesheet" href="index.css" type="text/css">
-<script type='text/javascript' src='jquery-1.6.1.min.js'></script>
-<script type='text/javascript' src='utils.js'></script>
-<script type='text/javascript' src='index.js'></script>
+<link rel="stylesheet" href="css/index.css" type="text/css">
+<script type='text/javascript' src='js/jquery-1.6.1.min.js'></script>
+<script type='text/javascript' src='js/utils.js'></script>
+<script type='text/javascript' src='js/index.js'></script>
 </head>
 <body onload="onLoad();">
 				
-<div id="div_all" style="width: 100%; height: 100%; overflow: hidden;">
+<div id="div_full_page">
 
-	<div class="div_center_wrapper">
+	<div id="div_center" style="visibility:hidden;" class="div_center_wrapper">
 		<div class="div_center_container">
 			
 			<!-- ------------------------ header ----------------------- -->
-			<div class="header_logo_chumby"></div>
+			<div class="div_header" style="float: top;">
+				<div class="spacer">&nbsp;</div>
+					<div style="float: left; width: 80px; height: 48px; background-image: url('../images/chumby_logo_48x48.png'); background-repeat: no-repeat; background-position:center"></div>
+					<div style="float: left; height: 48px; line-height:48px; font-size: 18px; font-weight:bold;">NeTV Network Configuration</div>
+				<div class="spacer">&nbsp;</div>
+			</div>
 			
 			<!-- ----------------------- loading icon ---------------------- -->
 			<div id="div_loadingMain">
-				<div style="float: top; font-size:16; font-weight: bold; color:#ff0000;">Updating...<br>Do not unplug the device!</div>
-				<div style="float: top;"><img src="../images/gif-loading.gif"></div>
+				<div class="div_title_wrapper">
+					<div class="div_title">System update in progress...</div>
+				</div>
+				
+				<div style="text-align:center; margin-top:130px">
+					<img width="62" height="62" src="images/loading_black.gif">
+				</div>
+				<div style="text-align: center; margin-top: 15px;">Please do not unplug the device.</div>
 			</div>
+			
+			<!-- ----------------------- loading icon ---------------------- -->
 				
 		</div>
     </div>
