@@ -2,6 +2,7 @@
 <head>
 <title>NeTV Update</title>
 <link rel="stylesheet" href="css/index.css" type="text/css">
+<link rel="stylesheet" href="css/progress.css" type="text/css">
 <script type='text/javascript' src='js/jquery-1.6.1.min.js'></script>
 <script type='text/javascript' src='js/utils.js'></script>
 <script type='text/javascript' src='js/index.js'></script>
@@ -27,13 +28,16 @@
 					<div class="div_title">System update in progress...</div>
 				</div>
 				
-				<div style="text-align:center; margin-top:130px">
+				<div style="text-align:center; margin-top:105px">
 					<img width="62" height="62" src="images/loading_black.gif">
 				</div>
-				<div style="text-align: center; margin-top: 15px;">Please do not unplug the device.</div>
+				<div style="text-align: center; margin-top: 20px; color:#ff0000">Please do not unplug the device.</div>
 			</div>
-			
-			<!-- ----------------------- loading icon ---------------------- -->
+
+			<!-- ----------------------- progress bar ---------------------- -->			
+			<div class="meter">
+				<span id="progress_bar" style="width: 50.5%"></span>
+			</div>
 				
 		</div>
     </div>
