@@ -1,0 +1,166 @@
+/*-----------------------------
+	BASIC PAGE STYLING
+-----------------------------*/
+
+html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6
+{
+	margin:0;
+	padding:0;
+	-webkit-text-size-adjust:none;
+}
+body
+{
+	font-size: 14px;
+	color: #FFFFFF;
+}
+a
+{
+	color:#fff000;
+	text-decoration:none;
+}
+input
+{
+	background-color: #808080;
+	border: 0px;
+}
+.input_focus
+{
+	background-color: #FFFFFF;
+}
+.input_focus_error
+{
+	background-color: #FF0000;
+}
+.input_wrapper, .input_wrapper_focus
+{
+	float:left;
+	text-align: left;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-left: 15px;
+	border-radius:20px;
+}
+.input_wrapper
+{
+	background-color: #808080;
+}
+.input_wrapper_focus
+{
+	background-color: #FFFFFF;
+}
+
+
+/*-----------------------------
+	BASIC LAYOUT
+-----------------------------*/
+
+div.spacer
+{
+	clear: both;
+	height: 1px;
+}
+  
+#div_full_page 
+{
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.div_center_wrapper, .div_center_container {
+	width: 400px;
+	height: 500px;
+}
+.div_center_wrapper {
+	bottom: 50%;
+	right: 50%;
+	position: absolute;
+}
+.div_center_container {
+	left: 50%;
+	position: relative;
+	top: 50%;
+	background-color: #000000;
+	overflow: hidden;
+}
+
+.div_header {
+	float: top;
+	background-color: #232B36;
+	padding-top: 15px;
+	padding-bottom: 15px;
+}
+
+.div_title_wrapper {
+	background-color: #303030;
+	padding-top:2px;
+	padding-bottom:2px;
+	margin-bottom: 8px;
+}
+.div_title {
+	text-align: center;
+	background-color: #434B56;
+	padding: 7px;
+	border-top: 1px dashed #535B66;
+	border-bottom: 1px dashed #535B66;
+	font-weight: bold;
+	color: #6598EB;
+}
+
+/*-----------------------------
+	Loading
+-----------------------------*/
+
+#div_loadingMain
+{
+	float: top;
+	text-align: center;
+}
+
+/*-----------------------------
+	IR Remote Test
+-----------------------------*/
+
+#div_irRemoteMain
+{
+	
+}
+
+.div_irRemoteMain_row
+{
+	float: top;
+	clear: both;
+}
+
+.div_irRemoteMain_normal , .div_irRemoteMain_selected
+{
+	border-radius: 10px;
+}
+.div_irRemoteMain_normal
+{
+	background-color: #646464;
+}
+.div_irRemoteMain_selected 
+{
+	background-color: #6598EB;
+}
+
+.navwrap
+{
+	float: right;
+	position: relative;
+	left: -50%;
+	text-align: center;
+}
+.navwrap ul
+{
+	list-style:none;
+	position:relative;
+	left:50%;
+	margin:0;
+} 
+.navwrap li
+{
+	float:left;
+	margin: 5;
+}
