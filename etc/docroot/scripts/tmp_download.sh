@@ -20,4 +20,4 @@ if [ ! -e $newpath ]; then
 fi;
 
 # Return just the filename to the hardware bridge, to be used in a <img> tag
-echo "./tmp/netvserver/${newfilename}.jpg"
+echo "/tmp/netvserver/${newfilename}.jpg"
