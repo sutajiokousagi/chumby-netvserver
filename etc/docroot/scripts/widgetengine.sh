@@ -21,7 +21,7 @@ cmd=$(echo $1 | tr '[A-Z]' '[a-z]')
 
 # Start
 if [ "$cmd" == "start" ]; then
-	if ps ax | grep -v grep | grep $process_name > /dev/null
+	if [ ! -z $(pidof $process_name) ];
 	then
 		echo "Already running"
 		setplayer c
@@ -33,7 +33,7 @@ fi
 
 # Start
 if [ "$cmd" == "startminimize" ]; then
-	if ps ax | grep -v grep | grep $process_name > /dev/null
+	if [ ! -z $(pidof $process_name) ];
 	then
 		echo "Already running"
 	else
@@ -47,7 +47,7 @@ fi
 
 # Minimize
 if [ "$cmd" == "minimize" -o "$cmd" == "hide" ]; then
-	if ps ax | grep -v grep | grep $process_name > /dev/null
+	if [ ! -z $(pidof $process_name) ];
 	then
 		echo "Already running"
 	else
@@ -62,7 +62,7 @@ fi
 
 # Maximize/Fullscreen
 if [ "$cmd" == "maximize" -o "$cmd" == "fullscreen" -o "$cmd" == "show" ]; then
-	if ps ax | grep -v grep | grep $process_name > /dev/null
+	if [ ! -z $(pidof $process_name) ];
 	then
 		echo "Already running"
 	else
@@ -76,7 +76,7 @@ fi
 
 # Quit/Stop
 if [ "$cmd" == "quit" -o "$cmd" == "exit" -o "$cmd" == "terminate" -o "$cmd" == "stop" ]; then
-	if ps ax | grep -v grep | grep $process_name > /dev/null
+	if [ ! -z $(pidof $process_name) ];
 	then
 		echo "stopping..."
 		kill -9 $(pidof $process_name)
@@ -88,7 +88,7 @@ fi
 
 # Restart
 if [ "$cmd" == "restart" ]; then
-	if ps ax | grep -v grep | grep $process_name > /dev/null
+	if [ ! -z $(pidof $process_name) ];
 	then
 		echo "stopping previous instance..."
 		kill -9 $(pidof $process_name)
@@ -100,7 +100,7 @@ fi
 
 # SetBox
 if [ "$cmd" == "setbox" ]; then
-	if ps ax | grep -v grep | grep $process_name > /dev/null
+	if [ ! -z $(pidof $process_name) ];
 	then
 		echo ""
 	else

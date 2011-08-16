@@ -8,7 +8,7 @@ SCRIPTPATH=`dirname $SCRIPT`
 
 # Running in Access Point mode
 is_ap_mode=0
-if ps ax | grep -v grep | grep hostapd > /dev/null
+if [ ! -z $(pidof hostapd) ];
 then
 	is_ap_mode=1
 fi

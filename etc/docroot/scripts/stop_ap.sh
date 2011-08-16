@@ -12,11 +12,11 @@ fi
 
 # Stop the AP
 echo "Stopping previous AP"
-if ps ax | grep -v grep | grep hostapd > /dev/null
+if [ ! -z $(pidof hostapd) ];
 then
 	killall hostapd
 fi
-if ps ax | grep -v grep | grep dnsmasq > /dev/null
+if [ ! -z $(pidof dnsmasq) ];
 then
 	killall dnsmasq
 fi

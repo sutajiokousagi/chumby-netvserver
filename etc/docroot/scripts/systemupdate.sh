@@ -1,11 +1,6 @@
 #!/bin/sh
 #
 
-#
-# This script is deprecated.
-# All upgrading operation is now controlled by NeTVBrowser directly
-#
-
 #Get the list of upgradable packages
 if [ "$1" == "list-upgradable" ]; then
 	upgradeOuput=$(opkg list-upgradable)

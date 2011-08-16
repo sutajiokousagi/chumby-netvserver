@@ -17,7 +17,7 @@ if [ -z "${DCID}" ]; then
 fi
 
 # Hardware version
-hwver=$(chumby_version -h)
+hwver=$(chumby_version -h | sed "1 d")
 if [ -z "${hwver}" ]; then
 	hwver='10.1'
 fi
@@ -49,7 +49,7 @@ IP=$(/sbin/ifconfig ${INTIF} | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1
 
 # Network manager state
 nmstate="4"
-if ps ax | grep -v grep | grep NetworkManager > /dev/null
+if [ ! -z $(pidof NetworkManager) ];
 then
 	nmstate=$(dbus-send --system --print-reply --dest='org.freedesktop.NetworkManager' /org/freedesktop/NetworkManager org.freedesktop.DBus.Properties.Get string:'' string:'State' | grep uint32 | awk '{print $3}')
 fi

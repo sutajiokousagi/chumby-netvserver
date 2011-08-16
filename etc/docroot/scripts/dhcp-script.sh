@@ -2,6 +2,7 @@
 
 #
 # This script is to be called on new DHCP event by dnsmasq
+# Currently it doesn't do anything
 #
 
 # if $1 is 'init' which is called by dnsmasq at startup, it's ignored
@@ -15,12 +16,7 @@
 # $4 is hostname (optional, may be unset)
 
 # Absolute path to this script. /home/user/bin/foo.sh
-SCRIPT=$(readlink -f $0)
+#SCRIPT=$(readlink -f $0)
 # Absolute path this script is in. /home/user/bin
-SCRIPTPATH=`dirname $SCRIPT`
-
-
-#fbwrite --pos=0,0 --color=0,255,0     "DHCP Event script"
-#fbwrite --pos=0,1 --color=255,255,255 "Action: $1   MAC: $2"
-#fbwrite --pos=0,2 --color=255,255,255 "IP: $3   Hostname: $4"
+#SCRIPTPATH=`dirname $SCRIPT`
 
