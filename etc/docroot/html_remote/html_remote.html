@@ -1,0 +1,60 @@
+<html>
+<head>
+<title>NeTV Remote Control</title>
+<meta name="viewport" content="width=device-width; initial-scale=1; maximum-scale=1; user-scalable=0;">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<link rel="apple-touch-icon" href="../webapp_icon.png" />
+<link rel="stylesheet" href="html_remote/remote.css" type="text/css">
+<script type='text/javascript' src='html_remote/jquery-1.6.1.min.js'></script>
+<script type='text/javascript' src='html_remote/utils.js'></script>
+<script type='text/javascript' src='html_remote/cRemote.js'></script>
+<script type='text/javascript' src='html_remote/fastButton.js'></script>
+<script type='text/javascript' src='html_remote/html.js'></script>
+</head>
+<body onload="onLoad();" onorientationchange="updateOrientation();" >
+	<div id="page_wrapper">
+	
+        <div id="content_normal">
+            <table width='100%' id='mainRemoteDiv' cellpadding=0 cellspacing=0 >
+				<tr>
+					<td width="33%" id="btn_cpanel" align="right"><img src="html_remote/btn_controlpanel.png"></td>
+					<td width="34%"></td>
+					<td width="33%" id="btn_widget" align="left"><img src="html_remote/btn_widget.png"></td>
+				</tr>
+				<tr>
+					<td width="100%" id="btn_up" colspan=3 align="center"><img src="html_remote/up.png"></td>
+				</tr>
+				<tr>
+					<td align="right" id="btn_left"><img src="html_remote/left.png"></td>
+					<td align="center" id="btn_center"><img src="html_remote/center.png"></td>
+					<td align="left" id="btn_right"><img src="html_remote/right.png"></td>
+				</tr>
+				<tr>
+					<td width="100%" id="btn_down" colspan=3 align="center"><img src="html_remote/down.png"></td>
+				</tr>
+			</table>
+        </div>
+		
+		<div id="content_left">  
+			<p>You are now holding your phone to the left</p>  
+		</div>  
+		<div id="content_right">  
+			<p>You are now holding your phone to the right</p>  
+		</div>
+		<div id="content_flipped">  
+			<p>This doesn't work yet.</p>  
+		</div>  
+
+		<div id='breadcumb'>
+			<div id='statusinfo' width='100%'></div>		<!-- HW: ...; FW: ... -->
+			<div id='recommendation' width='100%'></div>	<!-- For better experience... -->
+		</div>
+		
+    </div>
+	
+	<!-- mainly for iOS -->
+	<iframe style="visibility:hidden;" width=0 height=0 name="loadframe" id="loadframe" border="0px"></iframe>
+
+</body>
+</html>

@@ -107,6 +107,9 @@ cNetConfig.prototype.SetWifiScanData = function (vData)
 
 cNetConfig.prototype.rawWifiScanCallback = function (vData)
 {
+	if (vData.split == undefined)
+		return;
+		
 	if (vData.split("</status>")[0].split("<status>")[1] != "1")
 		return;
 	

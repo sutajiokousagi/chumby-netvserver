@@ -15,7 +15,7 @@ function onLoad()
 	main_x = $("#div_center").offset().left;
 	$("#div_loadingMain").fadeIn(0);
 	
-	setUpgradeProgress(continue_percentage);
+	setUpgradePercentage(continue_percentage);
 	
 	//Not continue from an upgrade process
 	if (continue_percentage == "" || continue_percentage == 0)
@@ -24,6 +24,9 @@ function onLoad()
 		
 		//Hide everything immediately, animate in later
 		main_hideMainPanel();
+		
+		clearConsoleLog();
+		addConsoleLog("Starting...");
 	
 		setTimeout("onLoadLater()", 100);
 	}
@@ -33,6 +36,8 @@ function onLoad()
 	{
 		fDbg2("Continue upgrading UI: " + continue_percentage + "%");
 		main_showMainPanel();
+		
+		addConsoleLog("...");
 	}
 }
 
@@ -87,12 +92,37 @@ function fUPDATEEvents( vEventName, vEventData )
 	}
 }
 
-function setUpgradeProgress(percentage)
+function setUpgradeProgress(vData)
+{
+	//Format: <percentage>%1</percentage><pkgname>%2</pkgname><pkgversion>%3</pkgversion><pkgsize>%4</pkgsize>
+	vData = decodeURIComponent(vData);
+	if (vData.split == undefined)
+		return;
+					
+	var percentage = vData.split("</percentage>")[0].split("<percentage>")[1];
+	var name = vData.split("</pkgname>")[0].split("<pkgname>")[1];
+	var version = vData.split("</pkgversion>")[0].split("<pkgversion>")[1];
+	var size = vData.split("</pkgsize>")[0].split("<pkgsize>")[1];
+	size = Math.round(size/1024*10)/10;
+	
+	//Progress bar
+	setUpgradePercentage(percentage);
+	
+	//Console text
+	addConsoleLog("Upgrading " + name + "<br>Version " + version + " (" + size + "KB)...");
+}
+
+function setUpgradePercentage(percentage)
 {
 	if (!percentage || percentage == "" || percentage == 0)
 		percentage = 0;
 	percentage = parseFloat(""+percentage);
-		
+	
+	//Some pretty adjustments
+	if (percentage < 3.0)			percentage = 3;
+	else if (percentage >= 200)		percentage = 100;
+	else if (percentage == 100)		percentage = 97;
+	
 	//Set the progress bar (very convenient!)
 	$("#progress_bar").width(""+percentage+"%");
 	
@@ -113,14 +143,41 @@ function setUpgradeProgress(percentage)
 function setUpgradeDone()
 {
 	//Hehe
-	setUpgradeProgress(100);
+	setUpgradePercentage(201);
+	
+	//Console text
+	addConsoleLog("Upgrading done!");
+	
+	//Wait for 2.5 seconds then continue
 	
 	//Gracefully hide the update panel
-	main_hideMainPanel(1650);
+	setTimeout("main_hideMainPanel(1600);", 2500+1650);
 	
 	//May not reach here if upgrade script reboots the system itself
-	setTimeout("location.href=\"http://localhost/\"", 1650);
+	setTimeout("location.href=\"http://localhost/\"", 2500+1650+1650);
 }
+
+//-----------------------------------------------------------
+
+function addConsoleLog(text)
+{
+	var oldValue = $("#consolelog").html();
+		
+	//Keep only last 14 lines
+	var tempArray = oldValue.split("<br>");
+	while (tempArray.length > 14)
+		tempArray.splice(0,1);
+	oldValue = tempArray.join("<br>");
+		
+	$("#consolelog").html(oldValue + "<br>" + text);
+}
+
+function clearConsoleLog(text)
+{
+	var oldValue = $("#consolelog").html("");
+}
+
+
 
 
 

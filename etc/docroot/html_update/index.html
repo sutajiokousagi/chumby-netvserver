@@ -27,16 +27,19 @@
 				<div class="div_title_wrapper">
 					<div class="div_title">System update in progress...</div>
 				</div>
-				
-				<div style="text-align:center; margin-top:105px">
-					<img width="48" height="48" src="images/loading_48.gif">
-				</div>
-				<div style="text-align: center; margin-top: 20px; color:#ff0000">Please do not unplug the device.</div>
+
+				<div style="text-align: center; margin-top: 20px; margin-bottom: 20px; color:#ff0000; font-weight: bold;">Please do not unplug the device.</div>
 			</div>
 
 			<!-- ----------------------- progress bar ---------------------- -->			
-			<div class="meter">
-				<span id="progress_bar" style="width: 50.5%"></span>
+			<div class="meter animate">
+				<span id="progress_bar" style="width: 50.5%"><span></span></span>
+			</div>
+			
+			<!-- ----------------------- console log ---------------------- -->			
+			<div class="console">
+				<div id="consolelog">
+				</div>
 			</div>
 				
 		</div>
