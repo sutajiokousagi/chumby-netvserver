@@ -123,8 +123,8 @@ function setUpgradePercentage(percentage)
 	else if (percentage >= 200)		percentage = 100;
 	else if (percentage == 100)		percentage = 97;
 	
-	//Set the progress bar (very convenient!)
-	$("#progress_bar").width(""+percentage+"%");
+	//Animate the progress bar
+	$("#progress_bar").animate({ width: ""+percentage+"%" }, 1000);
 	
 	//Nicely style the end cap
 	if (percentage > 100-(24-8)/2)
