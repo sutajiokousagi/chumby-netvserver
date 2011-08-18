@@ -98,21 +98,21 @@ cNetConfig.prototype.SetNetwork = function (ssid, key, encryption, auth)
 
 cNetConfig.prototype.SetWifiScanData = function (vData)
 {
-	cNetConfig.instance.rawWifiScanCallback(vData);
+	cNetConfig.instance.rawWifiScanCallback(vData, true);
 }
 
 // -------------------------------------------------------------------------------------------------
 //	internal callbacks
 // -------------------------------------------------------------------------------------------------
 
-cNetConfig.prototype.rawWifiScanCallback = function (vData)
+cNetConfig.prototype.rawWifiScanCallback = function (vData, doNotSort)
 {
 	if (vData.split == undefined)
 		return;
 		
 	if (vData.split("</status>")[0].split("<status>")[1] != "1")
 		return;
-	
+		
 	vData = vData.split("</data>")[0].split("<data>")[1];		
 	vRawArray = vData.split("<wifi>");
 	var count = 0;
@@ -137,11 +137,11 @@ cNetConfig.prototype.rawWifiScanCallback = function (vData)
 	fDbg2("" + count + " wifi networks found");
 	if (count <= 0) {
 		cNetConfig.instance.WifiScan();
-		
 	}
 		
 	//Bubbling
-	cNetConfig.instance.sortWifiList();
+	if (doNotSort != true && doNotSort != "true")
+		cNetConfig.instance.sortWifiList();
 	
 	if (cNetConfig.instance.wifiScanCallback)
 		cNetConfig.instance.wifiScanCallback(cNetConfig.instance.wifiListArray);

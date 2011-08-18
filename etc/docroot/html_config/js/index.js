@@ -39,35 +39,6 @@ function main_hideMainPanel(duration)
 	$("#div_center").animate({ top: main_y + $(window).height() }, !duration ? 1600 : duration);
 }
 
-/*
-function slideToLeft(itemName, duration)
-{
-	var width = $("#div_center_container").width();
-	$("#"+itemName).animate({ left: -width * 1.5 }, !duration ? 800 : duration);
-}
-function slideToRight(itemName, duration)
-{
-	var width = $("#div_center_container").width();
-	$("#"+itemName).animate({ left: width * 1.5 }, !duration ? 800 : duration);
-}
-function slideInFromLeft(itemName, duration)
-{
-	var width = $("#div_center_container").width();
-	var offset = $("#"+itemName).offset();
-	offset.left = -width*1.5;
-	$("#"+itemName).offset(offset);
-	$("#"+itemName).animate({ left: 0 }, !duration ? 800 : duration);
-}
-function slideInFromRight(itemName, duration)
-{
-	var width = $("#div_center_container").width();
-	var offset = $("#"+itemName).offset();
-	offset.left = width*1.5;
-	$("#"+itemName).offset(offset);
-	$("#"+itemName).animate({ left: 0 }, !duration ? 800 : duration);
-}
-*/
-
 //-----------------------------------------------------------
 
 function main_currentState()
