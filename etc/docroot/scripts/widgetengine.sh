@@ -21,7 +21,7 @@ cmd=$(echo $1 | tr '[A-Z]' '[a-z]')
 
 # Start
 if [ "$cmd" == "start" ]; then
-	if [ ! -z $(pidof $process_name) ];
+	if [ ! -z "$(pidof $process_name)" ];
 	then
 		echo "Already running"
 		setplayer c
@@ -33,7 +33,7 @@ fi
 
 # Start
 if [ "$cmd" == "startminimize" ]; then
-	if [ ! -z $(pidof $process_name) ];
+	if [ ! -z "$(pidof $process_name)" ];
 	then
 		echo "Already running"
 	else
@@ -47,7 +47,7 @@ fi
 
 # Minimize
 if [ "$cmd" == "minimize" -o "$cmd" == "hide" ]; then
-	if [ ! -z $(pidof $process_name) ];
+	if [ ! -z "$(pidof $process_name)" ];
 	then
 		echo "Already running"
 	else
@@ -62,7 +62,7 @@ fi
 
 # Maximize/Fullscreen
 if [ "$cmd" == "maximize" -o "$cmd" == "fullscreen" -o "$cmd" == "show" ]; then
-	if [ ! -z $(pidof $process_name) ];
+	if [ ! -z "$(pidof $process_name)" ];
 	then
 		echo "Already running"
 	else
@@ -76,10 +76,10 @@ fi
 
 # Quit/Stop
 if [ "$cmd" == "quit" -o "$cmd" == "exit" -o "$cmd" == "terminate" -o "$cmd" == "stop" ]; then
-	if [ ! -z $(pidof $process_name) ];
+	if [ ! -z "$(pidof $process_name)" ];
 	then
 		echo "stopping..."
-		kill -9 $(pidof $process_name)
+		kill -9 "$(pidof $process_name)"
 	else
 		echo "Already stopped"
 	fi
@@ -88,10 +88,10 @@ fi
 
 # Restart
 if [ "$cmd" == "restart" ]; then
-	if [ ! -z $(pidof $process_name) ];
+	if [ ! -z "$(pidof $process_name)" ];
 	then
 		echo "stopping previous instance..."
-		kill -9 $(pidof $process_name)
+		kill -9 "$(pidof $process_name)"
 		sleep 2
 	fi
 	${process_name} -i ${widget_engine_swf} 2> /dev/null > /dev/null &
@@ -100,7 +100,7 @@ fi
 
 # SetBox
 if [ "$cmd" == "setbox" ]; then
-	if [ ! -z $(pidof $process_name) ];
+	if [ ! -z "$(pidof $process_name)" ];
 	then
 		echo ""
 	else

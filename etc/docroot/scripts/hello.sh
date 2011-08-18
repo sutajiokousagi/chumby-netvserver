@@ -49,7 +49,7 @@ IP=$(/sbin/ifconfig ${INTIF} | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1
 
 # Network manager state
 nmstate="4"
-if [ ! -z $(pidof NetworkManager) ];
+if [ ! -z "$(pidof NetworkManager)" ];
 then
 	nmstate=$(dbus-send --system --print-reply --dest='org.freedesktop.NetworkManager' /org/freedesktop/NetworkManager org.freedesktop.DBus.Properties.Get string:'' string:'State' | grep uint32 | awk '{print $3}')
 fi
