@@ -9,6 +9,7 @@ function configuring_init()
 	activationTimer = null;
 	mNetConfig.helloCallback = configuring_helloCallback;
 	
+	$("#div_activationStatus").html("");
 	$("#div_activationStatus").removeClass('div_activationStatus_success').removeClass('div_activationStatus_error');
 	startActivation();
 }
