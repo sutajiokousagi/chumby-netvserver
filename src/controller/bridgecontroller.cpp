@@ -49,7 +49,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     QByteArray authorizedCaller = request.getHeader(STRING_AUTHORIZED_CALLER).toUpper();
     QByteArray cmdString = request.getParameter(STRING_COMMAND).toUpper();
-    QByteArray dataString = request.getParameter(STRING_VALUE).toUpper();
+    QByteArray dataString = request.getParameter(STRING_VALUE);
     QByteArray dataXmlString = request.getParameter(STRING_DATA);
 
     //A specialize QHash for received parameters in XML format
