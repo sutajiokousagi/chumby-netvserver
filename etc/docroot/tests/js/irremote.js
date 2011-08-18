@@ -17,8 +17,6 @@ function irremote_init()
 
 function refreshIRRemote()
 {
-	fDbg2("Refresh IR Remote view");
-	
 	for (var btnName in buttonPressedArray)
 	{
 		var pressed = buttonPressedArray[btnName];
@@ -38,16 +36,17 @@ function irremote_onRemoteControl(vButtonName)
 {
 	//Set the flag & refresh whole page
 	buttonPressedArray[vButtonName] = true;
-	refreshIRRemote(false);
+	refreshIRRemote();
 	
 	//Count how many (unique) buttons have been pressed
 	var btnCount = 0;
 	for (var btnName in buttonPressedArray)
-		if (buttonPressedArray[btnName] != null && buttonPressedArray[btnName] = true)
+		if (buttonPressedArray[btnName] != null && buttonPressedArray[btnName] == true)
 			btnCount++;
 	
-	//Done
-	if (count >= irremote_numButton())
-	{
-	}
+	if (btnCount < irremote_numButton())
+		return;
+		
+	//All done
+	main_showState("androiddownload");
 }

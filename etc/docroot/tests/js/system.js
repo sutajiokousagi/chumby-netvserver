@@ -9,6 +9,7 @@
 function fServerReset()
 {
 	fDbg2("fServerReset()");
+	return "ignore";
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -29,6 +30,7 @@ function fHDMIEvents( vEventName )
 	if (vEventName == "attach");
 	if (vEventName == "detach");
 	if (vEventName == "trigger");
+	return "ignore";
 }
 
 // -------------------------------------------------------------------------------------------------

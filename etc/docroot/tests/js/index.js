@@ -22,19 +22,20 @@ function onLoadLater()
 function main_showMainPanel(duration)
 {
 	$("#div_center").css('visibility', 'visible');
-	$("#div_center").animate({ top: main_y }, !duration ? 1000 : duration);
+	$("#div_center").animate({ top: main_y }, !duration ? 1600 : duration);
 }
 
 function main_hideMainPanel(duration)
 {
-	$("#div_center").animate({ top: main_y + $(window).height() }, !duration ? 1000 : duration);
+	$("#div_center").animate({ top: main_y + $(window).height() }, !duration ? 1600 : duration);
 }
 
 //-----------------------------------------------------------
 
 function main_currentState()
 {
-	if ( $("#div_irRemoteMain").is(":visible") )			return "irremote";
+	if ( $("#div_androidDownloadMain").is(":visible") )		return "androiddownload";
+	else if ( $("#div_irRemoteMain").is(":visible") )		return "irremote";
 	else if ( $("#div_loadingMain").is(":visible") )		return "loading";
 }
 
@@ -45,14 +46,21 @@ function main_showState(vStateName, animated)
 	{
 		irremote_init();
 		setTimeout("$('#div_irRemoteMain').fadeIn("+(duration+50)+");", duration);
-		//$("#div_wifiDetailsMain").fadeOut(duration);
+		$("#div_androidDownloadMain").fadeOut(duration);
+		//$("#div_accountMain").fadeOut(duration);
+		//$("#div_configuringMain").fadeOut(duration);
+	}
+	if (vStateName == "androiddownload")
+	{
+		$("#div_irRemoteMain").fadeOut(duration);
+		setTimeout("$('#div_androidDownloadMain').fadeIn("+(duration+50)+");", duration);
 		//$("#div_accountMain").fadeOut(duration);
 		//$("#div_configuringMain").fadeOut(duration);
 	}
 	else
 	{
 		$("#div_irRemoteMain").fadeOut(duration);
-		//$("#div_wifiDetailsMain").fadeOut(duration);
+		$("#div_androidDownloadMain").fadeOut(duration);
 		//$("#div_accountMain").fadeOut(duration);
 		//$("#div_configuringMain").fadeOut(duration);
 	}
@@ -62,7 +70,6 @@ function main_showState(vStateName, animated)
 
 function main_onRemoteControl(vButtonName)
 {
-	if ( $("#div_irRemote").is(":visible") )					irremote_onRemoteControl(vButtonName);
-	//else if ( $("#div_wifiDetailsMain").is(":visible") )		wifidetails_onRemoteControl(vButtonName);
-	//else if ( $("#div_configuringMain").is(":visible") )		configuring_onRemoteControl(vButtonName);
+	if ( $("#div_irRemoteMain").is(":visible") )				irremote_onRemoteControl(vButtonName);
+	//else if ( $("#div_androidDownloadMain").is(":visible") )	androiddownload_onRemoteControl(vButtonName);
 }
