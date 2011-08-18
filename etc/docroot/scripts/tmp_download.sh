@@ -10,14 +10,20 @@ if [ ! -e ${SCRIPTPATH}/../tmp/netvserver ]; then
 	mkdir ${SCRIPTPATH}/../tmp/netvserver;
 fi
 
-# Construct cache filename from the full Url
+# Construct absolute cache filename from the full url
 newfilename=$(echo $1 | sed -e "s/\//\|\|/g")
 newpath="${SCRIPTPATH}/../tmp/netvserver/${newfilename}.jpg"
 
-# Download only if it doesn't exist in cache
+# Download only if it doesn't exist in cache OR bad cache
 if [ ! -e $newpath ]; then
-    wget $1 -q -O $newpath
-fi;
+    curl --silent --output $newpath $1
+else
+    filesize=$(stat -c %s $newpath)
+    if [ $filesize -lt 1 ]; then
+        curl --silent --output $newpath $1
+    fi
+fi
 
 # Return just the filename to the hardware bridge, to be used in a <img> tag
-echo "${SCRIPTPATH}/../tmp/netvserver/${newfilename}.jpg"
+# This has to be a relative path to docroot
+echo "tmp/netvserver/${newfilename}.jpg"
