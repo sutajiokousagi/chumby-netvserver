@@ -47,6 +47,9 @@ INTIF=$(ls -1 /sys/class/net/ | grep wlan | head -1)
 MAC=$(ifconfig | grep ${INTIF} | tr -s ' ' | cut -d ' ' -f5)
 IP=$(/sbin/ifconfig ${INTIF} | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 
+# Public Internet IP address
+PUBLIC_IP=$(curl -s http://whatismyip.org)
+
 # Network manager state
 nmstate="4"
 if [ ! -z "$(pidof NetworkManager)" ];
@@ -73,4 +76,5 @@ echo "<flashver>${flashver}</flashver>"
 echo "<internet>${internet}</internet>"
 echo "<mac>${MAC}</mac>"
 echo "<ip>${IP}</ip>"
+echo "<public_ip>${PUBLIC_IP}</public_ip>"
 echo "${network_status}"
