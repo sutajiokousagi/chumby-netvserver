@@ -37,7 +37,7 @@ timer_servers=( nist1-sj.ustiming.org
 for t_server in "${timer_servers[@]}"
 do
 	# blank output if fails
-	output=$(rdate -p $t_server)
+	output=$(rdate $t_server)
 	if [ ${#output} -gt 5 ];
 	then
 		if [ -z "$(echo ${output} | grep matches)" ];
