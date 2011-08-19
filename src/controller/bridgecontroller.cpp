@@ -266,6 +266,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     {
         // <time> is time formatted in GMT time as "yyyy.mm.dd-hh:mm:ss"
         // <timezone> is standard timezone ID string formated as "Asia/Singapore"
+        // see http://developer.android.com/reference/java/util/TimeZone.html#getID()
         QString time = request.getParameter("time");
         QString timezone = request.getParameter("timezone");
 
