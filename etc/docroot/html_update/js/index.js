@@ -2,6 +2,7 @@ var main_x;
 var main_y;
 var updateCount;
 var needReboot;
+var startConfiguring;
 
 function onLoad()
 {
@@ -9,13 +10,14 @@ function onLoad()
 	updateCount = GET('updateCount');
 	needReboot = GET('reboot');
 	continue_percentage = GET('continue');
+	startConfiguring = false;
 	
 	//Save initial parameters
 	main_y = $("#div_center").offset().top;
 	main_x = $("#div_center").offset().left;
 	$("#div_loadingMain").fadeIn(0);
 	
-	setUpgradePercentage(continue_percentage);
+	setUpgradePercentage(continue_percentage, false);
 	
 	//Not continue from an upgrade process
 	if (continue_percentage == "" || continue_percentage == 0)
@@ -87,6 +89,7 @@ function fUPDATEEvents( vEventName, vEventData )
 {
 	switch (vEventName)
 	{
+		case "configuring":	setUpgradeConfiguring(vEventData);	break;
 		case "progress":	setUpgradeProgress(vEventData);		break;
 		case "done":		setUpgradeDone();					break;
 	}
@@ -94,6 +97,27 @@ function fUPDATEEvents( vEventName, vEventData )
 
 function setUpgradeProgress(vData)
 {
+	//Format: <percentage>%1</percentage><pkgname>%2</pkgname><sizeprogress>%3</sizeprogress>
+	vData = decodeURIComponent(vData);
+	if (vData.split == undefined)
+		return;
+					
+	var percentage = vData.split("</percentage>")[0].split("<percentage>")[1];
+	var name = vData.split("</pkgname>")[0].split("<pkgname>")[1];
+	var size = vData.split("</sizeprogress>")[0].split("<sizeprogress>")[1];
+	
+	//Progress bar
+	setUpgradePercentage(percentage, false);
+	
+	//Console text
+	addConsoleLog("Upgrading " + name);
+}
+
+/*
+function setUpgradeProgress(vData)
+{
+	vData = decodeURIComponent(vData);
+
 	//Format: <percentage>%1</percentage><pkgname>%2</pkgname><pkgversion>%3</pkgversion><pkgsize>%4</pkgsize>
 	vData = decodeURIComponent(vData);
 	if (vData.split == undefined)
@@ -111,8 +135,25 @@ function setUpgradeProgress(vData)
 	//Console text
 	addConsoleLog("Upgrading " + name + "<br>Version " + version + " (" + size + "KB)...");
 }
+*/
 
-function setUpgradePercentage(percentage)
+function setUpgradeConfiguring(vData)
+{
+	//Format: <percentage>%1</percentage><pkgname>%2</pkgname>
+	vData = decodeURIComponent(vData);
+	if (vData.split == undefined)
+		return;
+					
+	var percentage = vData.split("</percentage>")[0].split("<percentage>")[1];
+	var name = vData.split("</pkgname>")[0].split("<pkgname>")[1];
+	
+	//Console text
+	if (startConfiguring == false)
+		addConsoleLog("Finalizing updates, please wait...");
+	startConfiguring = true;
+}
+
+function setUpgradePercentage(percentage, animated)
 {
 	if (!percentage || percentage == "" || percentage == 0)
 		percentage = 0;
@@ -124,7 +165,8 @@ function setUpgradePercentage(percentage)
 	else if (percentage == 100)		percentage = 97;
 	
 	//Animate the progress bar
-	$("#progress_bar").animate({ width: ""+percentage+"%" }, 1000);
+	if (animated == true)		$("#progress_bar").animate({ width: ""+percentage+"%" }, 1000);
+	else						$("#progress_bar").width("" + percentage + "%");
 	
 	//Nicely style the end cap
 	if (percentage > 100-(24-8)/2)
@@ -143,7 +185,7 @@ function setUpgradePercentage(percentage)
 function setUpgradeDone()
 {
 	//Hehe
-	setUpgradePercentage(201);
+	setUpgradePercentage(201, true);
 	
 	//Console text
 	addConsoleLog("Upgrading done!");
