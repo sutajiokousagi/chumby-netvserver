@@ -9,22 +9,22 @@ function onLoad()
 	//Params passed thru GET
 	updateCount = GET('updateCount');
 	needReboot = GET('reboot');
-	continue_percentage = GET('continue');
+	isContinue = GET('continue');
 	startConfiguring = false;
 	
-	//Save initial parameters
+	//Save initial panel position
 	main_y = $("#div_center").offset().top;
 	main_x = $("#div_center").offset().left;
 	$("#div_loadingMain").fadeIn(0);
 	
-	setUpgradePercentage(continue_percentage, false);
-	
 	//Not continue from an upgrade process
-	if (continue_percentage == "" || continue_percentage == 0)
+	if (isContinue == "" || isContinue == 0)
 	{
 		fDbg2("Start upgrading UI");
 		
-		//Hide everything immediately, animate in later
+		setUpgradePercentage(0, false);
+		
+		//Hide everything immediately, slide in later
 		main_hideMainPanel();
 		
 		clearConsoleLog();
@@ -34,12 +34,16 @@ function onLoad()
 	}
 	
 	//This happens when browser restarts half way during an upgrading process
+	//Using opkg-chumby-upgrade, the Browser only get killed at the end, so we consider it as done
 	else
 	{
-		fDbg2("Continue upgrading UI: " + continue_percentage + "%");
+		fDbg2("Continue upgrading UI: " + isContinue + "%");
+		
+		setUpgradePercentage(201, false);
+		
 		main_showMainPanel();
 		
-		addConsoleLog("...");
+		setUpgradeDone();
 	}
 }
 
@@ -97,20 +101,22 @@ function fUPDATEEvents( vEventName, vEventData )
 
 function setUpgradeProgress(vData)
 {
-	//Format: <percentage>%1</percentage><pkgname>%2</pkgname><sizeprogress>%3</sizeprogress>
+	//Format: <percentage>%1</percentage><pkgname>%2</pkgname><pkgsize>%3</pkgsize><sizeprogress>%4</sizeprogress>
 	vData = decodeURIComponent(vData);
 	if (vData.split == undefined)
 		return;
 					
 	var percentage = vData.split("</percentage>")[0].split("<percentage>")[1];
 	var name = vData.split("</pkgname>")[0].split("<pkgname>")[1];
-	var size = vData.split("</sizeprogress>")[0].split("<sizeprogress>")[1];
-	
+	var size = vData.split("</pkgsize>")[0].split("<pkgsize>")[1];
+	var sizeprogress = vData.split("</sizeprogress>")[0].split("<sizeprogress>")[1];
+
 	//Progress bar
 	setUpgradePercentage(percentage, false);
 	
 	//Console text
-	addConsoleLog("Upgrading " + name);
+	if (size > 0)	addConsoleLog("<font color='#6598EB'>Upgrading " + name + "</font>");
+	else			addConsoleLog("Upgrading " + name);
 }
 
 /*
@@ -188,7 +194,7 @@ function setUpgradeDone()
 	setUpgradePercentage(201, true);
 	
 	//Console text
-	addConsoleLog("Upgrading done!");
+	addConsoleLog("Upgrading completed!");
 	
 	//Wait for 2.5 seconds then continue
 	
