@@ -57,9 +57,9 @@ function main_showState(vStateName, animated)
 	}
 	if (vStateName == "resetbtn")
 	{
-		setTimeout("$('#div_androidTestMain').fadeIn("+(duration+50)+");", duration);
+		$("#div_androidTestMain").fadeOut(duration);
 		$("#div_irRemoteMain").fadeOut(duration);
-		$("#div_resetBtnMain").fadeOut(duration);
+		setTimeout("$('#div_resetBtnMain').fadeIn("+(duration+50)+");", duration);
 	}
 	else
 	{
