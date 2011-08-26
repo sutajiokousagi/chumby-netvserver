@@ -7,7 +7,7 @@ function onLoad()
 	
 	//Init first view
 	irremote_init();
-	main_showState('irremote', false);
+	main_showState('androidtest', false);
 
 	setTimeout("onLoadLater()", 100);
 }
@@ -34,9 +34,9 @@ function main_hideMainPanel(duration)
 
 function main_currentState()
 {
-	if ( $("#div_androidDownloadMain").is(":visible") )		return "androiddownload";
-	else if ( $("#div_irRemoteMain").is(":visible") )		return "irremote";
-	else if ( $("#div_loadingMain").is(":visible") )		return "loading";
+	if ( $("#div_irRemoteMain").is(":visible") )				return "irremote";
+	else if ( $("#div_androidTestMain").is(":visible") )		return "androidtest";
+	else if ( $("#div_resetBtnMain").is(":visible") )			return "resetbtn";
 }
 
 function main_showState(vStateName, animated)
@@ -44,25 +44,28 @@ function main_showState(vStateName, animated)
 	var duration = (animated == true) ? 300 : 0;
 	if (vStateName == "irremote")
 	{
-		irremote_init();
+		irremote_init(0);
+		$("#div_androidTestMain").fadeOut(duration);
 		setTimeout("$('#div_irRemoteMain').fadeIn("+(duration+50)+");", duration);
-		$("#div_androidDownloadMain").fadeOut(duration);
-		//$("#div_accountMain").fadeOut(duration);
-		//$("#div_configuringMain").fadeOut(duration);
+		$("#div_resetBtnMain").fadeOut(duration);
 	}
-	if (vStateName == "androiddownload")
+	if (vStateName == "androidtest")
 	{
+		setTimeout("$('#div_androidTestMain').fadeIn("+(duration+50)+");", duration);
 		$("#div_irRemoteMain").fadeOut(duration);
-		setTimeout("$('#div_androidDownloadMain').fadeIn("+(duration+50)+");", duration);
-		//$("#div_accountMain").fadeOut(duration);
-		//$("#div_configuringMain").fadeOut(duration);
+		$("#div_resetBtnMain").fadeOut(duration);
+	}
+	if (vStateName == "resetbtn")
+	{
+		setTimeout("$('#div_androidTestMain').fadeIn("+(duration+50)+");", duration);
+		$("#div_irRemoteMain").fadeOut(duration);
+		$("#div_resetBtnMain").fadeOut(duration);
 	}
 	else
 	{
+		$("#div_androidTestMain").fadeOut(duration);
 		$("#div_irRemoteMain").fadeOut(duration);
-		$("#div_androidDownloadMain").fadeOut(duration);
-		//$("#div_accountMain").fadeOut(duration);
-		//$("#div_configuringMain").fadeOut(duration);
+		$("#div_resetBtnMain").fadeOut(duration);
 	}
 }
 
@@ -71,5 +74,5 @@ function main_showState(vStateName, animated)
 function main_onRemoteControl(vButtonName)
 {
 	if ( $("#div_irRemoteMain").is(":visible") )				irremote_onRemoteControl(vButtonName);
-	//else if ( $("#div_androidDownloadMain").is(":visible") )	androiddownload_onRemoteControl(vButtonName);
+	//else if ( $("#div_androidTestMain").is(":visible") )		androidtest_onRemoteControl(vButtonName);
 }

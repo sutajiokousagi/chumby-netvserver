@@ -1,8 +1,11 @@
 var buttonPressedArray;
 var buttonNameArray = ['cpanel', 'widget', 'up', 'left', 'center', 'right', 'down'];
+var irremote_testIndex;
 
-function irremote_init()
+function irremote_init(testIndex)
 {
+	irremote_testIndex = testIndex;
+	
 	buttonPressedArray = new Array();
 	for (var btnIndex in buttonNameArray)
 		buttonPressedArray[buttonNameArray[btnIndex]] = false;
@@ -11,6 +14,18 @@ function irremote_init()
 		
 	fDbg2("Refresh IR Remote view");
 	refreshIRRemote();
+	
+	if (irremote_testIndex == 0)
+	{
+		$("#div_irRemoteMain_instruction1").show();
+		$("#div_irRemoteMain_instruction2").hide();
+	}
+	else
+	{
+		$("#div_irRemoteMain_instruction1").hide();
+		$("#div_irRemoteMain_instruction2").show();
+	}
+	
 }
 
 //-----------------------------------------------------------
@@ -47,6 +62,7 @@ function irremote_onRemoteControl(vButtonName)
 	if (btnCount < irremote_numButton())
 		return;
 		
-	//All done
-	main_showState("androiddownload");
+	//Finish first test
+	if (irremote_testIndex == 0)		irremote_init(1);
+	else								main_showState("resetbtn");
 }
