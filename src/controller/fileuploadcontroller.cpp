@@ -1,20 +1,17 @@
-/**
-  @file
-  @author Stefan Frings
-  @version $Id: fileuploadcontroller.cpp 894 2010-10-18 20:54:32Z stefan $
-*/
-
 #include "fileuploadcontroller.h"
 
 FileUploadController::FileUploadController() {}
 
-void FileUploadController::service(HttpRequest& request, HttpResponse& response) {
+void FileUploadController::service(HttpRequest& request, HttpResponse& response)
+{
 
-    if (request.getParameter("action")=="show") {
+    if (request.getParameter("action")=="show")
+    {
         response.setHeader("Content-Type", "image/jpeg");
         QTemporaryFile* file=request.getUploadedFile("file1");
         if (file) {
-            while (!file->atEnd() && !file->error()) {
+            while (!file->atEnd() && !file->error())
+            {
                 QByteArray buffer=file->read(65536);
                 response.write(buffer);
             }
