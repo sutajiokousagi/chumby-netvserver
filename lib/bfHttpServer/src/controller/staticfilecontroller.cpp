@@ -1,9 +1,3 @@
-/**
-  @file
-  @author Stefan Frings
-  @version $Id: staticfilecontroller.cpp 938 2010-12-05 14:29:58Z stefan $
-*/
-
 #include "staticfilecontroller.h"
 #include <QFileInfo>
 #include <QDir>

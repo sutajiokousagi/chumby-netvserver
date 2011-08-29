@@ -398,6 +398,71 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>true</value></data></xml>", true);
     }
 
+    else if (cmdString == "MD5FILE")
+    {
+        if (!FileExists(dataString)) {
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>file not found</message><path>" + dataString + "</path></data></xml>", true);
+            return;
+        }
+        QByteArray md5sum = GetFileMD5(dataString);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><path>" + dataString + "</path><md5sum>" + md5sum + "</md5sum></data></xml>", true);
+    }
+
+    //-----------
+
+    else if (cmdString == "DOWNLOADFILE")
+    {
+        if (!IsAuthorizedCaller(authorizedCaller)) {
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+            return;
+        }
+
+        DumpStaticFile(dataString, response);
+    }
+
+    else if (cmdString == "UPLOADFILE")
+    {
+        if (!IsAuthorizedCaller(authorizedCaller)) {
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+            return;
+        }
+
+        QString pathString = QString(request.getParameter("path"));
+
+        //Clear existing file (if any)
+        bool cleanFile = true;
+        if (FileExists(pathString))
+            cleanFile = UnlinkFile(pathString);
+        if (!cleanFile) {
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>unable to clean existing file</message><path>" + pathString.toLatin1() + "</path></data></xml>", true);
+            return;
+        }
+
+        QTemporaryFile* file = request.getUploadedFile("filedata");
+        if (!file) {
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>uploaded file data not found</message><path>" + pathString.toLatin1() + "</path></data></xml>", true);
+            return;
+        }
+
+        //Write the buffer to non-volatile disk
+        //MountRW();
+        bool success = file->copy( pathString );
+        //MountRO();
+
+        if (!success) {
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>error writing to disk (read-only partition?)</message><path>" + pathString.toLatin1() + "</path></data></xml>", true);
+            return;
+        }
+
+        quint64 filesize = GetFileSize(pathString);
+        if (filesize <= 0) {
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>invalid filesize</message><path>" + pathString.toLatin1() + "</path></data></xml>", true);
+            return;
+        }
+        QByteArray sizeStr = QByteArray().setNum(filesize);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><path>" + pathString.toLatin1() + "</path><filesize>" + sizeStr + "</filesize></data></xml>", true);
+    }
+
     //-----------
 
     //A generic command to execute name-alike scripts
@@ -671,6 +736,76 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
     //-----------
 
+    else if (cmdString == "GETFILECONTENTS")
+    {
+        QByteArray filedata = GetFileContents(dataString);
+        if (filedata == "file not found" || filedata == "no permission")        response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+        else                                                                    response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setCommand(cmdString);
+        response.setParameter(STRING_VALUE, filedata);
+        response.setParameter("path", dataString);
+        response.write();
+    }
+
+    else if (cmdString == "SETFILECONTENTS")
+    {
+        //<path>full path to a file</path><content>........</content>
+        QByteArray path = request.getParameter("path");
+        QByteArray content = request.getParameter("content");
+        if (!SetFileContents(path,content))        response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+        else                                       response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setCommand(cmdString);
+        response.setParameter(STRING_VALUE, QByteArray().setNum(GetFileSize(path)));
+        response.setParameter("path", path);
+        response.write();
+    }
+
+    else if (cmdString == "FILEEXISTS")
+    {
+        QByteArray existStr = "false";
+        if (FileExists(dataString))
+            existStr = "true";
+        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setCommand(cmdString);
+        response.setParameter(STRING_VALUE, existStr);
+        response.setParameter("path", dataString);
+        response.write();
+    }
+
+    else if (cmdString == "GETFILESIZE")
+    {
+        QByteArray sizeStr = QByteArray().setNum(GetFileSize(dataString));
+        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setCommand(cmdString);
+        response.setParameter(STRING_VALUE, sizeStr);
+        response.setParameter("path", dataString);
+        response.write();
+    }
+
+    else if (cmdString == "UNLINKFILE")
+    {
+        bool success = UnlinkFile(dataString);
+        if (!success)                       response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+        else                                response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setCommand(cmdString);
+        response.setParameter(STRING_VALUE, QByteArray(success ? "true" : "false"));
+        response.setParameter("path", dataString);
+        response.write();
+    }
+
+    else if (cmdString == "MD5FILE")
+    {
+        QByteArray md5sum = GetFileMD5(dataString);
+        if (!FileExists(dataString))        response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+        else                                response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setCommand(cmdString);
+        response.setParameter(STRING_VALUE, md5sum);
+        response.setParameter("path", dataString);
+        response.write();
+    }
+
+    //-----------
+
 #if defined (CURSOR_CONTROLLER)
     else if (cmdString == "CURDOWN")
     {
@@ -835,9 +970,9 @@ bool BridgeController::IsAuthorizedCaller(QByteArray headerValue)
     qint64 second2 = now / 1000;
     qint64 second3 = (now + 1000) / 1000;
 
-    QByteArray hashResult1 = QCryptographicHash::hash(QByteArray().setNum(second1),QCryptographicHash::Md5).toHex();
-    QByteArray hashResult2 = QCryptographicHash::hash(QByteArray().setNum(second2),QCryptographicHash::Md5).toHex();
-    QByteArray hashResult3 = QCryptographicHash::hash(QByteArray().setNum(second3),QCryptographicHash::Md5).toHex();
+    QByteArray hashResult1 = QCryptographicHash::hash(QByteArray().setNum(second1),QCryptographicHash::Md5).toHex().toUpper();
+    QByteArray hashResult2 = QCryptographicHash::hash(QByteArray().setNum(second2),QCryptographicHash::Md5).toHex().toUpper();
+    QByteArray hashResult3 = QCryptographicHash::hash(QByteArray().setNum(second3),QCryptographicHash::Md5).toHex().toUpper();
 
     qDebug() << "Received hash: " << headerValue;
     qDebug() << "Calculated hash: " << hashResult1;
@@ -918,7 +1053,7 @@ bool BridgeController::FileExecutable(const QString &fullPath)
     QFile file(fullPath);
     if (!file.exists())
         return false;
-    return ((file.permissions() & QFile::ExeOwner) || (file.permissions() & QFile::ExeOther));
+    return ((file.permissions() & QFile::ExeOwner) || (file.permissions() & QFile::ExeOther) || (file.permissions() & QFile::ExeUser));
 }
 
 qint64 BridgeController::GetFileSize(const QString &fullPath)
@@ -955,6 +1090,17 @@ bool BridgeController::SetFileContents(const QString &fullPath, QByteArray data)
     return true;
 }
 
+bool BridgeController::SetFileExecutable(const QString &fullPath)
+{
+    QFile file(fullPath);
+    if (!file.exists())                         //doesn't exist
+        return false;
+    if (FileExecutable(fullPath))
+        return true;
+    //return true;
+    return file.setPermissions(file.permissions() | QFile::ExeUser | QFile::ExeOther | QFile::ExeOwner);
+}
+
 bool BridgeController::UnlinkFile(const QString &fullPath)
 {
     QFile file(fullPath);
@@ -963,14 +1109,27 @@ bool BridgeController::UnlinkFile(const QString &fullPath)
     return file.remove();
 }
 
-bool BridgeController::SetFileExecutable(const QString &fullPath)
+QByteArray BridgeController::GetFileMD5(const QString &fullPath)
 {
-    QFile file(fullPath);
-    if (!file.exists())                         //doesn't exist
+    QByteArray output = Execute(QString("/usr/bin/md5sum"), QStringList(fullPath));
+    return output.split(' ')[0];
+}
+
+// Mount/Unmount utility
+//---------------------------------------------
+
+bool BridgeController::MountRW()
+{
+    Execute("/bin/mount", QStringList() << "-o" << "remount,rw" << "/");
+    return true;
+}
+
+bool BridgeController::MountRO()
+{
+    QByteArray output = Execute("/bin/mount", QStringList() << "-o" << "remount,ro" << "/");
+    if (output.contains("error"))
         return false;
-    if (FileExecutable(fullPath))
-        return true;
-    return file.setPermissions(file.permissions() | QFile::ExeUser | QFile::ExeOther);
+    return true;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1046,4 +1205,59 @@ void BridgeController::SaveParameters(QString * filename /* = NULL */)
     if (parameters != NULL)        parameters->sync();
     else if (filename == NULL)     parameters = new QSettings(paramsFile, QSettings::IniFormat);
     else                           parameters = new QSettings(*filename, QSettings::IniFormat);
+}
+
+//----------------------------------------------------------------------------------------------------
+// Copied from StaticFileController
+//-----------------------------------------------------------------------------------------------------
+
+void BridgeController::DumpStaticFile(QByteArray path, HttpResponse& response)
+{
+    // If the filename is a directory, append index.html.
+    if (QFileInfo(path).isDir())
+        path+="/index.html";
+
+    // IF file not exists
+    QFile file(docroot+path);
+    if (!file.exists())
+    {
+        response.setStatus(404,"not found");
+        response.write("404 not found",true);
+        return;
+    }
+
+    // Error opening the file
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        response.setStatus(403,"forbidden");
+        response.write("403 forbidden",true);
+        return;
+    }
+
+    SetContentType(path,response);
+
+    // Return the file content
+    while (!file.atEnd() && !file.error())
+        response.write(file.read(65536));
+    file.close();
+}
+
+void BridgeController::SetContentType(QString fileName, HttpResponse& response) const
+{
+    if (fileName.endsWith(".png")) {
+        response.setHeader("Content-Type", "image/png");
+    }
+    else if (fileName.endsWith(".jpg")) {
+        response.setHeader("Content-Type", "image/jpeg");
+    }
+    else if (fileName.endsWith(".gif")) {
+        response.setHeader("Content-Type", "image/gif");
+    }
+    else if (fileName.endsWith(".txt")) {
+        response.setHeader("Content-Type", "text/plain; charset=UTF-8");
+    }
+    else if (fileName.endsWith(".html") || fileName.endsWith(".htm")) {
+        response.setHeader("Content-Type", "text/html; charset=charset=UTF-8");
+    }
+    // Todo: add all of your content types
 }

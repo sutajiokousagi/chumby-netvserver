@@ -66,6 +66,12 @@ private:
     bool SetFileContents(const QString &fullPath, QByteArray data);
     bool SetFileExecutable(const QString &fullPath);
     bool UnlinkFile(const QString &fullPath);
+    bool MountRW();
+    bool MountRO();
+    QByteArray GetFileMD5(const QString &fullPath);
+
+    void DumpStaticFile(QByteArray path, HttpResponse& response);
+    void SetContentType(QString fileName, HttpResponse& response) const;
 };
 
 #endif // BridgeController_H
