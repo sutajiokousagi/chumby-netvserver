@@ -20,8 +20,8 @@ void FileUploadController::service(HttpRequest& request, HttpResponse& response)
             response.write("upload failed");
         }
     }
-
-    else {
+    else
+    {
         response.setHeader("Content-Type", "text/html; charset=ISO-8859-1");
         response.write("<html><body>");
         response.write("Upload a JPEG image file<p>");
