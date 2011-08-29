@@ -1257,7 +1257,11 @@ void BridgeController::SetContentType(QString fileName, HttpResponse& response) 
         response.setHeader("Content-Type", "text/plain; charset=UTF-8");
     }
     else if (fileName.endsWith(".html") || fileName.endsWith(".htm")) {
-        response.setHeader("Content-Type", "text/html; charset=charset=UTF-8");
+        response.setHeader("Content-Type", "text/html; charset=UTF-8");
+    }
+    else
+    {
+        response.setHeader("Content-Type", "text/plain; charset=UTF-8");
     }
     // Todo: add all of your content types
 }
