@@ -1218,7 +1218,7 @@ void BridgeController::DumpStaticFile(QByteArray path, HttpResponse& response)
         path+="/index.html";
 
     // IF file not exists
-    QFile file(docroot+path);
+    QFile file(path);
     if (!file.exists())
     {
         response.setStatus(404,"not found");
