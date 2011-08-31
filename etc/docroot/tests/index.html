@@ -8,6 +8,7 @@
 <script type='text/javascript' src='js/index.js'></script>
 <script type='text/javascript' src='js/system.js'></script>
 <script type='text/javascript' src='js/irremote.js'></script>
+<script type='text/javascript' src='js/resetbtn.js'></script>
 <script type='text/javascript' src='js/android.js'></script>
 </head>
 <body onload="onLoad();">
@@ -96,9 +97,26 @@
 					<div class="div_title">Test Reset button</div>
 				</div>
 				
-				<div style="text-align: center; margin-top: 130px;">Press the button on the front panel of the NeTV</div>
+				<div id="div_resetBtnMain_instruction1" style="text-align: center; margin-top: 130px;">
+					Press the <font color="6598EB"><b>SETUP</b></font> on NeTV device
+				</div>
+				<div id="div_resetBtnMain_instruction2" style="text-align: center; margin-top: 130px;">
+					<font color="6598EB"><b>SETUP</b></font> button is <font color="00ff00"><b>OK</b></font>
+				</div>
 			</div>
-						
+			
+			<!-- ----------------------- All Done ---------------------- -->
+			<div id="div_allDoneMain">
+				<div class="div_title_wrapper">
+					<div class="div_title">On-Screen Tests Completed</div>
+				</div>
+
+				<div id="div_allDoneMain_instruction" style="text-align: center; margin-top: 130px;">
+					All on-screen tests are completed.<br>
+					Please continue with the next step (if any).
+				</div>
+			</div>
+			
 		</div>
     </div>
 

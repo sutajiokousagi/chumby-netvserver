@@ -49,6 +49,10 @@ function irremote_numButton()
 
 function irremote_onRemoteControl(vButtonName)
 {
+	//Ignore 'setup' button here
+	if (vButtonName == "setup")
+		return;
+	
 	//Set the flag & refresh whole page
 	buttonPressedArray[vButtonName] = true;
 	refreshIRRemote();
@@ -61,7 +65,7 @@ function irremote_onRemoteControl(vButtonName)
 	
 	if (btnCount < irremote_numButton())
 		return;
-		
+	
 	//Finish first test
 	if (irremote_testIndex == 0)		irremote_init(1);
 	else								main_showState("resetbtn");

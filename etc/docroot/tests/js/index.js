@@ -5,8 +5,10 @@ function onLoad()
 	main_y = $("#div_center").offset().top;
 	main_hideMainPanel(50);
 	
+	resetbtn_pressed = false;
+	
 	//Init first view
-	irremote_init();
+	irremote_init(0);
 	main_showState('androidtest', false);
 
 	setTimeout("onLoadLater()", 100);
@@ -37,6 +39,7 @@ function main_currentState()
 	if ( $("#div_irRemoteMain").is(":visible") )				return "irremote";
 	else if ( $("#div_androidTestMain").is(":visible") )		return "androidtest";
 	else if ( $("#div_resetBtnMain").is(":visible") )			return "resetbtn";
+	else if ( $("#div_allDoneMain").is(":visible") )			return "done";
 }
 
 function main_showState(vStateName, animated)
@@ -48,24 +51,36 @@ function main_showState(vStateName, animated)
 		$("#div_androidTestMain").fadeOut(duration);
 		setTimeout("$('#div_irRemoteMain').fadeIn("+(duration+50)+");", duration);
 		$("#div_resetBtnMain").fadeOut(duration);
+		$("#div_allDoneMain").fadeOut(duration);
 	}
-	if (vStateName == "androidtest")
+	else if (vStateName == "androidtest")
 	{
 		setTimeout("$('#div_androidTestMain').fadeIn("+(duration+50)+");", duration);
 		$("#div_irRemoteMain").fadeOut(duration);
 		$("#div_resetBtnMain").fadeOut(duration);
+		$("#div_allDoneMain").fadeOut(duration);
 	}
-	if (vStateName == "resetbtn")
+	else if (vStateName == "resetbtn")
 	{
+		resetbtn_init(0);
 		$("#div_androidTestMain").fadeOut(duration);
 		$("#div_irRemoteMain").fadeOut(duration);
 		setTimeout("$('#div_resetBtnMain').fadeIn("+(duration+50)+");", duration);
+		$("#div_allDoneMain").fadeOut(duration);
+	}
+	else if (vStateName == "done")
+	{
+		$("#div_androidTestMain").fadeOut(duration);
+		$("#div_irRemoteMain").fadeOut(duration);
+		$("#div_resetBtnMain").fadeOut(duration);
+		setTimeout("$('#div_allDoneMain').fadeIn("+(duration+50)+");", duration);
 	}
 	else
 	{
 		$("#div_androidTestMain").fadeOut(duration);
 		$("#div_irRemoteMain").fadeOut(duration);
 		$("#div_resetBtnMain").fadeOut(duration);
+		$("#div_allDoneMain").fadeOut(duration);
 	}
 }
 
@@ -74,5 +89,5 @@ function main_showState(vStateName, animated)
 function main_onRemoteControl(vButtonName)
 {
 	if ( $("#div_irRemoteMain").is(":visible") )				irremote_onRemoteControl(vButtonName);
-	//else if ( $("#div_androidTestMain").is(":visible") )		androidtest_onRemoteControl(vButtonName);
+	else if ( $("#div_resetBtnMain").is(":visible") )			resetbtn_onRemoteControl(vButtonName);
 }
