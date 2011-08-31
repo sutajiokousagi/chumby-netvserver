@@ -575,6 +575,28 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
+    else if (cmdString == "SETIFRAME")
+    {
+        QByteArray url = request.getParameter("url").trimmed();
+        QByteArray options = request.getParameter("options").trimmed();
+        QByteArray javaScriptString = "fSetIFrame(\"" + options + "\",\"" + url + "\");";
+
+        //Forward to browser only
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>JavaScript</cmd><data><value>") + javaScriptString + "</value></data></xml>", "netvbrowser");
+
+        //Reply to socket client (Android/iOS)
+        if (numClient > 0) {
+            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+            response.setCommand(cmdString);
+            response.setParameter(STRING_VALUE, "Command forwarded to browser");
+        }else{
+            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+            response.setCommand(cmdString);
+            response.setParameter(STRING_VALUE, "No browser running");
+        }
+        response.write();
+    }
+
     else if (cmdString == "TICKEREVENT")
     {
         //All these should already be URI encoded
@@ -616,26 +638,6 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
             response.setCommand(cmdString);
             response.setParameter(STRING_VALUE, "No browser running");
         }
-        response.write();
-    }
-
-    else if (cmdString == "GETSCREENSHOTPATH")
-    {
-        QByteArray tmpString = QByteArray("http://" +  request.getLocalAddress() + "/framebuffer");
-        if (tmpString != "")
-        {
-            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
-            response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, tmpString);
-            response.write();
-        }
-    }
-
-    else if (cmdString == "SETSCREENSHOTRES")
-    {
-        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
-        response.setCommand(cmdString);
-        response.setParameter(STRING_VALUE, "Screenshot resolution changed");
         response.write();
     }
 
