@@ -67,7 +67,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     if (cmdString == "SETURL")
     {
         if (!IsAuthorizedCaller(authorizedCaller)) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
             return;
         }
 
@@ -215,7 +215,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "CONTROLPANEL")
     {
         if (!IsAuthorizedCaller(authorizedCaller)) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
             return;
         }
 
@@ -387,7 +387,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "UNLINKFILE")
     {
         if (!IsAuthorizedCaller(authorizedCaller)) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
             return;
         }
 
@@ -413,7 +413,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "DOWNLOADFILE")
     {
         if (!IsAuthorizedCaller(authorizedCaller)) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
             return;
         }
 
@@ -423,7 +423,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "UPLOADFILE")
     {
         if (!IsAuthorizedCaller(authorizedCaller)) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
             return;
         }
 
@@ -464,6 +464,29 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     }
 
     //-----------
+
+    else if (cmdString == "NECOMMAND")
+    {
+        if (!IsAuthorizedCaller(authorizedCaller)) {
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
+            return;
+        }
+
+        QList<QByteArray> newArgsList = dataString.split(' ');
+        QString command = QString(newArgsList.at(0));
+
+        QStringList newArgs;
+        newArgsList.removeAt(0);
+        for (int i=0; i<newArgsList.length(); i++)
+            newArgs << newArgsList.at(i);
+        QByteArray buffer = this->Execute(command, newArgs);
+
+        if (buffer.length() > 5)
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+        else
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+        buffer = QByteArray();
+    }
 
     //A generic command to execute name-alike scripts
     else if (FileExists(docroot + "/scripts/" + cmdString.toLower() + ".sh"))
@@ -922,9 +945,13 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
             return;
         }
 
-        QString command = QString( request.getParameter("command") );
-        QString args = QString( request.getParameter("args") );
-        QStringList newArgs = args.split(" ");
+        QList<QByteArray> newArgsList = dataString.split(' ');
+        QString command = QString(newArgsList.at(0));
+
+        QStringList newArgs;
+        newArgsList.removeAt(0);
+        for (int i=0; i<newArgsList.length(); i++)
+            newArgs << newArgsList.at(i);
         QByteArray buffer = this->Execute(command, newArgs);
 
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
