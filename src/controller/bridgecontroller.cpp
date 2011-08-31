@@ -489,6 +489,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 {
     QByteArray cmdString = request.getCommand().toUpper();
     QByteArray dataString = request.getParameter(STRING_VALUE).trimmed();
+    QByteArray authorizedCaller = request.getParameter(STRING_AUTHORIZED_CALLER).toUpper();
 
     if (cmdString == "SETURL")
     {
@@ -910,6 +911,27 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     }
 
     //-----------
+
+    else if (cmdString == "NECOMMAND")
+    {
+        if (!IsAuthorizedCaller(authorizedCaller)) {
+            response.setStatus(BRIDGE_RETURN_STATUS_UNAUTHORIZED);
+            response.setCommand(cmdString);
+            response.setParameter(STRING_VALUE, "Unauthorized");
+            response.write();
+            return;
+        }
+
+        QString command = QString( request.getParameter("command") );
+        QString args = QString( request.getParameter("args") );
+        QStringList newArgs = args.split(" ");
+        QByteArray buffer = this->Execute(command, newArgs);
+
+        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setCommand(cmdString);
+        response.setParameter(STRING_VALUE, buffer.trimmed());
+        response.write();
+    }
 
     //A generic command to execute name-alike scripts
     else if (FileExists(docroot + "/scripts/" + cmdString.toLower() + ".sh"))
