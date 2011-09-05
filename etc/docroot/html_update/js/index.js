@@ -3,14 +3,19 @@ var main_y;
 var updateCount;
 var needReboot;
 var startConfiguring;
+var completedTextString = "Upgrade Completed!";
+var upgradedPackageColor = "6598EB";
+var needRebootTextString = "System will reboot after upgrading";
+var rebootingTextString = "System is rebooting...";
+var rebootTextColor = "FF0000";
 
 function onLoad()
 {
 	//Params passed thru GET
 	updateCount = GET('updateCount');
-	needReboot = GET('reboot');
 	isContinue = GET('continue');
 	startConfiguring = false;
+	needReboot = GET('reboot');
 	
 	//Save initial panel position
 	main_y = $("#div_center").offset().top;
@@ -28,6 +33,8 @@ function onLoad()
 		main_hideMainPanel();
 		
 		clearConsoleLog();
+		if (needReboot == "true" || needReboot == true)
+			addConsoleLog("<font color='#" + rebootTextColor + "'>" + needRebootTextString + "</font>");
 		addConsoleLog("Starting...");
 	
 		setTimeout("onLoadLater()", 100);
@@ -43,7 +50,9 @@ function onLoad()
 		
 		main_showMainPanel();
 		
-		setUpgradeDone();
+		//setUpgradeDone();
+		setUpgradePercentage(201, true);
+		addConsoleLog("<font color='#" + upgradedPackageColor + "'>" + completedTextString + "</font>");
 	}
 }
 
@@ -115,7 +124,7 @@ function setUpgradeProgress(vData)
 	setUpgradePercentage(percentage, false);
 	
 	//Console text
-	if (size > 0)	addConsoleLog("<font color='#6598EB'>Upgrading " + name + "</font>");
+	if (size > 0)	addConsoleLog("<font color='#" + upgradedPackageColor +"'>Upgrading " + name + "</font>");
 	else			addConsoleLog("Upgrading " + name);
 }
 
@@ -155,7 +164,7 @@ function setUpgradeConfiguring(vData)
 	
 	//Console text
 	if (startConfiguring == false)
-		addConsoleLog("Finalizing updates, please wait...");
+		addConsoleLog("<font color='#" + upgradedPackageColor + "'>" + "Finalizing updates, please wait..." + "</font>");
 	startConfiguring = true;
 }
 
@@ -194,14 +203,17 @@ function setUpgradeDone()
 	setUpgradePercentage(201, true);
 	
 	//Console text
-	addConsoleLog("Upgrading completed!");
-	
+	if (!isConsoleLogContains(completedTextString))
+		addConsoleLog("<font color='#" + upgradedPackageColor + "'>" + completedTextString + "</font>");
+	if (needReboot == "true" || needReboot == true)
+		addConsoleLog("<font color='#" + rebootTextColor + "'>" + rebootingTextString + "</font>");
+			
 	//Wait for 2.5 seconds then continue
 	
 	//Gracefully hide the update panel
 	setTimeout("main_hideMainPanel(1600);", 2500+1650);
 	
-	//May not reach here if upgrade script reboots the system itself
+	//May not reach here if upgrade script reboots the system automatically
 	setTimeout("location.href=\"http://localhost/\"", 2500+1650+1650);
 }
 
@@ -211,10 +223,16 @@ function addConsoleLog(text)
 {
 	var oldValue = $("#consolelog").html();
 		
-	//Keep only last 14 lines
+	//Keep only last 14 lines, do not delete those with colors
 	var tempArray = oldValue.split("<br>");
 	while (tempArray.length > 14)
-		tempArray.splice(0,1);
+	{
+		for (var i=0; i<tempArray.length - 1)
+		{
+			if (!stringContains(tempArray[i], "<font>")
+				tempArray.splice(i,1);
+		}
+	}
 	oldValue = tempArray.join("<br>");
 		
 	$("#consolelog").html(oldValue + "<br>" + text);
@@ -225,6 +243,30 @@ function clearConsoleLog(text)
 	var oldValue = $("#consolelog").html("");
 }
 
+function isConsoleLogContains(text)
+{
+	for (var i=0; i<tempArray.length - 1)
+		if (stringContains(tempArray[i], text)
+			return true;
+	return false;
+}
+
+//-----------------------------------------------------------
+
+function stringEndsWith(text, searchText)
+{
+    return (text.match(searchText+"$")==searchText);
+}
+
+function stringStartsWith(text, searchText)
+{
+    return (text.indexOf(searchText) === 0) ? true : false;
+}
+
+function stringContains(text, searchText)
+{
+    return (text.indexOf(searchText) != -1);
+}
 
 
 
