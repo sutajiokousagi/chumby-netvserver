@@ -247,10 +247,8 @@ function clearConsoleLog(text)
 
 function isConsoleLogContains(text)
 {
-	for (var i=0; i<tempArray.length - 1; i++)
-		if (stringContains(tempArray[i], text))
-			return true;
-	return false;
+	var currentValue = $("#consolelog").html();
+	return stringContains(currentValue, text);
 }
 
 //-----------------------------------------------------------
