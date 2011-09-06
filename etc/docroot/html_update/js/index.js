@@ -14,8 +14,8 @@ function onLoad()
 	//Params passed thru GET
 	updateCount = GET('updateCount');
 	isContinue = GET('continue');
-	startConfiguring = false;
 	needReboot = GET('reboot');
+	startConfiguring = false;
 	
 	//Save initial panel position
 	main_y = $("#div_center").offset().top;
@@ -227,10 +227,12 @@ function addConsoleLog(text)
 	var tempArray = oldValue.split("<br>");
 	while (tempArray.length > 14)
 	{
-		for (var i=0; i<tempArray.length - 1)
+		for (var i=0; i<tempArray.length - 1; i++)
 		{
-			if (!stringContains(tempArray[i], "<font>")
-				tempArray.splice(i,1);
+			if (stringContains(tempArray[i], "<font>"))
+				continue;
+			tempArray.splice(i,1);
+			break;
 		}
 	}
 	oldValue = tempArray.join("<br>");
@@ -245,8 +247,8 @@ function clearConsoleLog(text)
 
 function isConsoleLogContains(text)
 {
-	for (var i=0; i<tempArray.length - 1)
-		if (stringContains(tempArray[i], text)
+	for (var i=0; i<tempArray.length - 1; i++)
+		if (stringContains(tempArray[i], text))
 			return true;
 	return false;
 }
