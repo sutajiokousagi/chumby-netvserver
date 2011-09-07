@@ -68,3 +68,11 @@ function fNMDeviceRemoved(  )
 	if (activationState == '')
 		return;
 }
+
+// -------------------------------------------------------------------------------------------------
+//	NeTVBrowser will check this function every 60 seconds and reload the page if the reply is not 'true'
+// -------------------------------------------------------------------------------------------------
+function fCheckAlive()
+{
+	return true;
+}
