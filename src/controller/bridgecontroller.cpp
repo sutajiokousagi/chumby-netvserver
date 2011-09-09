@@ -260,11 +260,12 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "SETIFRAME" || cmdString == "MULTITAB")
     {
-        QByteArray url = xmlparameters.value("url", "");
+        QByteArray param = xmlparameters.value("param", "");
         QByteArray options = xmlparameters.value("options", "");
+        QByteArray tab = xmlparameters.value("tab", "");
 
         //Forward to browser
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>" + cmdString + "</cmd><data><url>") + url + "</url><options>" + options + "</options></data></xml>", "netvbrowser");
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>" + cmdString + "</cmd><data><param>") + param + "</param><options>" + options + "</options><tab>" + tab + "</tab></data></xml>", "netvbrowser");
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
