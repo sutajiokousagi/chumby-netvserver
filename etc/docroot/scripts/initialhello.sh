@@ -34,9 +34,6 @@ if [ -z "${fwver}" ]; then
 	fwver='1.0'
 fi
 
-# No flash plugin on NeTV
-flashplugin='0'
-
 # Flash version
 flashver=$(chumbyflashplayer.x -v | sed '5!d')
 
@@ -102,7 +99,8 @@ echo "<guid>${GUID}</guid>"
 echo "<dcid>${DCID}</dcid>"
 echo "<hwver>${hwver}</hwver>"
 echo "<fwver>${fwver}</fwver>"
-echo "<flashplugin>${flashplugin}</flashplugin>"
+echo "<minAndroid>0.4.91</minAndroid>"
+echo "<minIOS>0.0.0</minIOS>"
 echo "<flashver>${flashver}</flashver>"
 echo "<internet>${internet}</internet>"
 echo "<mac>${MAC}</mac>"
