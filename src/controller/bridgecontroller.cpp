@@ -6,6 +6,7 @@
 #include <QProcess>
 #include <QDateTime>
 #include <QCryptographicHash>
+#include <QUrl>
 
 #define BRIDGE_RETURN_STATUS_UNIMPLEMENTED  "0"
 #define BRIDGE_RETURN_STATUS_SUCCESS        "1"
@@ -210,6 +211,18 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
     }
 
+    else if (cmdString == "KEY")
+    {
+        //Forward to all clients
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataString + "</data></xml>", "all");
+
+        //Reply to JavaScriptCore/ControlPanel
+        if (numClient > 0)
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", true);
+        else
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No client running</value></data></xml>", true);
+    }
+
     //-----------
 
     else if (cmdString == "CONTROLPANEL")
@@ -227,15 +240,15 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "TICKEREVENT")
     {
-        //All these should already be URI encoded
-        QByteArray message = xmlparameters.value("message", "");
-        QByteArray title = xmlparameters.value("title", "");
-        QByteArray image = xmlparameters.value("image", "");
-        QByteArray type = xmlparameters.value("type", "");
-        QByteArray level = xmlparameters.value("level", "");
+        //All these should be URI encoded before passing to JavaScript
+        QByteArray message = QUrl::toPercentEncoding(QString(xmlparameters.value("message", "")), "", "/'\"");
+        QByteArray title = QUrl::toPercentEncoding(QString(xmlparameters.value("title", "")), "", "/'\"");
+        QByteArray image = QUrl::toPercentEncoding(QString(xmlparameters.value("image", "")), "", "/'\"");
+        QByteArray type = QUrl::toPercentEncoding(QString(xmlparameters.value("type", "")), "", "/'\"");
+        QByteArray level = QUrl::toPercentEncoding(QString(xmlparameters.value("level", "")), "", "/'\"");
         QByteArray javaScriptString = "fTickerEvents(\"" + message + "\",\"" + title + "\",\"" + image + "\",\"" + type + "\",\"" + level + "\");";
 
-        //Forward to browser only
+        //Forward to browser
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>JavaScript</cmd><data><value>") + javaScriptString + "</value></data></xml>", "netvbrowser");
 
         //Reply to JavaScriptCore/ControlPanel
@@ -245,16 +258,19 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
     }
 
-    else if (cmdString == "KEY")
+    else if (cmdString == "SETIFRAME" || cmdString == "MULTITAB")
     {
-        //Forward to all clients
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataString + "</data></xml>", "all");
+        QByteArray url = xmlparameters.value("url", "");
+        QByteArray options = xmlparameters.value("options", "");
+
+        //Forward to browser
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>" + cmdString + "</cmd><data><url>") + url + "</url><options>" + options + "</options></data></xml>", "netvbrowser");
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>OK</value></data></xml>", true);
         else
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No client running</value></data></xml>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
     }
 
     //-----------
@@ -575,14 +591,10 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    else if (cmdString == "SETIFRAME")
+    else if (cmdString == "SETIFRAME" || cmdString == "MULTITAB")
     {
-        QByteArray url = request.getParameter("url").trimmed();
-        QByteArray options = request.getParameter("options").trimmed();
-        QByteArray javaScriptString = "fSetIFrame(\"" + options + "\",\"" + url + "\");";
-
-        //Forward to browser only
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>JavaScript</cmd><data><value>") + javaScriptString + "</value></data></xml>", "netvbrowser");
+        //Forward to browser
+        int numClient = Static::tcpSocketServer->broadcast(request.getRawData(), "netvbrowser");
 
         //Reply to socket client (Android/iOS)
         if (numClient > 0) {
@@ -599,12 +611,12 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
     else if (cmdString == "TICKEREVENT")
     {
-        //All these should already be URI encoded
-        QByteArray message = request.getParameter("message").trimmed();
-        QByteArray title = request.getParameter("title").trimmed();
-        QByteArray image = request.getParameter("image").trimmed();
-        QByteArray type = request.getParameter("type").trimmed();
-        QByteArray level = request.getParameter("level").trimmed();
+        //All these should be URI encoded
+        QByteArray message = QUrl::toPercentEncoding(QString(request.getParameter("message").trimmed()), "", "/'\"");
+        QByteArray title = QUrl::toPercentEncoding(QString(request.getParameter("title").trimmed()), "", "/'\"");
+        QByteArray image = QUrl::toPercentEncoding(QString(request.getParameter("image").trimmed()), "", "/'\"");
+        QByteArray type = QUrl::toPercentEncoding(QString(request.getParameter("type").trimmed()), "", "/'\"");
+        QByteArray level = QUrl::toPercentEncoding(QString(request.getParameter("level").trimmed()), "", "/'\"");
         QByteArray javaScriptString = "fTickerEvents(\"" + message + "\",\"" + title + "\",\"" + image + "\",\"" + type + "\",\"" + level + "\");";
 
         //Forward to browser only
