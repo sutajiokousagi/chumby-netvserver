@@ -223,20 +223,26 @@ function addConsoleLog(text)
 {
 	var oldValue = $("#consolelog").html();
 		
-	//Keep only last 14 lines, do not delete those with colors
+	//Keep only last 15 lines, do not delete those with colors
 	var tempArray = oldValue.split("<br>");
-	while (tempArray.length > 14)
+	var colorCount = 0;
+	while (tempArray.length > 15)
 	{
-		for (var i=0; i<tempArray.length - 1; i++)
+		for (var i=0; i<tempArray.length; i++)
 		{
-			if (stringContains(tempArray[i], "<font>"))
+			if (stringContains(tempArray[i], "</font>")) {
+				colorCount++;
 				continue;
+			}
 			tempArray.splice(i,1);
 			break;
 		}
+		if (colorCount >= 15)
+			break;
 	}
+	
+	//Set the new log list
 	oldValue = tempArray.join("<br>");
-		
 	$("#consolelog").html(oldValue + "<br>" + text);
 }
 
