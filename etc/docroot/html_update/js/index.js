@@ -231,6 +231,7 @@ function addConsoleLog(text)
 		for (var i=0; i<tempArray.length; i++)
 		{
 			if (stringContains(tempArray[i], "</font>")) {
+				tempArray[i] = tempArray[i].replace("Upgrading", "Upgraded");
 				colorCount++;
 				continue;
 			}
