@@ -36,14 +36,14 @@ if [ $is_ap_mode -eq 1 ]; then
 		fi
 
 	else
-		$(${SCRIPTPATH}/stop_ap.sh)
+		whatever=$(${SCRIPTPATH}/stop_ap.sh)
 		sleep 4
 	fi
 fi
 
 # Wireless Interface
 INTIF=$(ls -1 /sys/class/net/ | grep wlan | head -1)
-$(ifconfig ${INTIF} up)
+whatever=$(ifconfig ${INTIF} up)
 sleep 1
 
 wifilist=$(${SCRIPTPATH}/wifiscan.pl)

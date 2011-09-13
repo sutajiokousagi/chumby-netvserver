@@ -24,15 +24,15 @@ fi
 
 # Stop previous AP
 echo "Stopping previous AP"
-if [ ! -z $(pidof hostapd) ];
+if [ ! -z "$(pidof hostapd)" ];
 then
 	killall hostapd
 fi
-if [ ! -z $(pidof dnsmasq) ];
+if [ ! -z "$(pidof dnsmasq)" ];
 then
 	killall dnsmasq
 fi
-if [ ! -z $(pidof NetworkManager) ];
+if [ ! -z "$(pidof NetworkManager)" ];
 then
 	/etc/init.d/NetworkManager stop
 fi
