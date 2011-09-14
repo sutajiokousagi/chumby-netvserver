@@ -8,7 +8,8 @@ var upgradedPackageColor = "6598EB";
 var needRebootTextString = "System will reboot after upgrading";
 var rebootingTextString = "System is rebooting...";
 var rebootTextColor = "FF0000";
-var maxConsoleLines = 23;
+var maxConsoleLines = 60;
+var leftMargin = 30;
 
 function onLoad()
 {
@@ -67,7 +68,7 @@ function onResize()
 	var height = $("#div_center").css('height').split('px')[0];
 	var viewportwidth = $(window).width();
 	var viewportheight = $(window).height();
-	var left = viewportwidth - width - 60;
+	var left = viewportwidth - width - leftMargin;
 	var top = (viewportheight - height) / 2;
 	
 	$("#div_center").css('top', top);
@@ -87,7 +88,7 @@ function main_showMainPanel(duration)
 function main_hideMainPanel(duration)
 {
 	if (!duration || duration == 0)		$("#div_center").css('left', $(window).width() + 'px');
-	else								$("#div_center").animate({ left: main_x + $(window).height() }, !duration ? 1600 : duration);
+	else								$("#div_center").animate({ left: $(window).width() }, !duration ? 1600 : duration);
 }
 
 //-----------------------------------------------------------
@@ -133,30 +134,6 @@ function setUpgradeProgress(vData)
 	if (size > 0)	addConsoleLog("<font color='#" + upgradedPackageColor +"'>Checking " + name + "</font>");
 	else			addConsoleLog("Checking " + name);
 }
-
-/*
-function setUpgradeProgress(vData)
-{
-	vData = decodeURIComponent(vData);
-
-	//Format: <percentage>%1</percentage><pkgname>%2</pkgname><pkgversion>%3</pkgversion><pkgsize>%4</pkgsize>
-	vData = decodeURIComponent(vData);
-	if (vData.split == undefined)
-		return;
-					
-	var percentage = vData.split("</percentage>")[0].split("<percentage>")[1];
-	var name = vData.split("</pkgname>")[0].split("<pkgname>")[1];
-	var version = vData.split("</pkgversion>")[0].split("<pkgversion>")[1];
-	var size = vData.split("</pkgsize>")[0].split("<pkgsize>")[1];
-	size = Math.round(size/1024*10)/10;
-	
-	//Progress bar
-	setUpgradePercentage(percentage);
-	
-	//Console text
-	addConsoleLog("Upgrading " + name + "<br>Version " + version + " (" + size + "KB)...");
-}
-*/
 
 function setUpgradeConfiguring(vData)
 {
@@ -231,7 +208,14 @@ function addConsoleLog(text)
 		
 	//Keep only last 15 lines, do not delete those with colors
 	var tempArray = oldValue.split("<br>");
+	var numLines = tempArray.length;
+	
+	//Calculate the max number of lines
+	var bottom = $("#consolelog").offset().top + $("#consolelog").height();
 	var colorCount = 0;
+	if ( numLines > 10 && bottom > ($(window).height() - 60) )
+		maxConsoleLines = numLines - 1;
+	
 	while (tempArray.length > maxConsoleLines)
 	{
 		for (var i=0; i<tempArray.length; i++)
@@ -297,7 +281,7 @@ function fButtonPress( vButtonName )
 {
 	//Allow user to hide the Update UI
 	if (vButtonName.toLowerCase() == 'cpanel' || vButtonName.toLowerCase() == 'widget' || vButtonName.toLowerCase() == 'setup') {
-		main_hideMainPanel();
+		main_hideMainPanel(1600);
 		return vButtonName;
 	}
 	return "button ignored";
