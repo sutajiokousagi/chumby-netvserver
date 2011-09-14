@@ -2,7 +2,7 @@
 // Common functions
 //----------------------------------------------------------------
 
-var ipaddress = "192.168.1.60";
+var ipaddress = "";
 
 function onLoad()
 {
