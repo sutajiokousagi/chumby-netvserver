@@ -178,6 +178,11 @@ function TickerEvent()
 	}
 }
 
+function EnableSSH()
+{
+	sendSingleValueCommand('EnableSSH', '');
+}
+
 //----------------------------------------------------------------
 // Private API
 //----------------------------------------------------------------
