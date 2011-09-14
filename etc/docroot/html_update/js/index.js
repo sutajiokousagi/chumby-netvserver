@@ -8,9 +8,12 @@ var upgradedPackageColor = "6598EB";
 var needRebootTextString = "System will reboot after upgrading";
 var rebootingTextString = "System is rebooting...";
 var rebootTextColor = "FF0000";
+var maxConsoleLines = 20;
 
 function onLoad()
 {
+	onResize();
+
 	//Params passed thru GET
 	updateCount = GET('updateCount');
 	isContinue = GET('continue');
@@ -18,8 +21,8 @@ function onLoad()
 	startConfiguring = false;
 	
 	//Save initial panel position
-	main_y = $("#div_center").offset().top;
-	main_x = $("#div_center").offset().left;
+	main_y = $("#div_center").css('top').split('px')[0];
+	main_x = $("#div_center").css('left').split('px')[0];
 	$("#div_loadingMain").fadeIn(0);
 	
 	//Not continue from an upgrade process
@@ -45,14 +48,10 @@ function onLoad()
 	else
 	{
 		fDbg2("Continue upgrading UI: " + isContinue + "%");
-		
-		setUpgradePercentage(201, false);
-		
+				
 		main_showMainPanel();
-		
-		//setUpgradeDone();
-		setUpgradePercentage(201, true);
-		addConsoleLog("<font color='#" + upgradedPackageColor + "'>" + completedTextString + "</font>");
+		setUpgradePercentage(201, false);
+		setUpgradeDone();
 	}
 }
 
@@ -62,26 +61,33 @@ function onLoadLater()
 	main_showMainPanel(1650);
 }
 
+function onResize()
+{
+	var width = $("#div_center").css('width').split('px')[0];
+	var height = $("#div_center").css('height').split('px')[0];
+	var viewportwidth = $(window).width();
+	var viewportheight = $(window).height();
+	var left = viewportwidth - width - 60;
+	var top = (viewportheight - height) / 2;
+	
+	$("#div_center").css('top', top);
+	$("#div_center").css('left', left);
+}
+
 //-----------------------------------------------------------
 
 function main_showMainPanel(duration)
 {
 	$("#div_center").css('visibility', 'visible');
 	
-	var offset = $("#div_center").offset();
-	offset.top = main_y;
-	
-	if (!duration || duration == 0)		$("#div_center").offset( offset );
-	else								$("#div_center").animate({ top: main_y }, !duration ? 1600 : duration);
+	if (!duration || duration == 0)		$("#div_center").css('left', main_x + 'px');
+	else								$("#div_center").animate({ left: main_x }, !duration ? 1600 : duration);
 }
 
 function main_hideMainPanel(duration)
 {
-	var offset = $("#div_center").offset();
-	offset.top = $(window).height();
-	
-	if (!duration || duration == 0)		$("#div_center").offset( offset );
-	else								$("#div_center").animate({ top: main_y + $(window).height() }, !duration ? 1600 : duration);
+	if (!duration || duration == 0)		$("#div_center").css('left', $(window).width() + 'px');
+	else								$("#div_center").animate({ left: main_x + $(window).height() }, !duration ? 1600 : duration);
 }
 
 //-----------------------------------------------------------
@@ -124,8 +130,8 @@ function setUpgradeProgress(vData)
 	setUpgradePercentage(percentage, false);
 	
 	//Console text
-	if (size > 0)	addConsoleLog("<font color='#" + upgradedPackageColor +"'>Upgrading " + name + "</font>");
-	else			addConsoleLog("Upgrading " + name);
+	if (size > 0)	addConsoleLog("<font color='#" + upgradedPackageColor +"'>Upgraded " + name + "</font>");
+	else			addConsoleLog("Upgraded " + name);
 }
 
 /*
@@ -226,20 +232,28 @@ function addConsoleLog(text)
 	//Keep only last 15 lines, do not delete those with colors
 	var tempArray = oldValue.split("<br>");
 	var colorCount = 0;
-	while (tempArray.length > 15)
+	while (tempArray.length > maxConsoleLines)
 	{
 		for (var i=0; i<tempArray.length; i++)
 		{
 			if (stringContains(tempArray[i], "</font>")) {
-				tempArray[i] = tempArray[i].replace("Upgrading", "Upgraded");
 				colorCount++;
 				continue;
 			}
 			tempArray.splice(i,1);
 			break;
 		}
-		if (colorCount >= 15)
-			break;
+		if (colorCount >= maxConsoleLines)
+		{
+			for (var i=0; i<tempArray.length; i++)
+			{
+				//Do not delete the reboot warning
+				if (stringContains(tempArray[i], rebootTextColor))
+					continue;
+				tempArray.splice(i,1);
+				break;
+			}
+		}
 	}
 	
 	//Set the new log list
@@ -275,11 +289,30 @@ function stringContains(text, searchText)
     return (text.indexOf(searchText) != -1);
 }
 
+// -------------------------------------------------------------------------------------------------
+//	press button on D-pad / android
+// -------------------------------------------------------------------------------------------------
+function fButtonPress( vButtonName )
+{
+	//Allow user to hide the Update UI
+	if (vButtonName.toLowerCase() == 'cpanel' || vButtonName.toLowerCase() == 'widget' || vButtonName.toLowerCase() == 'setup') {
+		main_hideMainPanel();
+		return vButtonName;
+	}
+	return "button ignored";
+}
+
+// -------------------------------------------------------------------------------------------------
+//	NeTVBrowser will check this function every 60 seconds and reload the page if the reply is not 'true'
+// -------------------------------------------------------------------------------------------------
+function fCheckAlive()
+{
+	return true;
+}
 
 
 
-
-// Other system events are totally ignored below
+// Other system events are totally ignored
 
 
 
@@ -295,14 +328,6 @@ function stringContains(text, searchText)
 //	server reset - due to upgrade
 // -------------------------------------------------------------------------------------------------
 function fServerReset()
-{
-	return "command ignored";
-}
-
-// -------------------------------------------------------------------------------------------------
-//	press button on D-pad / android
-// -------------------------------------------------------------------------------------------------
-function fButtonPress( vButtonName )
 {
 	return "command ignored";
 }
@@ -339,12 +364,4 @@ function fNMDeviceRemoved(  )
 function fUPDATECOUNTEvent( vEventData )
 {
 	return "command ignored";
-}
-
-// -------------------------------------------------------------------------------------------------
-//	NeTVBrowser will check this function every 60 seconds and reload the page if the reply is not 'true'
-// -------------------------------------------------------------------------------------------------
-function fCheckAlive()
-{
-	return true;
 }
