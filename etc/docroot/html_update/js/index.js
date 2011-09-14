@@ -8,7 +8,7 @@ var upgradedPackageColor = "6598EB";
 var needRebootTextString = "System will reboot after upgrading";
 var rebootingTextString = "System is rebooting...";
 var rebootTextColor = "FF0000";
-var maxConsoleLines = 20;
+var maxConsoleLines = 23;
 
 function onLoad()
 {
