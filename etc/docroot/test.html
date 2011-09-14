@@ -99,7 +99,9 @@
 			</td>
 		</tr>
 		
-		<!-- The meaty stufs are below ----------------------------------------------------------------->
+		<!------------------------------------------------------------------------
+		Public API
+		-------------------------------------------------------------------------->
 		
 		<!-- Hello -->
 		<form name="form_Hello" method="POST" action="">
@@ -137,237 +139,38 @@
 		</tr>
 		</form>
 		
-		<!-- GetXML -->
-		<form name="form_SetUrl" method="POST" action="">
+		<!-- RemoteControl -->
+		<form name="form_RemoteControl" method="POST" action="">
 		<tr class="service_row">
 			<td class="service_done">
 				done
 			</td>
 			<td>
-				SetUrl
+				RemoteControl
 			</td>
 			<td>
-				<input type="text" size="256" name="inputField" value="http://localhost" >
+				<input type="text" size="256" name="inputField" value="cpanel" >
 			</td>
 			<td class="td_button">
-				<input type="button" value="GO!" onclick="SetUrl()">
+				<input type="button" value="GO!" onclick="RemoteControl()">
 			</td>
 		</tr>
 		</form>
 		
-		<!-- GetXML -->
-		<form name="form_GetXML" method="POST" action="">
+		<!-- FileExists -->
+		<form name="form_FileExists" method="POST" action="">
 		<tr class="service_row">
 			<td class="service_done">
 				done
 			</td>
 			<td>
-				GetXML
+				FileExists
 			</td>
 			<td>
-				<input type="text" size="256" name="inputField" value="http://xml.chumby.com/xml/chumbies/?id=4FCD4051-9867-006A-9DC1-443BD3477E8E&nocache=4682&dcid_skin=0000" >
+				<input type="text" size="256" name="inputField" value="/psp/network_config" >
 			</td>
 			<td class="td_button">
-				<input type="button" value="GO!" onclick="GetXML()">
-			</td>
-		</tr>
-		</form>
-		
-		<!-- GetUrl -->
-		<form name="form_GetUrl" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_done">
-				done
-			</td>
-			<td>
-				GetUrl
-			</td>
-			<td>
-				<input type="text" size="256" name="inputField" value="http://s3movies.chumby.com/cdn/xmlthumbnail/86976CD4-C50E-11DF-91A6-001B24E044BE" > (url)
-				<input type="text" size="128" name="inputField2" value="param1=value1&param2=value2" > (post)
-			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="GetUrl()">
-			</td>
-		</tr>
-		</form>
-		
-		<!-- HasFlashPlugin -->
-		<form name="form_HasFlashPlugin" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_done">
-				done
-			</td>
-			<td>
-				HasFlashPlugin
-			</td>
-			<td>
-				(no input required)
-			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="HasFlashPlugin()">
-			</td>
-		</tr>
-		</form>
-		
-		<!-- PlayWidget -->
-		<form name="form_PlayWidget" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_in_progress">
-				In Testing
-			</td>
-			<td>
-				PlayWidget
-			</td>
-			<td>
-				<input type="text" size="256" name="inputField" value="http://s3movies.chumby.com/cdn/xmlmovie/F3A86472-05F6-11DF-A1F8-001B24E044BE" >
-			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="PlayWidget()">
-			</td>
-		</tr>
-		</form>
-		
-		<!-- PlaySWF -->
-		<form name="form_PlaySWF" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_in_progress">
-				In Testing
-			</td>
-			<td>
-				PlaySWF
-			</td>
-			<td>
-				<input type="text" size="256" name="inputField" value="http://www.flashscene.org/flash/EvenMoreExplosionsInTheSkies/explosionsinthesky.swf" >
-			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="PlaySWF()">
-			</td>
-		</tr>
-		</form>
-		
-		<!-- SetWidgetSize -->
-		<form name="form_SetWidgetSize" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_in_progress">
-				In Testing
-			</td>
-			<td>
-				SetWidgetSize
-			</td>
-			<td>
-				<input type="text" size="128" name="inputField" value="400 300 160 120" >
-			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="SetWidgetSize()">
-			</td>
-		</tr>
-		</form>
-		
-		<!-- SetBox -->
-		<form name="form_SetBox" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_done">
-				Done
-			</td>
-			<td>
-				SetBox
-			</td>
-			<td>
-				<input type="text" size="128" name="inputField" value="400 300 160 120" >
-			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="SetBox()">
-			</td>
-		</tr>
-		</form>
-		
-		<!-- SetChromaKey -->
-		<form name="form_SetChromaKeyOnOff" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_done">
-				done
-			</td>
-			<td>
-				SetChromaKey
-			</td>
-			<td>
-				<input type="text" size="3" name="inputField" value="off" >
-			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="SetChromaKeyOnOff()">
-			</td>
-		</tr>
-		</form>
-		
-		<!-- SetChromaKey -->
-		<form name="form_SetChromaKeyColor" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_done">
-				done
-			</td>
-			<td>
-				SetChromaKey
-			</td>
-			<td>
-				<input type="text" size="11" name="inputField" value="0,7,0" >
-			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="SetChromaKeyColor()">
-			</td>
-		</tr>
-		</form>
-		
-		<!-- ControlPanel -->
-		<form name="form_ControlPanel" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_done">
-				Done
-			</td>
-			<td>
-				ControlPanel
-			</td>
-			<td>
-				<input type="text" size="128" name="inputField" value="Maximize" >
-			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="ControlPanel()">
-			</td>
-		</tr>
-		</form>
-		
-		<!-- WidgetEngine -->
-		<form name="form_WidgetEngine" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_in_progress">
-				In Testing
-			</td>
-			<td>
-				WidgetEngine
-			</td>
-			<td>
-				<input type="text" size="128" name="inputField" value="TBD" >
-			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="WidgetEngine()">
-			</td>
-		</tr>
-		</form>
-			
-		<!-- GetAllParams -->
-		<form name="form_GetAllParams" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_done">
-				done
-			</td>
-			<td>
-				GetAllParams
-			</td>
-			<td>
-				(no input required)
-			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="GetAllParams()">
+				<input type="button" value="GO!" onclick="FileExists()">
 			</td>
 		</tr>
 		</form>
@@ -409,6 +212,235 @@
 		</tr>
 		</form>
 		
+		<!-- TickerEvent -->
+		<form name="form_TickerEvent" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				TickerEvent
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="abc def ghi jkl" > (message)
+				<input type="text" size="256" name="inputField2" value="Hello Ticker" > (title)
+				<input type="text" size="256" name="inputField3" value="" > (image)
+				<input type="text" size="256" name="inputField4" value="" > (type)
+				<input type="text" size="256" name="inputField5" value="" > (level)
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="TickerEvent()">
+			</td>
+		</tr>
+		</form>
+		
+		<!------------------------------------------------------------------------
+		Private API
+		-------------------------------------------------------------------------->
+
+		<!-- SetUrl -->
+		<form name="form_SetUrl" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				SetUrl
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="http://localhost" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="SetUrl()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- GetXML -->
+		<form name="form_GetXML" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				GetXML [deprecated by GetUrl]
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="http://xml.chumby.com/xml/chumbies/?id=4FCD4051-9867-006A-9DC1-443BD3477E8E&nocache=4682&dcid_skin=0000" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="GetXML()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- GetUrl -->
+		<form name="form_GetUrl" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				GetUrl
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="http://s3movies.chumby.com/cdn/xmlthumbnail/86976CD4-C50E-11DF-91A6-001B24E044BE" > (url)
+				<input type="text" size="128" name="inputField2" value="param1=value1&param2=value2" > (post)
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="GetUrl()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- GetJPG -->
+		<form name="form_GetJPG" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				GetJPG (returns path in tmp)
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="http://images.chumby.com/images/en_us/cms/chumby8_200x150.jpg" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="GetJPG()">
+			</td>
+		</tr>
+		</form>
+		
+		<!------------------------------->
+			
+		<!-- PlayWidget -->
+		<form name="form_PlayWidget" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_in_progress">
+				not in used
+			</td>
+			<td>
+				PlayWidget
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="http://s3movies.chumby.com/cdn/xmlmovie/F3A86472-05F6-11DF-A1F8-001B24E044BE" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="PlayWidget()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- PlaySWF -->
+		<form name="form_PlaySWF" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_in_progress">
+				not in used
+			</td>
+			<td>
+				PlaySWF
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="http://www.flashscene.org/flash/EvenMoreExplosionsInTheSkies/explosionsinthesky.swf" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="PlaySWF()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- SetWidgetSize -->
+		<form name="form_SetWidgetSize" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_in_progress">
+				not in used
+			</td>
+			<td>
+				SetWidgetSize
+			</td>
+			<td>
+				<input type="text" size="128" name="inputField" value="400 300 160 120" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="SetWidgetSize()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- WidgetEngine -->
+		<form name="form_WidgetEngine" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_in_progress">
+				not in used
+			</td>
+			<td>
+				WidgetEngine
+			</td>
+			<td>
+				<input type="text" size="128" name="inputField" value="TBD" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="WidgetEngine()">
+			</td>
+		</tr>
+		</form>
+		
+		<!------------------------------->
+		
+		<!-- SetChromaKey -->
+		<form name="form_SetChromaKeyOnOff" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				SetChromaKey
+			</td>
+			<td>
+				<input type="text" size="3" name="inputField" value="off" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="SetChromaKeyOnOff()">
+			</td>
+		</tr>
+		</form>
+		
+		<!-- ControlPanel -->
+		<form name="form_ControlPanel" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				Done
+			</td>
+			<td>
+				ControlPanel (<a href="https://internal.chumby.com/wiki/index.php/NeTVBrowser">NeTVBrowser</a>)
+			</td>
+			<td>
+				<input type="text" size="128" name="inputField" value="Maximize" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="ControlPanel()">
+			</td>
+		</tr>
+		</form>
+					
+		<!-- GetAllParams -->
+		<form name="form_GetAllParams" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				GetAllParams
+			</td>
+			<td>
+				(no input required)
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="GetAllParams()">
+			</td>
+		</tr>
+		</form>
+				
 		<!-- GetFileContents -->
 		<form name="form_GetFileContents" method="POST" action="">
 		<tr class="service_row">
@@ -446,24 +478,6 @@
 		</tr>
 		</form>
 		
-		<!-- FileExists -->
-		<form name="form_FileExists" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_done">
-				done
-			</td>
-			<td>
-				FileExists
-			</td>
-			<td>
-				<input type="text" size="256" name="inputField" value="/psp/network_config" >
-			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="FileExists()">
-			</td>
-		</tr>
-		</form>
-		
 		<!-- GetFileSize -->
 		<form name="form_GetFileSize" method="POST" action="">
 		<tr class="service_row">
@@ -489,7 +503,7 @@
 				done
 			</td>
 			<td>
-				UnlinkFile
+				UnlinkFile (delete file)
 			</td>
 			<td>
 				<input type="text" size="256" name="inputField" value="/psp/network_config" >
@@ -500,9 +514,8 @@
 		</tr>
 		</form>
 		
-		
 		<!-- SetTime -->
-		<form name="form_SetTime" method="POST" action="">
+		<form name="form_SetTime" id="form_SetTime" method="POST" action="">
 		<tr class="service_row">
 			<td class="service_done">
 				done
@@ -512,14 +525,13 @@
 			</td>
 			<td>
 				<input type="text" size="256" name="inputField" value="yyyy.mm.dd-hh:mm:ss" > (time)
-				<input type="text" size="256" name="inputField2" value="" > (timezone)
+				<input type="text" size="256" name="inputField2" value="Asia/Singapore" > (timezone)
 			</td>
 			<td class="td_button">
 				<input type="button" value="GO!" onclick="SetTime()">
 			</td>
 		</tr>
 		</form>
-		
 		
 		<!-- SetNetwork -->
 		<form name="form_SetNetwork" method="POST" action="">
@@ -543,12 +555,11 @@
 		</tr>
 		</form>
 		
-		
 		<!-- SetAccount -->
 		<form name="form_SetAccount" method="POST" action="">
 		<tr class="service_row">
-			<td class="service_done">
-				done
+			<td class="service_in_progress">
+				not in used
 			</td>
 			<td>
 				SetAccount
@@ -560,6 +571,24 @@
 			</td>
 			<td class="td_button">
 				<input type="button" value="GO!" onclick="SetAccount()">
+			</td>
+		</tr>
+		</form>
+				
+		<!-- NeCommand -->
+		<form name="form_NeCommand" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				NeCommand
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="/bin/ps ax" >
+			</td>
+			<td class="td_button">
+				<input type="button" value="GO!" onclick="NeCommand()">
 			</td>
 		</tr>
 		</form>

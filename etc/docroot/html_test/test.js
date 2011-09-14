@@ -1,7 +1,31 @@
+//----------------------------------------------------------------
+// Common functions
+//----------------------------------------------------------------
+
+var ipaddress = "192.168.1.60";
+
+function onLoad()
+{
+	//Set the current date & time for easy testing
+	var now = new Date();
+	var unixDateFormat = now.getFullYear()+'.'+(now.getMonth()+1)+'.'+now.getDate(); 
+	unixDateFormat += '-'+now.getHours()+':'+now.getMinutes()+':'+now.getSeconds(); 
+	initForm("form_SetTime", "inputField", unixDateFormat);
+}
+
+function initForm(form_id, element_name, init_txt)
+{
+	oFormObject = document.forms[form_id];
+	frmElement = oFormObject.elements[element_name];
+	frmElement.value = init_txt;
+}
+
 function sendSingleValueCommand(cmd, dataString)
 {
 	//Which address to submit to
 	var web_address = "./bridge";
+	if (ipaddress && ipaddress != "")
+		web_address = "http://" + ipaddress + "/bridge";
 
 	//Convert data string to XML format
 	var xmlDataString = '<value>' +  dataString + '</value>';
@@ -31,7 +55,9 @@ function sendMultiValueCommand(cmd, dataArray)
 {
 	//Which address to submit to
 	var web_address = "./bridge";
-	
+	if (ipaddress && ipaddress != "")
+		web_address = "http://" + ipaddress + "/bridge";
+		
 	//Create a clean new form and input fields
 	var myForm = document.createElement("form");
 	myForm.method = 'POST';
@@ -56,6 +82,10 @@ function sendMultiValueCommand(cmd, dataArray)
 	document.body.removeChild(myForm) ;
 }
 
+//----------------------------------------------------------------
+// Public API
+//----------------------------------------------------------------
+
 function Hello()
 {
 	sendSingleValueCommand('Hello', '');
@@ -65,6 +95,92 @@ function WifiScan()
 {
 	sendSingleValueCommand('WifiScan', '');
 }
+
+function RemoteControl()
+{
+	var dataString = document.form_RemoteControl.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('RemoteControl', dataString);
+	}
+}
+
+function FileExists()
+{
+	var dataString = document.form_FileExists.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('FileExists', dataString);
+	}
+}
+
+function GetParam()
+{
+	var dataString = document.form_GetParam.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('GetParam', dataString);
+	}
+}
+
+function SetParam()
+{
+	var dataString1 = document.form_SetParam.inputField.value;
+	var dataString2 = document.form_SetParam.inputField2.value;
+	var dataArray = { 'dataxml_cpanel/username':dataString1, 'dataxml_cpanel/password':dataString2 };
+	
+	if (dataString1 == '' || dataString2 == '') 
+	{
+		alert('Input field(s) are required');
+		console.log('Input field(s) are empty');
+	}
+	else
+	{
+		sendMultiValueCommand('SetParam', dataArray);
+	}
+}
+
+function TickerEvent()
+{
+	var dataString1 = document.form_TickerEvent.inputField.value;
+	var dataString2 = document.form_TickerEvent.inputField2.value;
+	var dataString3 = document.form_TickerEvent.inputField3.value;
+	var dataString4 = document.form_TickerEvent.inputField4.value;
+	var dataString5 = document.form_TickerEvent.inputField5.value;
+	var dataArray = { 'dataxml_message':dataString1, 'dataxml_title':dataString2, 'dataxml_image':dataString3, 'dataxml_type':dataString4, 'dataxml_level':dataString5 };
+	
+	if (dataString2 == '') 
+	{
+		alert('Title field is required');
+		console.log('Title field is empty');
+	}
+	else
+	{
+		sendMultiValueCommand('TickerEvent', dataArray);
+	}
+}
+
+//----------------------------------------------------------------
+// Private API
+//----------------------------------------------------------------
 
 function SetUrl()
 {
@@ -113,10 +229,23 @@ function GetUrl()
 	}
 }
 
-function HasFlashPlugin()
+function GetJPG()
 {
-	sendSingleValueCommand('HasFlashPlugin', '');
+	var dataString = document.form_GetJPG.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('GetJPG', dataString);
+	}
 }
+
+//---------------------------------
+//Not in used
 
 function PlayWidget()
 {
@@ -163,9 +292,9 @@ function SetWidgetSize()
 	}
 }
 
-function SetBox()
+function WidgetEngine()
 {
-	var dataString = document.form_SetBox.inputField.value;
+	var dataString = document.form_WidgetEngine.inputField.value;
 	
 	if (dataString == '') 
 	{
@@ -174,28 +303,15 @@ function SetBox()
 	}
 	else
 	{
-		sendSingleValueCommand('SetBox', dataString);
+		sendSingleValueCommand('WidgetEngine', dataString);
 	}
 }
+
+//---------------------------------
 
 function SetChromaKeyOnOff()
 {
 	var dataString = document.form_SetChromaKeyOnOff.inputField.value;
-	
-	if (dataString == '') 
-	{
-		alert('Input field is required');
-		console.log('Input field is empty');
-	}
-	else
-	{
-		sendSingleValueCommand('SetChromaKey', dataString);
-	}
-}
-
-function SetChromaKeyColor()
-{
-	var dataString = document.form_SetChromaKeyColor.inputField.value;
 	
 	if (dataString == '') 
 	{
@@ -223,56 +339,9 @@ function ControlPanel()
 	}
 }
 
-function WidgetEngine()
-{
-	var dataString = document.form_WidgetEngine.inputField.value;
-	
-	if (dataString == '') 
-	{
-		alert('Input field is required');
-		console.log('Input field is empty');
-	}
-	else
-	{
-		sendSingleValueCommand('WidgetEngine', dataString);
-	}
-}
-
 function GetAllParams()
 {
 	sendSingleValueCommand('GetAllParams', '');
-}
-
-function GetParam()
-{
-	var dataString = document.form_GetParam.inputField.value;
-	
-	if (dataString == '') 
-	{
-		alert('Input field is required');
-		console.log('Input field is empty');
-	}
-	else
-	{
-		sendSingleValueCommand('GetParam', dataString);
-	}
-}
-
-function SetParam()
-{
-	var dataString1 = document.form_SetParam.inputField.value;
-	var dataString2 = document.form_SetParam.inputField2.value;
-	var dataArray = { 'dataxml_cpanel/username':dataString1, 'dataxml_cpanel/password':dataString2 };
-	
-	if (dataString1 == '' || dataString2 == '') 
-	{
-		alert('Input field(s) are required');
-		console.log('Input field(s) are empty');
-	}
-	else
-	{
-		sendMultiValueCommand('SetParam', dataArray);
-	}
 }
 
 function GetFileContents()
@@ -304,21 +373,6 @@ function SetFileContents()
 	else
 	{
 		sendMultiValueCommand('SetFileContents', dataArray);
-	}
-}
-
-function FileExists()
-{
-	var dataString = document.form_FileExists.inputField.value;
-	
-	if (dataString == '') 
-	{
-		alert('Input field is required');
-		console.log('Input field is empty');
-	}
-	else
-	{
-		sendSingleValueCommand('FileExists', dataString);
 	}
 }
 
@@ -374,9 +428,6 @@ function SetTime()
 
 function SetNetwork()
 {
-	// <time> is time formatted in GMT time as "yyyy.mm.dd-hh:mm:ss"
-    // <timezone> is standard timezone ID string formated as "Asia/Singapore
-		
 	var dataString1 = document.form_SetNetwork.inputField.value;
 	var dataString2 = document.form_SetNetwork.inputField2.value;
 	var dataString3 = document.form_SetNetwork.inputField3.value;
@@ -397,9 +448,6 @@ function SetNetwork()
 
 function SetAccount()
 {
-	// <time> is time formatted in GMT time as "yyyy.mm.dd-hh:mm:ss"
-    // <timezone> is standard timezone ID string formated as "Asia/Singapore
-		
 	var dataString1 = document.form_SetAccount.inputField.value;
 	var dataString2 = document.form_SetAccount.inputField2.value;
 	var dataString3 = document.form_SetAccount.inputField3.value;
@@ -413,5 +461,20 @@ function SetAccount()
 	else
 	{
 		sendMultiValueCommand('SetAccount', dataArray);
+	}
+}
+
+function NeCommand()
+{
+	var dataString = document.form_NeCommand.inputField.value;
+
+	if (dataString == '') 
+	{
+		alert('Input field(s) are required');
+		console.log('Input field(s) are empty');
+	}
+	else
+	{
+		sendSingleValueCommand('NeCommand', dataString);
 	}
 }
