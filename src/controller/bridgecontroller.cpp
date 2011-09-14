@@ -161,6 +161,16 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         }
     }
 
+    else if (cmdString == "ENABLESSH")
+    {
+        if (dataString.length() < 1)
+            dataString = "start";
+        QByteArray buffer = this->Execute("/etc/init.d/sshd", QStringList(QString(dataString)));
+
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+        buffer = QByteArray();
+    }
+
     //-----------
 
     else if (cmdString == "WIDGETENGINE")
@@ -968,6 +978,18 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         for (int i=0; i<newArgsList.length(); i++)
             newArgs << newArgsList.at(i);
         QByteArray buffer = this->Execute(command, newArgs);
+
+        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setCommand(cmdString);
+        response.setParameter(STRING_VALUE, buffer.trimmed());
+        response.write();
+    }
+
+    else if (cmdString == "ENABLESSH")
+    {
+        if (dataString.length() < 1)
+            dataString = "start";
+        QByteArray buffer = this->Execute("/etc/init.d/sshd", QStringList(QString(dataString)));
 
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setCommand(cmdString);
