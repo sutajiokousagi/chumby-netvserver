@@ -153,7 +153,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "ENABLESSH")
     {
         if (dataString.length() < 1)
-            dataString = "start";
+            dataString = "start-chumby";
         QByteArray buffer = this->Execute("/etc/init.d/sshd", QStringList(QString(dataString)));
 
         response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
@@ -977,7 +977,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     else if (cmdString == "ENABLESSH")
     {
         if (dataString.length() < 1)
-            dataString = "start";
+            dataString = "start-chumby";
         QByteArray buffer = this->Execute("/etc/init.d/sshd", QStringList(QString(dataString)));
 
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
