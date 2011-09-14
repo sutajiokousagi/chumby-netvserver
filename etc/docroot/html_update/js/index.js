@@ -3,7 +3,7 @@ var main_y;
 var updateCount;
 var needReboot;
 var startConfiguring;
-var completedTextString = "Upgrade Completed!";
+var completedTextString = "Update Completed!";
 var upgradedPackageColor = "6598EB";
 var needRebootTextString = "System will reboot after upgrading";
 var rebootingTextString = "System is rebooting...";
