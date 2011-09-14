@@ -130,8 +130,8 @@ function setUpgradeProgress(vData)
 	setUpgradePercentage(percentage, false);
 	
 	//Console text
-	if (size > 0)	addConsoleLog("<font color='#" + upgradedPackageColor +"'>Upgraded " + name + "</font>");
-	else			addConsoleLog("Upgraded " + name);
+	if (size > 0)	addConsoleLog("<font color='#" + upgradedPackageColor +"'>Checking " + name + "</font>");
+	else			addConsoleLog("Checking " + name);
 }
 
 /*
@@ -237,6 +237,7 @@ function addConsoleLog(text)
 		for (var i=0; i<tempArray.length; i++)
 		{
 			if (stringContains(tempArray[i], "</font>")) {
+				tempArray[i] = tempArray[i].replace("Checking", "Upgraded");
 				colorCount++;
 				continue;
 			}
