@@ -136,17 +136,6 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
         if (dataString == "on" || dataString == "true" || dataString == "yes")                argList.append(QString("on"));
         else if (dataString == "off" || dataString == "false" || dataString == "no")          argList.append(QString("off"));
-        else if (dataString.count(",") == 2 && dataString.length() <= 11 && dataString.length() >= 5)
-        {
-            //Do 8-bit to 6-bit conversion
-            QList<QByteArray> rgb = dataString.split(',');
-            int r = rgb[0].toInt();
-            int g = rgb[1].toInt();
-            int b = rgb[2].toInt();
-            argList.append(QString("%1").arg(r));
-            argList.append(QString("%1").arg(g));
-            argList.append(QString("%1").arg(b));
-        }
 
         //Execute the script
         if (argList.size() <= 0)

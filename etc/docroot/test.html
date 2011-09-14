@@ -55,10 +55,10 @@
 		padding: 4px;
 		width: 200px;
 		border: 1px solid #0044AA;
+		display: inline;
 	}
 
-	button { 
-		background: #0044AA;
+	.td_button { 
 		padding: 5px;
 		border: 0px;
 		color: #444444;
@@ -85,16 +85,16 @@
 
 		<!-- Service header row -->
 		<tr class="service_header_row">
-			<td width="15%" align="center">
+			<td width="10%" align="center">
 				<b>Status</b>
 			</td>
-			<td width="30%" style="padding:8px;">
+			<td width="40%" style="padding:8px;">
 				<b>Service name</b>
 			</td>
-			<td width="55%">
+			<td width="50%">
 				<b>Input or parameters</b>
 			</td>
-			<td width="96px">
+			<td width="32px">
 
 			</td>
 		</tr>
@@ -140,7 +140,7 @@
 		</form>
 		
 		<!-- EnableSSH -->
-		<form name="form_Enablesshd" method="POST" action="">
+		<form name="form_EnableSSH" method="POST" action="">
 		<tr class="service_row">
 			<td class="service_done">
 				done
@@ -149,7 +149,9 @@
 				EnableSSH
 			</td>
 			<td>
-				(no input required)
+				<input type="radio" name="inputField" value="start" checked>start<br/>
+				<input type="radio" name="inputField" value="restart">restart<br/>
+				<input type="radio" name="inputField" value="stop">stop
 			</td>
 			<td class="td_button">
 				<input type="button" value="GO!" onclick="EnableSSH()">
@@ -221,7 +223,7 @@
 				SetParam
 			</td>
 			<td>
-				<input type="text" size="256" name="inputField" value="username" > (key)
+				<input type="text" size="256" name="inputField" value="username" > (key)<br/>
 				<input type="text" size="256" name="inputField2" value="torin" > (value)
 			</td>
 			<td class="td_button">
@@ -240,10 +242,10 @@
 				TickerEvent
 			</td>
 			<td>
-				<input type="text" size="256" name="inputField" value="abc def ghi jkl" > (message)
-				<input type="text" size="256" name="inputField2" value="Hello Ticker" > (title)
-				<input type="text" size="256" name="inputField3" value="" > (image)
-				<input type="text" size="256" name="inputField4" value="" > (type)
+				<input type="text" size="256" name="inputField" value="abc def ghi jkl" > (message)<br/>
+				<input type="text" size="256" name="inputField2" value="Hello Ticker" > (title)<br/>
+				<input type="text" size="256" name="inputField3" value="" > (image)<br/>
+				<input type="text" size="256" name="inputField4" value="" > (type)<br/>
 				<input type="text" size="256" name="inputField5" value="" > (level)
 			</td>
 			<td class="td_button">
@@ -303,7 +305,7 @@
 				GetUrl
 			</td>
 			<td>
-				<input type="text" size="256" name="inputField" value="http://s3movies.chumby.com/cdn/xmlthumbnail/86976CD4-C50E-11DF-91A6-001B24E044BE" > (url)
+				<input type="text" size="256" name="inputField" value="http://s3movies.chumby.com/cdn/xmlthumbnail/86976CD4-C50E-11DF-91A6-001B24E044BE" > (url)<br/>
 				<input type="text" size="128" name="inputField2" value="param1=value1&param2=value2" > (post)
 			</td>
 			<td class="td_button">
@@ -416,7 +418,8 @@
 				SetChromaKey
 			</td>
 			<td>
-				<input type="text" size="3" name="inputField" value="off" >
+				<input type="radio" name="inputField" value="off" checked>off<br/>
+				<input type="radio" name="inputField" value="on">on
 			</td>
 			<td class="td_button">
 				<input type="button" value="GO!" onclick="SetChromaKeyOnOff()">
@@ -488,7 +491,7 @@
 				SetFileContents
 			</td>
 			<td>
-				<input type="text" size="256" name="inputField" value="/tmp/abc_some_filename" > (path)
+				<input type="text" size="256" name="inputField" value="/tmp/abc_some_filename" > (path)<br/>
 				<input type="text" size="256" name="inputField2" value="some long content" > (content)
 			</td>
 			<td class="td_button">
@@ -543,7 +546,7 @@
 				SetTime
 			</td>
 			<td>
-				<input type="text" size="256" name="inputField" value="yyyy.mm.dd-hh:mm:ss" > (time)
+				<input type="text" size="256" name="inputField" value="yyyy.mm.dd-hh:mm:ss" > (time)<br/>
 				<input type="text" size="256" name="inputField2" value="Asia/Singapore" > (timezone)
 			</td>
 			<td class="td_button">
@@ -562,10 +565,10 @@
 				SetNetwork
 			</td>
 			<td>
-				<input type="text" size="256" name="inputField" value="ChumbyTest" > (ssid)
-				<input type="text" size="256" name="inputField2" value="" > (key)
-				<input type="text" size="256" name="inputField3" value="NONE" > (encryption)
-				<input type="text" size="256" name="inputField4" value="OPEN" > (auth)
+				<input type="text" size="256" name="inputField" value="ChumbyTest" > (ssid)<br/>
+				<input type="text" size="256" name="inputField2" value="" > (key)<br/>
+				<input type="text" size="256" name="inputField3" value="NONE" > (encryption)<br/>
+				<input type="text" size="256" name="inputField4" value="OPEN" > (auth)<br/>
 				<input type="text" size="256" name="inputField5" value="dhcp" > (allocation)
 			</td>
 			<td class="td_button">
@@ -584,8 +587,8 @@
 				SetAccount
 			</td>
 			<td>
-				<input type="text" size="256" name="inputField" value="myusername" > (username)
-				<input type="text" size="256" name="inputField2" value="mypassword" > (password)
+				<input type="text" size="256" name="inputField" value="myusername" > (username)<br/>
+				<input type="text" size="256" name="inputField2" value="mypassword" > (password)<br/>
 				<input type="text" size="256" name="inputField3" value="NeTV Living Room" > (device name)
 			</td>
 			<td class="td_button">

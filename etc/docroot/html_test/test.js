@@ -82,6 +82,25 @@ function sendMultiValueCommand(cmd, dataArray)
 	document.body.removeChild(myForm) ;
 }
 
+// return the value of the radio button that is checked
+// return an empty string if none are checked, or
+// there are no radio buttons
+function getCheckedValue(radioObj)
+{
+	if(!radioObj)
+		return "";
+	var radioLength = radioObj.length;
+	if(radioLength == undefined)
+		if(radioObj.checked)		return radioObj.value;
+		else						return "";
+	
+	for(var i = 0; i < radioLength; i++)
+		if(radioObj[i].checked)
+			return radioObj[i].value;
+	
+	return "";
+}
+
 //----------------------------------------------------------------
 // Public API
 //----------------------------------------------------------------
@@ -180,7 +199,8 @@ function TickerEvent()
 
 function EnableSSH()
 {
-	sendSingleValueCommand('EnableSSH', '');
+	var dataString = getCheckedValue(document.forms['form_EnableSSH'].elements['inputField']);
+	sendSingleValueCommand('EnableSSH', dataString);
 }
 
 //----------------------------------------------------------------
@@ -316,7 +336,7 @@ function WidgetEngine()
 
 function SetChromaKeyOnOff()
 {
-	var dataString = document.form_SetChromaKeyOnOff.inputField.value;
+	var dataString = getCheckedValue(document.forms['form_SetChromaKeyOnOff'].elements['inputField']);
 	
 	if (dataString == '') 
 	{
