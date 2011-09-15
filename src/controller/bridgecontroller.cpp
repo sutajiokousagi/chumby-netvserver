@@ -307,9 +307,10 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         params.clear();
 
         //Stop AP Mode & start NetworkManager
+        bool isTest = request.getParameter("true").length() > 1;
         QByteArray buffer;
-        if (!fileOK)        buffer = this->GetFileContents(networkConfigFile);
-        else                buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
+        if (!fileOK || isTest)      buffer = this->GetFileContents(networkConfigFile);
+        else                        buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
 
         //Reply to JavaScriptCore/ControlPanel
         if (!fileOK)        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
@@ -696,11 +697,12 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
         qDebug("NeTVServer: Receive network config for '%s'", request.getParameter("wifi_ssid").constData());
 
+        bool isTest = request.getParameter("true").length() > 1;
         QByteArray buffer;
-        if (!fileOK)        qDebug("Error writing network config file");
-        else                qDebug("Writing network config file OK");
-        if (!fileOK)        buffer = this->GetFileContents(networkConfigFile);
-        else                buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
+        if (!fileOK)                qDebug("Error writing network config file");
+        else                        qDebug("Writing network config file OK");
+        if (!fileOK || isTest)      buffer = this->GetFileContents(networkConfigFile);
+        else                        buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
 
         response.setStatus(fileOK ? BRIDGE_RETURN_STATUS_SUCCESS : BRIDGE_RETURN_STATUS_ERROR);
         response.setCommand(cmdString);
