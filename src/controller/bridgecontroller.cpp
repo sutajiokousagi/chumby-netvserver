@@ -1095,10 +1095,7 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
     {
         auth = "WEPAUTO";
 
-        bool isHex = false;
-        qulonglong temp = key.toULongLong ( &isHex, 16);
-        temp = 0;
-
+        bool isHex = IsHexString(key);
         if (isHex && (key.length()==10 || key.length()==26))    encoding = "hex";
         else                                                    encoding = "ascii";
     }
@@ -1205,6 +1202,23 @@ bool BridgeController::MountRO()
     if (output.contains("error"))
         return false;
     return true;
+}
+
+// Other Utilities
+//---------------------------------------------
+
+bool BridgeController::IsHexString(QString testString)
+{
+    static QString hexCharacters = "0123456789ABCDEF";
+    bool isHex = true;
+    for (int i=0; i<testString.length(); i++)
+    {
+        if ( hexCharacters.contains(testString.at(i), Qt::CaseInsensitive) )
+            continue;
+        isHex = false;
+        break;
+    }
+    return isHex;
 }
 
 //----------------------------------------------------------------------------------------------------

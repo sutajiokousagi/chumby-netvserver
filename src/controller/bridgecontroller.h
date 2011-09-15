@@ -66,9 +66,14 @@ private:
     bool SetFileContents(const QString &fullPath, QByteArray data);
     bool SetFileExecutable(const QString &fullPath);
     bool UnlinkFile(const QString &fullPath);
+    QByteArray GetFileMD5(const QString &fullPath);
+
+    /** Mount/Unmount Utilities */
     bool MountRW();
     bool MountRO();
-    QByteArray GetFileMD5(const QString &fullPath);
+
+    /** Other Utilities */
+    bool IsHexString(QString testString);
 
     void DumpStaticFile(QByteArray path, HttpResponse& response);
     void SetContentType(QString fileName, HttpResponse& response) const;
