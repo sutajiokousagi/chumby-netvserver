@@ -303,6 +303,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         params.insert("encryption", request.getParameter("wifi_encryption"));
         params.insert("key", request.getParameter("wifi_password"));
         params.insert("encoding", request.getParameter("wifi_encoding"));
+        params.insert("test", request.getParameter("test"));
         bool fileOK = SetNetworkConfig(params);
         params.clear();
 
@@ -692,12 +693,14 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         params.insert("encryption", request.getParameter("wifi_encryption"));
         params.insert("key", request.getParameter("wifi_password"));
         params.insert("encoding", request.getParameter("wifi_encoding"));
+        params.insert("test", request.getParameter("test"));
         bool fileOK = SetNetworkConfig(params);
         params.clear();
 
         qDebug("NeTVServer: Receive network config for '%s'", request.getParameter("wifi_ssid").constData());
 
-        bool isTest = request.getParameter("true").length() > 1;
+        //Stop AP Mode & start NetworkManager
+        bool isTest = request.getParameter("test").length() > 1;
         QByteArray buffer;
         if (!fileOK)                qDebug("Error writing network config file");
         else                        qDebug("Writing network config file OK");
@@ -1073,6 +1076,8 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
     QString key = parameters.value("key");
     QString encoding = parameters.value("encoding");
 
+    bool isTest = parameters.value("test").length() > 1;
+
     //Debug
     /*
     qDebug() << "Received network config: ";
@@ -1113,7 +1118,8 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
 
     QString network_config = QString("<configuration type=\"%1\" allocation=\"%2\" ssid=\"%3\" auth=\"%4\" encryption=\"%5\" key=\"%6\" encoding=\"%7\" />")
                                                      .arg(type).arg(allocation).arg(ssid).arg(auth).arg(encryption).arg(key).arg(encoding);
-    return SetFileContents(networkConfigFile, network_config.toLatin1());
+    if (isTest)     return SetFileContents(networkConfigFile + "_test", network_config.toLatin1());
+    else            return SetFileContents(networkConfigFile, network_config.toLatin1());
 }
 
 //-----------------------------------------------------------------------------------------------------------
