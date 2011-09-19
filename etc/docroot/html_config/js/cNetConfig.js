@@ -45,10 +45,18 @@ cNetConfig.prototype.helloCallback = function (params) {};
 //	communication
 // -------------------------------------------------------------------------------------------------
 
-cNetConfig.prototype.WifiScan = function ()
+cNetConfig.prototype.WifiScan = function (useForce)
 {
-	fDbg2("Scanning for wifi...");
-	xmlhttpPost("", "post", { 'cmd' : 'WifiScan', 'value' : '' }, cNetConfig.instance.rawWifiScanCallback );
+	if (!useForce)
+	{
+		fDbg2("Scanning for wifi...");
+		xmlhttpPost("", "post", { 'cmd' : 'WifiScan', 'value' : '' }, cNetConfig.instance.rawWifiScanCallback );
+	}
+	else
+	{
+		fDbg2("Scanning for wifi...[forced]");
+		xmlhttpPost("", "post", { 'cmd' : 'WifiScan', 'value' : '-f' }, cNetConfig.instance.rawWifiScanCallback );
+	}
 }
 
 cNetConfig.prototype.Hello = function ()
@@ -107,7 +115,7 @@ cNetConfig.prototype.SetWifiScanData = function (vData)
 
 cNetConfig.prototype.rawWifiScanCallback = function (vData, doNotSort)
 {
-	if (vData.split == undefined)
+	if (vData == null || vData.split == undefined)
 		return;
 		
 	if (vData.split("</status>")[0].split("<status>")[1] != "1")

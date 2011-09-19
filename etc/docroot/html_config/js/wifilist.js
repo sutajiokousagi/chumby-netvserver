@@ -21,7 +21,7 @@ function wifilist_init()
 
 function onWifiScanTimer()
 {
-	mNetConfig.WifiScan();
+	mNetConfig.WifiScan(true);
 	mNetConfig.wifiScanCallback = wifilist_updateWifiList;
 	
 	wifiScanTimer = null;
@@ -30,7 +30,6 @@ function onWifiScanTimer()
 
 function wifilist_startWifiScan()
 {
-	useInternalScan = true;
 	onWifiScanTimer();
 }
 
