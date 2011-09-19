@@ -307,7 +307,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         params.clear();
 
         //Stop AP Mode & start NetworkManager
-        bool isTest = request.getParameter("true").length() > 1;
+        bool isTest = request.getParameter("test").length() > 1;
         QByteArray buffer;
         if (!fileOK || isTest)      buffer = this->GetFileContents(networkConfigFile);
         else                        buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
@@ -1105,6 +1105,10 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
     else
     {
         encoding = "";
+
+        //TKIP-only configurations
+        if (!encryption.contains("AES"))
+            encryption = "TKIP";
     }
 
     QString network_config = QString("<configuration type=\"%1\" allocation=\"%2\" ssid=\"%3\" auth=\"%4\" encryption=\"%5\" key=\"%6\" encoding=\"%7\" />")
