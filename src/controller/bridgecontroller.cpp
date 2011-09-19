@@ -304,13 +304,14 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         params.insert("key", request.getParameter("wifi_password"));
         params.insert("encoding", request.getParameter("wifi_encoding"));
         params.insert("test", request.getParameter("test"));
+        bool isTest = request.getParameter("test").length() > 1;
         bool fileOK = SetNetworkConfig(params);
         params.clear();
 
         //Stop AP Mode & start NetworkManager
-        bool isTest = request.getParameter("test").length() > 1;
         QByteArray buffer;
-        if (!fileOK || isTest)      buffer = this->GetFileContents(networkConfigFile);
+        if (isTest)                 buffer = this->GetFileContents(networkConfigFile + "_test");
+        else if (!fileOK)           buffer = this->GetFileContents(networkConfigFile);
         else                        buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
 
         //Reply to JavaScriptCore/ControlPanel
@@ -694,17 +695,19 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         params.insert("key", request.getParameter("wifi_password"));
         params.insert("encoding", request.getParameter("wifi_encoding"));
         params.insert("test", request.getParameter("test"));
+        bool isTest = request.getParameter("test").length() > 1;
         bool fileOK = SetNetworkConfig(params);
         params.clear();
 
         qDebug("NeTVServer: Receive network config for '%s'", request.getParameter("wifi_ssid").constData());
 
         //Stop AP Mode & start NetworkManager
-        bool isTest = request.getParameter("test").length() > 1;
         QByteArray buffer;
         if (!fileOK)                qDebug("Error writing network config file");
         else                        qDebug("Writing network config file OK");
-        if (!fileOK || isTest)      buffer = this->GetFileContents(networkConfigFile);
+
+        if (isTest)                 buffer = this->GetFileContents(networkConfigFile + "_test");
+        else if (!fileOK)           buffer = this->GetFileContents(networkConfigFile);
         else                        buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
 
         response.setStatus(fileOK ? BRIDGE_RETURN_STATUS_SUCCESS : BRIDGE_RETURN_STATUS_ERROR);
