@@ -84,7 +84,8 @@ function wifilist_updateWifiList(wifiListArray)
 	otherWifi['ch'] = "";
 	otherWifi['lvl'] = "";
 	otherWifi['qty'] = "";
-	currentWifiList.push( otherWifi );
+	if (mNetConfig.getWifiIndex('Other...') < 0)
+		currentWifiList.push( otherWifi );
 	
 	refreshWifiList(true);
 	if (main_currentState() == "loading")
@@ -141,7 +142,7 @@ function fadeInWifiList(animated)
 		else						div_string += 'div_wifiListItem_normal';
 		
 		//title
-		div_string += '"><div class="div_wifiListItem_ssid">' + XmlEscape(ssid) + '&nbsp;</div> ';
+		div_string += '"><div class="div_wifiListItem_ssid">' + XmlEscape(ssid) + '</div> ';
 		
 		//the rest
 		div_string += '<div class="div_wifiListItem_info">';

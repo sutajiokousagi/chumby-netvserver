@@ -20,11 +20,18 @@ function XmlEscape(s)
 }
 function XmlUnescape(s)
 {
+	/*
+	s = s.replace("&amp;", "&");
+	s = s.replace("&quot;", "\"");
+	s = s.replace("&apos;", "'");
+	s = s.replace("&lt;", "<");
+	s = s.replace("&gt;", ">");
+	*/
 	var el = document.createElement("div");
-	el.innerText = el.textContent = s;
-	s = el.innerHTML;
+	el.innerHTML = s;
+	s = el.innerText;
 	delete el;
-	return s;
+	return s;	
 }
 function HTMLEncode(str)
 {

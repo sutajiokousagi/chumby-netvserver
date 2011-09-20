@@ -88,7 +88,8 @@ else
 
 sub printOneLine()
 {
-    printf("<wifi><ssid>%s</ssid><qty>%s</qty><lvl>%s</lvl><ch>%s</ch><mode>%s</mode><encryption>%s</encryption><auth>%s</auth></wifi>\n", $_[0], $_[1], $_[2], $_[3], $_[4], $_[5], $_[6]);
+	$_[0] =~ s/&/&amp;/g;	$_[0] =~ s/\</&lt;/g;	$_[0] =~ s/\>/&gt;/g;	$_[0] =~ s/\'/&apos;/g;	$_[0] =~ s/\"/&quot;/g;
+    printf("<wifi><ssid>%s</ssid><qty>%s</qty><lvl>%s</lvl><ch>%s</ch><mode>%s</mode><encryption>%s</encryption><auth>%s</auth></wifi>\n",$_[0], $_[1], $_[2], $_[3], $_[4], $_[5], $_[6]);
 }
 
 sub varInit()
