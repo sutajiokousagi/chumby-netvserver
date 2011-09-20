@@ -4,8 +4,11 @@ function wifidetails_init()
 {
 	$("#wifi_password").val('');
 	$("#wifi_ssid").val('');
-			
+	
+	//Clear previous selection
 	wifidetails_selectedIndex = 0;
+	for (var i=0; i<5; i++)
+		$("#div_wifiListDetails"+i).removeClass("div_wifiDetailsItem_selected");
 }
 
 function wifidetails_highlightItem(itemName)

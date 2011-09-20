@@ -1,8 +1,11 @@
 var mNetConfig;
 var main_y;
+var leftMargin = 20;
 
 function onLoad()
 {
+	onResize();
+
 	main_y = $("#div_center").offset().top;
 	main_hideMainPanel(100);
 	
@@ -25,6 +28,19 @@ function onLoadLater()
 	//wifilist_startWifiScan();
 	
 	main_showMainPanel();
+}
+
+function onResize()
+{
+	var width = $("#div_center").css('width').split('px')[0];
+	var height = $("#div_center").css('height').split('px')[0];
+	var viewportwidth = $(window).width();
+	var viewportheight = $(window).height();
+	var left = viewportwidth - width - leftMargin;
+	var top = (viewportheight - height) / 2;
+	
+	$("#div_center").css('top', top);
+	$("#div_center").css('left', left);
 }
 
 //-----------------------------------------------------------
@@ -106,7 +122,7 @@ function main_onRemoteControl(vButtonName)
 	/* // Totally disable IR Remote Control
 	if ( $("#div_wifiListMain").is(":visible") )				wifilist_onRemoteControl(vButtonName);
 	else if ( $("#div_wifiDetailsMain").is(":visible") )		wifidetails_onRemoteControl(vButtonName);
-	//else if ( $("#div_accountMain").is(":visible") )			account_onRemoteControl(vButtonName);
 	else if ( $("#div_configuringMain").is(":visible") )		configuring_onRemoteControl(vButtonName);
+	//else if ( $("#div_accountMain").is(":visible") )			account_onRemoteControl(vButtonName);
 	*/
 }

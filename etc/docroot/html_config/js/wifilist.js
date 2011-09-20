@@ -10,7 +10,7 @@ function wifilist_init()
 	selectedSSID = '';
 	startingIndex = 0;
 	selectedIndex = 0;
-	maxWifiDisplay = 10;
+	maxWifiDisplay = 16;
 	wifiScanTimer = null;
 	currentWifiList = null;
 	
@@ -137,21 +137,23 @@ function fadeInWifiList(animated)
 			selectedSSID = ssid;
 		
 		//The row		
-		var div_string = '<div id="wifi_item_'+ssid+'" class="';
+		var div_string = '<div class="';
 		if (ssid == selectedSSID)	div_string += 'div_wifiListItem_selected';
 		else						div_string += 'div_wifiListItem_normal';
 		
 		//title
-		div_string += '"><div class="div_wifiListItem_ssid">'+ssid+'&nbsp;</div> ';
+		div_string += '"><div class="div_wifiListItem_ssid">' + XmlEscape(ssid) + '&nbsp;</div> ';
 		
 		//the rest
 		div_string += '<div class="div_wifiListItem_info">';
 
-		//encryption
-		//if (oneWifiData['encryption'] != 'NONE')	div_string += oneWifiData['encryption'];
-		if (oneWifiData['encryption'] != 'NONE')	div_string += '<img src="images/lock.png">';
+		//authentication type
+		if (oneWifiData['auth'] == 'WEPAUTO')			div_string += '<img src="images/wep.png">';
+		else if (oneWifiData['auth'] == 'WPAPSK')		div_string += '<img src="images/wpa.png">';
+		else if (oneWifiData['auth'] == 'WPA2PSK')		div_string += '<img src="images/wpa2.png">';
+		else if (oneWifiData['auth'] != 'OPEN')			div_string += '<img src="images/lock.png">';
 		
-		//signal level (magic number)
+		//signal level (magic number 20)
 		if (oneWifiData['lvl'] != '')
 		{
 			var lvl = Math.round( parseInt(oneWifiData['qty']) / 20.0 );

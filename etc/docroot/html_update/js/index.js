@@ -9,7 +9,7 @@ var needRebootTextString = "System will reboot after upgrading";
 var rebootingTextString = "System is rebooting...";
 var rebootTextColor = "FF0000";
 var maxConsoleLines = 60;
-var leftMargin = 30;
+var leftMargin = 20;
 
 function onLoad()
 {

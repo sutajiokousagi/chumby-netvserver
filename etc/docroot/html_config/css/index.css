@@ -10,6 +10,7 @@ html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6
 }
 body
 {
+	overflow: hidden;
 	font-size: 14px;
 	color: #FFFFFF;
 }
@@ -67,21 +68,16 @@ div.spacer
 	overflow: hidden;
 }
 
-.div_center_wrapper, .div_center_container {
-	width: 400px;
-	height: 500px;
-}
-.div_center_wrapper {
-	bottom: 50%;
-	right: 50%;
-	position: absolute;
-}
-.div_center_container {
-	left: 50%;
-	position: relative;
-	top: 50%;
+.div_center_wrapper, .div_center_container
+{
+	width: 420px;
+	height: 100%;
 	background-color: #000000;
 	overflow: hidden;
+}
+.div_center_wrapper
+{
+	position: absolute;
 }
 
 .div_header {
@@ -123,7 +119,7 @@ div.spacer
 
 .div_wifiListItem_normal , .div_wifiListItem_selected {
 	height: 30px;
-	width: 320px;
+	width: 350px;
 	margin: 0 auto;
 	float:top;
 	clear: both;
@@ -155,11 +151,14 @@ div.spacer
 -----------------------------*/
 
 .div_wifiDetailsItem_normal , .div_wifiDetailsItem_selected {
+	height: 25px;
+	width: 380px;
 	margin: 0 auto;
 	float:top;
 	clear: both;
 	padding-left: 5px;
 	padding-right: 5px;
+	line-height: 25px;
 	padding-top: 5px;
 	padding-bottom: 5px;
 	color: #FFFFFF;
