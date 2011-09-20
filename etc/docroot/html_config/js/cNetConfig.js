@@ -143,8 +143,9 @@ cNetConfig.prototype.rawWifiScanCallback = function (vData, doNotSort)
 	}
 	
 	fDbg2("" + count + " wifi networks found");
-	if (count <= 0) {
-		cNetConfig.instance.WifiScan();
+	if (count <= 0 && doNotSort != true && doNotSort != "true") {							//from internal, not Android/iOS
+		fDbg2("No wifi found, force rescan!");
+		cNetConfig.instance.WifiScan(true);
 	}
 		
 	//Bubbling

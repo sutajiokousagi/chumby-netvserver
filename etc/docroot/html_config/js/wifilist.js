@@ -110,10 +110,9 @@ function fadeInWifiList(animated)
 	//Clear the list
 	$('#div_wifiListMain_list').html('');
 	
-	//Adjust the display list
+	//Scroll the display list
 	if (selectedSSID == 'Other...')
 		selectedIndex = currentWifiList.length-1;
-		
 	if (selectedIndex < startingIndex)
 		startingIndex = selectedIndex;
 	if (selectedIndex >= startingIndex + maxWifiDisplay - 1)
