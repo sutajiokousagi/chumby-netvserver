@@ -1,22 +1,29 @@
 <html>
 <head>
 <title>NeTV Test Fade In/Out</title>
-<script type='text/javascript' src='jquery-1.6.1.min.js'></script>
-<script type='text/javascript' src='utils.js'></script>
-<link rel="stylesheet" href="../html_config/keyboard/keyboard.css" type="text/css">
-<link rel="stylesheet" href="test_fade.css" type="text/css">
-
 <script language="JavaScript">
 var counter;
 var timeStart;
 var duration = 200;
 var durationDirection = -1;
+var moveDuration = 1000;
+var moveDirection = 1;
 
 function onLoad()
 {
 	counter = 0;
 	timeStart = new Date();
 	retest(true);
+	moveTest(true);
+}
+
+function moveTest(flip)
+{
+	if (flip)		$("#div_center").animate( { left: 870 }, moveDuration, null);
+	else			$("#div_center").animate( { left: 0 }, moveDuration, null);
+	
+	if (flip)		setTimeout("moveTest(false)", moveDuration+50);
+	else			setTimeout("moveTest(true)", moveDuration+50);
 }
 
 function retest(isOut)
@@ -37,7 +44,7 @@ function retest(isOut)
 	if (isOut)		setTimeout("retest(false)", duration+50);
 	else			setTimeout("retest(true)", duration+50);
 	
-	xmlhttpPost("", "post", { 'cmd' : 'Hello' }, null );
+	//xmlhttpPost("", "post", { 'cmd' : 'Hello' }, null );
 	
 	//------------------------
 	
@@ -56,6 +63,12 @@ function fCheckAlive()
 }
 
 </script>
+
+<script type='text/javascript' src='jquery-1.6.1.min.js'></script>
+<script type='text/javascript' src='utils.js'></script>
+<link rel="stylesheet" href="../html_config/keyboard/keyboard.css" type="text/css">
+<link rel="stylesheet" href="test_fade.css" type="text/css">
+
 </head>
 <body onload="onLoad();">
 
