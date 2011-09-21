@@ -47,15 +47,15 @@ MAC=$(ifconfig | grep ${INTIF} | tr -s ' ' | cut -d ' ' -f5)
 IP=$(/sbin/ifconfig ${INTIF} | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 
 # Public Internet IP address
-if [ -z "${IP}" -o "${IP}" == "192.168.1.100" -o -z "$(pidof NetworkManager)" ];
-then
-	PUBLIC_IP=$IP
-else
-	PUBLIC_IP=$(curl -s http://whatismyip.org)
-	if [ ${#PUBLIC_IP} -gt 20 ]; then
-		PUBLIC_IP=$IP
-	fi
-fi
+#if [ -z "${IP}" -o "${IP}" == "192.168.1.100" -o -z "$(pidof NetworkManager)" ];
+#then
+#	PUBLIC_IP=$IP
+#else
+#	PUBLIC_IP=$(curl -s http://whatismyip.org)
+#	if [ ${#PUBLIC_IP} -gt 20 ]; then
+#		PUBLIC_IP=$IP
+#	fi
+#fi
 
 # Network manager state
 nmstate="4"
@@ -84,5 +84,5 @@ echo "<flashver>${flashver}</flashver>"
 echo "<internet>${internet}</internet>"
 echo "<mac>${MAC}</mac>"
 echo "<ip>${IP}</ip>"
-echo "<public_ip>${PUBLIC_IP}</public_ip>"
-echo "${network_status}"
+#echo "<public_ip>${PUBLIC_IP}</public_ip>"
+#echo "${network_status}"
