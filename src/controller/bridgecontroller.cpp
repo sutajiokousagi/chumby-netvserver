@@ -1100,8 +1100,9 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
         encryption = "WEP";
 
         bool isHex = IsHexString(key);
-        if (isHex && (key.length()==10 || key.length()==26))    encoding = "hex";
-        else                                                    encoding = "ascii";
+        if (isHex && (key.length()==10 || key.length()==26))   encoding = "hex";        //this is a good condition
+        else if (key.length()==5 || key.length()==13)          encoding = "hex";        //trying our luck here
+        else                                                   encoding = "ascii";
     }
     else
     {
