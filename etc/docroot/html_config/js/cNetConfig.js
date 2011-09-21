@@ -132,11 +132,11 @@ cNetConfig.prototype.rawWifiScanCallback = function (vData, doNotSort)
 		{
 			var paramName = cNetConfig.instance.wifiParamNamesArray[idx];
 			oneWifiArray[paramName] = oneWifiString.split("</"+paramName+">")[0].split("<"+paramName+">")[1];
-			if (paramName == 'ssid')
-				oneWifiArray[paramName] = XmlUnescape( oneWifiArray[paramName] );
 		}
 		if (oneWifiArray['ssid'] == null || oneWifiArray['ssid'] == '')
 			continue;
+		//We need to decode XML escape characters since we are using responseText
+		oneWifiArray['ssid'] = XmlUnescape( oneWifiArray['ssid'] );
 		
 		count++;
 		var index = cNetConfig.instance.getWifiIndex( oneWifiArray['ssid'] );
