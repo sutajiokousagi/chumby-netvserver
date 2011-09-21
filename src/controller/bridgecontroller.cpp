@@ -7,7 +7,6 @@
 #include <QDateTime>
 #include <QCryptographicHash>
 #include <QUrl>
-#include <QXmlStreamWriter>
 
 #define BRIDGE_RETURN_STATUS_UNIMPLEMENTED  "0"
 #define BRIDGE_RETURN_STATUS_SUCCESS        "1"
@@ -1111,68 +1110,24 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
         encoding = "";
     }
 
-    //----------------
-
-    QString filename = networkConfigFile;
-    if (isTest)
-        filename += "_test";
-
-    QFile file(filename);
-    if (!file.open(QFile::WriteOnly | QFile::Text))
-    {
-        qDebug("%s, cannot write network config file %s", TAG, qPrintable(filename) );
-        return false;
-    }
-
-    //Note that QXmlStreamWriter doesn't escape apostrophe (') in attributes
-    QXmlStreamWriter xmlWriter(&file);
-    xmlWriter.writeStartElement("configuration");
-    if (type.length() > 1)              xmlWriter.writeAttribute("type", type);
-    if (allocation.length() > 1)        xmlWriter.writeAttribute("allocation", allocation);
-    if (ssid.length() > 1)              xmlWriter.writeAttribute("ssid", ssid);
-    if (auth.length() > 1)              xmlWriter.writeAttribute("auth", auth);
-    if (encryption.length() > 1)        xmlWriter.writeAttribute("encryption", encryption);
-    if (key.length() > 1)               xmlWriter.writeAttribute("key", key);
-    if (encoding.length() > 1)          xmlWriter.writeAttribute("encoding", encoding);
-    xmlWriter.writeEndElement();
-    file.close();
-    if (file.error())
-    {
-        qDebug("%s, cannot write network config file %s", TAG, qPrintable(filename) );
-        return false;
-    }
-    return true;
+    //Escape special XML characters
+    key = XMLEscape(key);
+    ssid = XMLEscape(ssid);
 
     //----------------
-    // Old implementation
-    /*
-    //No password given or open network
-    if (key == "" || encryption == "NONE")
-    {
-        encoding = "";
-        auth = "OPEN";
-    }
-    else if (encryption == "WEP")
-    {
-        auth = "WEPAUTO";
 
-        bool isHex = IsHexString(key);
-        if (isHex && (key.length()==10 || key.length()==26))    encoding = "hex";
-        else                                                    encoding = "ascii";
-    }
-    //WPA
-    else
-    {
-        encoding = "";
-        if (!encryption.contains("AES"))
-            encryption = "TKIP";
-    }
+    QString network_config = QString("<configuration ");
+    if (type.length() > 1)              network_config += " type=\"" + type + "\"";
+    if (allocation.length() > 1)        network_config += " allocation=\"" + allocation + "\"";
+    if (ssid.length() > 1)              network_config += " ssid=\"" + ssid + "\"";
+    if (auth.length() > 1)              network_config += " auth=\"" + auth + "\"";
+    if (encryption.length() > 1)        network_config += " encryption=\"" + encryption + "\"";
+    if (key.length() > 1)               network_config += " key=\"" + key + "\"";
+    if (encoding.length() > 1)          network_config += " encoding=\"" + encoding + "\"";
+    network_config += " />";
 
-    QString network_config = QString("<configuration type=\"%1\" allocation=\"%2\" ssid=\"%3\" auth=\"%4\" encryption=\"%5\" key=\"%6\" encoding=\"%7\" />")
-                                                     .arg(type).arg(allocation).arg(ssid).arg(auth).arg(encryption).arg(key).arg(encoding);
     if (isTest)     return SetFileContents(networkConfigFile + "_test", network_config.toLatin1());
     else            return SetFileContents(networkConfigFile, network_config.toLatin1());
-    */
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -1284,6 +1239,11 @@ bool BridgeController::IsHexString(QString testString)
         break;
     }
     return isHex;
+}
+
+QString BridgeController::XMLEscape(QString inputString)
+{
+    return inputString.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&apos;");
 }
 
 //----------------------------------------------------------------------------------------------------

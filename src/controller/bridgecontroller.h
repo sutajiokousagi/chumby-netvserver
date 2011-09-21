@@ -76,6 +76,7 @@ private:
 
     /** Other Utilities */
     bool IsHexString(QString testString);
+    QString XMLEscape(QString inputString);
 
     void DumpStaticFile(QByteArray path, HttpResponse& response);
     void SetContentType(QString fileName, HttpResponse& response) const;
