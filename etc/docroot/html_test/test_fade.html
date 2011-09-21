@@ -2,19 +2,27 @@
 <head>
 <title>NeTV Test Fade In/Out</title>
 <script language="JavaScript">
+var duration = 200;
+var moveDuration = 1000;
+var helloDuration = 200;
+
 var counter;
 var timeStart;
-var duration = 200;
-var durationDirection = -1;
-var moveDuration = 1000;
 var moveDirection = 1;
+var durationDirection = -1;
 
 function onLoad()
 {
+	setTimeout("onLoadLater()", 1000);
+}
+
+function onLoadLater()
+{
 	counter = 0;
 	timeStart = new Date();
-	retest(true);
+	fadeTest(true);
 	moveTest(true);
+	helloTest();
 }
 
 function moveTest(flip)
@@ -26,12 +34,19 @@ function moveTest(flip)
 	else			setTimeout("moveTest(true)", moveDuration+50);
 }
 
-function retest(isOut)
+function helloTest()
+{
+	setTimeout("helloTest()", helloDuration);
+	
+	xmlhttpPost("", "post", { 'cmd' : 'Hello' }, null );	
+}
+
+function fadeTest(isOut)
 {
 	duration += 5 * durationDirection;
-	if (duration <= 50) {
+	if (duration <= 100) {
 		durationDirection = 1;
-		duration = 50;
+		duration = 100;
 	}
 	else if (duration >= 200) {
 		durationDirection = -1;
@@ -41,11 +56,9 @@ function retest(isOut)
 	if (isOut)		$("#div_loadingMain").fadeOut(duration);
 	else			$("#div_loadingMain").fadeIn(duration);
 	
-	if (isOut)		setTimeout("retest(false)", duration+50);
-	else			setTimeout("retest(true)", duration+50);
-	
-	//xmlhttpPost("", "post", { 'cmd' : 'Hello' }, null );
-	
+	if (isOut)		setTimeout("fadeTest(false)", duration+50);
+	else			setTimeout("fadeTest(true)", duration+50);
+		
 	//------------------------
 	
 	counter++;
