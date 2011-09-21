@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QCryptographicHash>
 #include <QUrl>
+#include <QXmlStreamWriter>
 
 #define BRIDGE_RETURN_STATUS_UNIMPLEMENTED  "0"
 #define BRIDGE_RETURN_STATUS_SUCCESS        "1"
@@ -1110,24 +1111,41 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
         encoding = "";
     }
 
-    //Escape special XML characters
+    //----------------
+
+    QString filename = networkConfigFile;
+    if (isTest)
+        filename += "_test";
+
+    QFile file(filename);
+    if (!file.open(QFile::WriteOnly | QFile::Text))
+    {
+        qDebug("%s, cannot write network config file %s", TAG, qPrintable(filename) );
+        return false;
+    }
+
+    //Note that QXmlStreamWriter doesn't escape apostrophe (') in attributes
+    //But NetworkManager requires (') to be escaped
     key = XMLEscape(key);
     ssid = XMLEscape(ssid);
 
-    //----------------
-
-    QString network_config = QString("<configuration ");
-    if (type.length() > 1)              network_config += " type=\"" + type + "\"";
-    if (allocation.length() > 1)        network_config += " allocation=\"" + allocation + "\"";
-    if (ssid.length() > 1)              network_config += " ssid=\"" + ssid + "\"";
-    if (auth.length() > 1)              network_config += " auth=\"" + auth + "\"";
-    if (encryption.length() > 1)        network_config += " encryption=\"" + encryption + "\"";
-    if (key.length() > 1)               network_config += " key=\"" + key + "\"";
-    if (encoding.length() > 1)          network_config += " encoding=\"" + encoding + "\"";
-    network_config += " />";
-
-    if (isTest)     return SetFileContents(networkConfigFile + "_test", network_config.toLatin1());
-    else            return SetFileContents(networkConfigFile, network_config.toLatin1());
+    QXmlStreamWriter xmlWriter(&file);
+    xmlWriter.writeStartElement("configuration");
+    if (type.length() > 1)              xmlWriter.writeAttribute("type", type);
+    if (allocation.length() > 1)        xmlWriter.writeAttribute("allocation", allocation);
+    if (ssid.length() > 1)              xmlWriter.writeAttribute("ssid", ssid);
+    if (auth.length() > 1)              xmlWriter.writeAttribute("auth", auth);
+    if (encryption.length() > 1)        xmlWriter.writeAttribute("encryption", encryption);
+    if (key.length() > 1)               xmlWriter.writeAttribute("key", key);
+    if (encoding.length() > 1)          xmlWriter.writeAttribute("encoding", encoding);
+    xmlWriter.writeEndElement();
+    file.close();
+    if (file.error())
+    {
+        qDebug("%s, cannot write network config file %s", TAG, qPrintable(filename) );
+        return false;
+    }
+    return true;
 }
 
 //-----------------------------------------------------------------------------------------------------------
