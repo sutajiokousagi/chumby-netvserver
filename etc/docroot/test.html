@@ -565,11 +565,12 @@
 				SetNetwork
 			</td>
 			<td>
-				<input type="text" size="256" name="inputField" value="ChumbyTest" > (ssid)<br/>
-				<input type="text" size="256" name="inputField2" value="" > (key)<br/>
-				<input type="text" size="256" name="inputField3" value="NONE" > (encryption)<br/>
-				<input type="text" size="256" name="inputField4" value="OPEN" > (auth)<br/>
-				<input type="text" size="256" name="inputField5" value="dhcp" > (allocation)
+				<input type="text" size="256" name="inputField" value="ChumbyTest" > (wifi_ssid)<br/>
+				<input type="text" size="256" name="inputField2" value="" > (wifi_key)<br/>
+				<input type="text" size="256" name="inputField4" value="OPEN" > (wifi_authentication)<br/>
+				<input type="text" size="256" name="inputField5" value="dhcp" > (wifi_allocation)
+				<input type="radio" name="inputField6" value="false" checked>false (test)<br>
+				<input type="radio" name="inputField6" value="stop">true (test)
 			</td>
 			<td class="td_button">
 				<input type="button" value="GO!" onclick="SetNetwork()">

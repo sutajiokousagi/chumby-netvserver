@@ -4,6 +4,8 @@
 #include "httprequesthandler.h"
 #include "socketrequesthandler.h"
 
+#define TAG         "NeTVServer"
+
 class BridgeController : public QObject, public HttpRequestHandler, public SocketRequestHandler
 {
     Q_OBJECT

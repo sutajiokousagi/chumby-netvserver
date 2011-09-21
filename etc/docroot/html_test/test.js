@@ -455,10 +455,10 @@ function SetNetwork()
 {
 	var dataString1 = document.form_SetNetwork.inputField.value;
 	var dataString2 = document.form_SetNetwork.inputField2.value;
-	var dataString3 = document.form_SetNetwork.inputField3.value;
 	var dataString4 = document.form_SetNetwork.inputField4.value;
 	var dataString5 = document.form_SetNetwork.inputField5.value;
-	var dataArray = { wifi_ssid:dataString1, wifi_password:dataString2, wifi_encryption:dataString3, wifi_auth:dataString4, wifi_allocation:dataString5 };
+	var dataString6 = getCheckedValue(document.forms['form_SetNetwork'].elements['inputField6']);
+	var dataArray = { wifi_ssid:dataString1, wifi_password:dataString2, wifi_authentication:dataString4, wifi_allocation:dataString5, test:dataString6 };
 	
 	if (dataString1 == '')
 	{

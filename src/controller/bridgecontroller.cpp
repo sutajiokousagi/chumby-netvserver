@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QCryptographicHash>
 #include <QUrl>
+#include <QXmlStreamWriter>
 
 #define BRIDGE_RETURN_STATUS_UNIMPLEMENTED  "0"
 #define BRIDGE_RETURN_STATUS_SUCCESS        "1"
@@ -296,13 +297,13 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "SETNETWORK")
     {
         QHash<QString,QString> params;
-        params.insert("type", request.getParameter("type"));
         params.insert("allocation", request.getParameter("wifi_allocation"));
         params.insert("ssid", request.getParameter("wifi_ssid"));
         params.insert("auth", request.getParameter("wifi_authentication"));
         params.insert("encryption", request.getParameter("wifi_encryption"));
         params.insert("key", request.getParameter("wifi_password"));
         params.insert("encoding", request.getParameter("wifi_encoding"));
+        params.insert("type", request.getParameter("type"));
         params.insert("test", request.getParameter("test"));
         bool isTest = request.getParameter("test").length() > 1;
         bool fileOK = SetNetworkConfig(params);
@@ -687,13 +688,13 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         */
 
         QHash<QString,QString> params;
-        params.insert("type", request.getParameter("type"));
         params.insert("allocation", request.getParameter("wifi_allocation"));
         params.insert("ssid", request.getParameter("wifi_ssid"));
         params.insert("auth", request.getParameter("wifi_authentication"));
         params.insert("encryption", request.getParameter("wifi_encryption"));
         params.insert("key", request.getParameter("wifi_password"));
         params.insert("encoding", request.getParameter("wifi_encoding"));
+        params.insert("type", request.getParameter("type"));
         params.insert("test", request.getParameter("test"));
         bool isTest = request.getParameter("test").length() > 1;
         bool fileOK = SetNetworkConfig(params);
@@ -1078,16 +1079,7 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
     QString encryption = parameters.value("encryption");
     QString key = parameters.value("key");
     QString encoding = parameters.value("encoding");
-
     bool isTest = parameters.value("test").length() > 1;
-
-    //Debug
-    /*
-    qDebug() << "Received network config: ";
-    QHash<QString, QString>::iterator i;
-    for  (i = parameters.begin (); i != parameters.end (); i++)
-        qDebug() << i.key() << " = " << i.value();
-    */
 
     if (type == "")         type = "wlan";
     if (auth == "")         auth = "OPEN";
@@ -1095,6 +1087,64 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
     if (encoding == "")     encoding = "hex";
     if (allocation == "")   allocation = "dhcp";
 
+    auth = auth.toUpper();
+    if (key == "" || auth == "" || auth == "OPEN")
+    {
+        encryption = "NONE";
+        auth = "OPEN";
+        encoding = "";
+    }
+    else if (auth.contains("WEP"))
+    {
+        auth = "WEPAUTO";
+        encryption = "WEP";
+
+        bool isHex = IsHexString(key);
+        if (isHex && (key.length()==10 || key.length()==26))    encoding = "hex";
+        else                                                    encoding = "ascii";
+    }
+    else
+    {
+        encryption = "AES";             //will also work for TKIP
+        auth = "WPA2PSK";               //will also work for WPA
+        encoding = "";
+    }
+
+    //----------------
+
+    QString filename = networkConfigFile;
+    if (isTest)
+        filename += "_test";
+
+    QFile file(filename);
+    if (!file.open(QFile::WriteOnly | QFile::Text))
+    {
+        qDebug("%s, cannot write network config file %s", TAG, qPrintable(filename) );
+        return false;
+    }
+
+    //Note that QXmlStreamWriter doesn't escape apostrophe (') in attributes
+    QXmlStreamWriter xmlWriter(&file);
+    xmlWriter.writeStartElement("configuration");
+    if (type.length() > 1)              xmlWriter.writeAttribute("type", type);
+    if (allocation.length() > 1)        xmlWriter.writeAttribute("allocation", allocation);
+    if (ssid.length() > 1)              xmlWriter.writeAttribute("ssid", ssid);
+    if (auth.length() > 1)              xmlWriter.writeAttribute("auth", auth);
+    if (encryption.length() > 1)        xmlWriter.writeAttribute("encryption", encryption);
+    if (key.length() > 1)               xmlWriter.writeAttribute("key", key);
+    if (encoding.length() > 1)          xmlWriter.writeAttribute("encoding", encoding);
+    xmlWriter.writeEndElement();
+    file.close();
+    if (file.error())
+    {
+        qDebug("%s, cannot write network config file %s", TAG, qPrintable(filename) );
+        return false;
+    }
+    return true;
+
+    //----------------
+    // Old implementation
+    /*
     //No password given or open network
     if (key == "" || encryption == "NONE")
     {
@@ -1113,8 +1163,6 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
     else
     {
         encoding = "";
-
-        //TKIP-only configurations
         if (!encryption.contains("AES"))
             encryption = "TKIP";
     }
@@ -1123,6 +1171,7 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
                                                      .arg(type).arg(allocation).arg(ssid).arg(auth).arg(encryption).arg(key).arg(encoding);
     if (isTest)     return SetFileContents(networkConfigFile + "_test", network_config.toLatin1());
     else            return SetFileContents(networkConfigFile, network_config.toLatin1());
+    */
 }
 
 //-----------------------------------------------------------------------------------------------------------
