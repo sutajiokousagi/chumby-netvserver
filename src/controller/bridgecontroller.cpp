@@ -1124,11 +1124,7 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
         return false;
     }
 
-    //Note that QXmlStreamWriter doesn't escape apostrophe (') in attributes
-    //But NetworkManager requires (') to be escaped
-    key = XMLEscape(key);
-    ssid = XMLEscape(ssid);
-
+    //Note that QXmlStreamWriter doesn't escape apostrophe (')
     QXmlStreamWriter xmlWriter(&file);
     xmlWriter.writeStartElement("configuration");
     if (type.length() > 1)              xmlWriter.writeAttribute("type", type);
