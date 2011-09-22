@@ -2,14 +2,26 @@
 <head>
 <title>NeTV Test Fade In/Out</title>
 <script language="JavaScript">
-var duration = 200;
-var moveDuration = 1000;
-var helloDuration = 200;
 
-var counter;
-var timeStart;
+//Fade & animation test
+var fadeDuration = 200;
+var moveDuration = 1000;
+var helloDuration = 1000;
 var moveDirection = 1;
 var durationDirection = -1;
+
+//Report
+var counter = 0;
+var timeStart = new Date();
+var tempNowDate;
+var elapsedSecond;
+var reportString;
+
+//Memory test
+var i;
+var testArraySize = 100000;
+var testArray;
+var memoryTestDuration = 40;
 
 function onLoad()
 {
@@ -18,11 +30,10 @@ function onLoad()
 
 function onLoadLater()
 {
-	counter = 0;
-	timeStart = new Date();
-	fadeTest(true);
-	moveTest(true);
-	helloTest();
+	//fadeTest(true);
+	//moveTest(true);
+	//helloTest();
+	memoryTest();
 }
 
 function moveTest(flip)
@@ -43,30 +54,47 @@ function helloTest()
 
 function fadeTest(isOut)
 {
-	duration += 5 * durationDirection;
-	if (duration <= 100) {
+	fadeDuration += 5 * durationDirection;
+	if (fadeDuration <= 100) {
 		durationDirection = 1;
-		duration = 100;
+		fadeDuration = 100;
 	}
-	else if (duration >= 200) {
+	else if (fadeDuration >= 200) {
 		durationDirection = -1;
-		duration = 200;
+		fadeDuration = 200;
 	}
 	
-	if (isOut)		$("#div_loadingMain").fadeOut(duration);
-	else			$("#div_loadingMain").fadeIn(duration);
+	if (isOut)		$("#div_loadingMain").fadeOut(fadeDuration);
+	else			$("#div_loadingMain").fadeIn(fadeDuration);
 	
-	if (isOut)		setTimeout("fadeTest(false)", duration+50);
-	else			setTimeout("fadeTest(true)", duration+50);
+	if (isOut)		setTimeout("fadeTest(false)", fadeDuration+50);
+	else			setTimeout("fadeTest(true)", fadeDuration+50);
 		
 	//------------------------
 	
+	updateStats();
+}
+
+function memoryTest()
+{
+	//This should activate the GC from 2nd iteration onwards
+	testArray = [];
+	
+	for (i=0; i<testArraySize; i++)
+		testArray.push("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer condimentum porttitor tristique. Nulla eleifend nisi nec dolor tempus rutrum. Maecenas faucibus, leo sit amet pharetra vehicula, mi augue fringilla magna, vitae laoreet massa nulla eget eros. Phasellus vehicula convallis dictum. Fusce eget scelerisque sapien. Nam volutpat vehicula nisi a laoreet. Duis pellentesque, mi a rhoncus facilisis, ante nibh ultricies magna, congue porta purus lacus sed neque. Sed eu mauris lorem, nec volutpat tellus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nulla et diam urna, vitae pretium nibh. Integer sodales imperdiet metus, vitae congue lorem ultricies ac. Vestibulum erat sapien, volutpat ac molestie eget, interdum quis odio. 		Pellentesque at turpis quam. Nulla eget nisi eu felis ultricies ultricies in quis lectus. Quisque nec elementum orci. Nam non lectus at eros dignissim faucibus. Proin luctus bibendum sem, at lobortis erat suscipit id. Quisque ut turpis augue, in congue massa. Sed sed cursus quam. Fusce ultricies lacinia risus ut sagittis. Phasellus libero lectus, tristique malesuada tincidunt id, bibendum ornare neque. Duis facilisis ultrices sapien, congue vulputate nulla ultricies non. In auctor elementum ultricies. Quisque neque justo, iaculis et euismod eget, condimentum id neque. Mauris pellentesque viverra scelerisque. Pellentesque consequat magna in augue sagittis mattis. Mauris scelerisque purus eget metus sodales venenatis. Maecenas iaculis accumsan dui elementum dapibus. Donec tempor sagittis sodales. Nam quis est quis arcu posuere varius a placerat est. Sed erat nisi, feugiat sed condimentum sit amet, consectetur vel nulla. Aliquam erat volutpat. Maecenas interdum tellus dignissim turpis lacinia viverra vestibulum tortor commodo. Proin vel porta eros. Duis in risus sit amet lacus mattis iaculis sit amet nec augue. Donec tempor placerat augue a porta. Aenean lorem leo, molestie sit amet consequat non, pretium id nisl. Mauris faucibus vulputate justo ut bibendum. Nulla facilisi. Nullam vestibulum tortor ut elit sodales euismod. Aenean eu pharetra est. Integer id nisl id tellus scelerisque auctor. Sed metus neque, iaculis sit amet venenatis eu, volutpat nec est. Etiam eget neque arcu. In eget nulla dolor, in fermentum augue. Curabitur euismod lorem sapien. Fusce ac neque vel purus faucibus vehicula nec at mauris. Cras viverra lobortis dapibus. Suspendisse lobortis, nisi vitae scelerisque tempus, tellus urna eleifend leo, sit amet pharetra turpis ante vitae ante. Ut ultricies faucibus massa eu euismod. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Curabitur convallis, risus sed aliquam blandit, libero arcu ultrices orci, sed ornare quam justo eget sapien. Nulla facilisi. Duis id nisi sem. Donec vel ante nec enim aliquet imperdiet eu a purus. Aenean pharetra sapien non dui elementum at dapibus erat tincidunt. Integer luctus dolor non mauris malesuada suscipit. Duis a faucibus risus. Nam consequat, quam ut condimentum vestibulum, mauris enim mattis est, eget lacinia felis augue et nunc. Aenean sed sapien non urna euismod lobortis sit amet sit amet nisi. Sed porttitor facilisis turpis, sit amet tristique justo fermentum ac. Suspendisse diam justo, scelerisque vitae posuere semper, gravida nec ante. Quisque dictum porttitor iaculis. Phasellus nec risus purus. Fusce rhoncus venenatis commodo. In gravida, nulla vitae fermentum mollis, dolor tellus vestibulum est, convallis volutpat nulla arcu a urna. Vestibulum vel eros justo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Sed rhoncus eros in dui congue nec tempus purus feugiat. Aenean quis sapien a purus ullamcorper congue eget at quam. Aliquam nec viverra enim. Aliquam quis nisi diam. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse dictum, nisi ac gravida interdum, turpis lorem tincidunt justo, consequat sollicitudin elit lectus vitae lectus. Phasellus mollis condimentum enim, sit amet sollicitudin lectus porttitor sed. In sem risus, ultricies ut vehicula eget, fermentum et turpis. Maecenas vehicula placerat erat non viverra. Cras leo neque, hendrerit quis placerat pretium, dictum et urna. Nam dapibus, quam vitae tempus elementum, nulla sapien elementum nisl, eget tempor purus risus vel lorem. Pellentesque congue, massa in feugiat accumsan, urna tellus fringilla lorem, ac consequat metus odio ut risus. Phasellus eleifend adipiscing purus consectetur elementum. Sed laoreet porta lacus, eget cursus nibh volutpat sed. Pellentesque ultricies sapien eu justo egestas quis adipiscing enim pulvinar. Praesent accumsan, turpis sit amet ultrices consectetur, sapien nibh imperdiet enim, vitae tempus nisi nisi eu eros. Cras tincidunt sodales fringilla. Quisque bibendum justo a purus vulputate lacinia. Aliquam erat volutpat. In porta mollis metus sit amet dignissim. Curabitur pharetra nisi et arcu pharetra laoreet. Proin posuere enim in neque mattis quis rhoncus lacus tempus. Praesent eget blandit erat. Curabitur nulla arcu, adipiscing vel sodales at, bibendum non justo. Suspendisse vestibulum, neque ut semper lobortis, elit nibh hendrerit sem, sed interdum erat risus vel risus. Nam ut dolor orci, pharetra aliquet augue. Aliquam varius elit malesuada ligula ornare mattis hendrerit velit eleifend. Morbi non ligula massa. Sed a magna nec purus lobortis fringilla non at eros. Praesent ut tellus et augue pretium dictum a vel nisl. Nulla auctor bibendum viverra. Donec mollis consequat convallis. Nulla vel dapibus justo. Cras libero erat, rutrum a condimentum sit amet, rhoncus at dolor. Donec ac leo faucibus sem pulvinar varius sed sed mi. Morbi nulla dui, dictum ut fermentum a, porta ut metus. Maecenas est risus, ullamcorper facilisis consequat a, posuere nec dolor. Cras nunc ipsum, ullamcorper quis elementum vel, ultricies sit amet nulla.");
+	
+	updateStats();
+	setTimeout("memoryTest()", memoryTestDuration);
+}
+
+function updateStats()
+{
 	counter++;
-	var nowDate = new Date();
-	var elapsedSec = Math.round( (nowDate - timeStart) / 1000 );
-	var reportString = "Count: " + counter + "<br>"
-	reportString += "Duration: " + duration + " ms<br>";
-	reportString += "Elapsed: " + elapsedSec + " sec<br>"
+	tempNowDate = new Date();
+	elapsedSecond = Math.round( (tempNowDate - timeStart) / 1000 );
+	reportString = "Count: " + counter + "<br>"
+	reportString += "Duration: " + memoryTestDuration + " ms<br>";
+	reportString += "Elapsed: " + elapsedSecond + " sec<br>"
 	$("#status_text").html(reportString);
 }
 
@@ -105,7 +133,7 @@ function fCheckAlive()
 					<div class="div_title">Testing in progress...</div>
 				</div>
 
-				<div id="status_text" style="text-align: center; margin-top: 20px; margin-bottom: 20px; color:#6598EB; font-weight: bold;">Testing...</div>
+				<div id="status_text" style="text-align: center; margin-top: 20px; margin-bottom: 20px; color:#6598EB; font-weight: bold;">Starting tests...</div>
 			
 				<!-- wifi credentials module -->
 				<div id="div_wifiListDetails0" class="div_wifiDetailsItem_normal">
