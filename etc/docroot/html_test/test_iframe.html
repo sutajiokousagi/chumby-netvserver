@@ -1,0 +1,47 @@
+<html>
+<head>
+<title>NeTV Test Reload test</title>
+<script language="JavaScript">
+
+//Multipage test
+var pageList = ["about:blank", "http://www.google.com"];
+var pageIndex = 0;
+
+function onLoad()
+{
+	setTimeout("pageTest()", 2000);
+}
+
+function pageTest()
+{
+	pageList = ["http://www.google.com", "about:blank"];
+		
+	console.log("|~|Loading: " + pageList[pageIndex]);
+	window.frames['iframe_test'].location = pageList[pageIndex];
+		
+	pageIndex++;
+	if (pageIndex >= pageList.length)
+		pageIndex = 0;		
+
+	setTimeout("pageTest()", 5000);
+}
+
+function fCheckAlive()
+{
+	return true;
+}
+
+</script>
+
+</head>
+<body onload="onLoad();">
+
+<div id="div_full_page">
+
+	<iframe id="iframe_test" name="iframe_test" width="850px" height="100%" style="margin-left:430px;">
+	</iframe>
+
+</div>
+
+</body>
+</html>
