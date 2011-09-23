@@ -105,6 +105,15 @@ function main_showState(vStateName, animated)
 		$("#div_accountMain").fadeOut(duration);
 		setTimeout("$('#div_configuringMain').fadeIn("+(duration+50)+");", duration);
 	}
+	else if (vStateName == "accountdetails")
+	{
+		//configuring_init();
+		$("#div_loadingMain").fadeOut(duration);
+		$("#div_wifiListMain").fadeOut(duration);
+		$("#div_wifiDetailsMain").fadeOut(duration);	
+		setTimeout("$('#div_accountMain').fadeIn("+(duration+50)+");", duration);
+		$("#div_configuringMain").fadeOut(duration);
+	}
 	else
 	{
 		$("#div_loadingMain").fadeOut(duration);
