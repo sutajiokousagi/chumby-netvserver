@@ -108,6 +108,10 @@ function refreshWifiList(animated)
 
 function fadeInWifiList(animated)
 {
+	//No list to display
+	if (currentWifiList == null)
+		return;
+		
 	//Clear the list
 	$('#div_wifiListMain_list').html('');
 	
