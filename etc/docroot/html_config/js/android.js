@@ -1,27 +1,38 @@
+var androidAliveTimer = null;
+var androidTimeoutDuration = 5000;
+
 // -------------------------------------------------------------------------------------------------
 //	Events from Android app
 // -------------------------------------------------------------------------------------------------
 
 function fAndroidEvents( vEventName, vEventData )
-{
+{	
 	vEventData = decodeURIComponent(vEventData);
 	switch (vEventName)
 	{
-		case "activationcancel":	location.href="http://localhost/";		break;
-		case "changeview":			android_changeView(vEventData);			break;
-		case "wifiscan":			android_wifiScan(vEventData);			break;
-		case "wifiselect":			android_selectWifi(vEventData);			break;
-		case "wifidetails":			android_setWifiDetails(vEventData);		break;
-		case "wificonfiguring":		android_setWifiDetails(vEventData);		break;
-		case "accountdetails":		android_setAccountDetails(vEventData);	break;
+		case "activationcancel":	android_clearTimeout();		location.href="http://localhost/";		break;
+		case "changeview":			android_clearTimeout();		android_changeView(vEventData);			break;
+		case "wifiscan":			android_resetTimeout();		android_wifiScan(vEventData);			break;
+		case "wifiselect":			android_resetTimeout();		android_selectWifi(vEventData);			break;
+		case "wifidetails":			android_resetTimeout();		android_setWifiDetails(vEventData);		break;
+		case "wificonfiguring":		android_clearTimeout();		android_setWifiDetails(vEventData);		break;
+		case "accountdetails":		android_resetTimeout();		android_setAccountDetails(vEventData);	break;
 	}
+	if (vEventData.length > 16)		fDbg2("Received Android event: [" + vEventName + "] data length: " + vEventData.length);
+	else							fDbg2("Received Android event: [" + vEventName + "] " + vEventData);
 }
 
 function android_changeView(xmlDataString)
 {
 	if (xmlDataString == "remote")
 	{
+		android_clearTimeout();
 		location.href="http://localhost/";
+	}
+	else if (xmlDataString == "wificonfiguring")
+	{
+		android_clearTimeout();
+		main_showState(xmlDataString, true);
 	}
 	else
 	{
@@ -40,7 +51,7 @@ function android_wifiScan(xmlDataString)
 }
 
 function android_selectWifi(xmlDataString)
-{
+{	
 	//Show WiFi list UI if it's not currently being shown
 	var currentState = main_currentState();
 	if (currentState != "wifilist")
@@ -81,4 +92,23 @@ function android_setAccountDetails(xmlDataString)
 	$("#chumby_username").val(ssid);
 	$("#chumby_password").val(passwordMask);
 	$("#chumby_device_name").val(devicename);
+}
+
+function android_clearTimeout()
+{
+	if (androidAliveTimer != null)
+		clearTimeout(androidAliveTimer);
+	androidAliveTimer = null;
+}
+
+function android_resetTimeout()
+{
+	android_clearTimeout();
+	androidAliveTimer = setTimeout("android_timeout()", androidTimeoutDuration);
+}
+	
+function android_timeout()
+{
+	fDbg2("Android html_config timeout...");
+	location.href="http://localhost/";
 }

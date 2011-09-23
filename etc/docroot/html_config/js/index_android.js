@@ -9,7 +9,7 @@ function onLoad()
 	main_y = $("#div_center").offset().top;
 	main_hideMainPanel(100);
 	
-	keyboard_init();
+	//keyboard_init();
 	
 	//Init loading view
 	main_showState('loading', false);
@@ -24,8 +24,8 @@ function onLoadLater()
 {
 	//Do not start the internal wifiscan in Android version
 	//WifiScan data will come from Android app event
-	wifilist_init();
 	//wifilist_startWifiScan();
+	wifilist_init();
 	
 	main_showMainPanel();
 }
