@@ -31,11 +31,21 @@ function android_changeView(xmlDataString)
 
 function android_wifiScan(xmlDataString)
 {
+	//Show WiFi list UI if it's not currently being shown
+	var currentState = main_currentState();
+	if (currentState != "wifilist")
+		main_showState("wifilist", true);
+		
 	mNetConfig.SetWifiScanData(xmlDataString);
 }
 
 function android_selectWifi(xmlDataString)
 {
+	//Show WiFi list UI if it's not currently being shown
+	var currentState = main_currentState();
+	if (currentState != "wifilist")
+		main_showState("wifilist", true);
+		
 	wifilist_setSelectedSSID(xmlDataString);
 }
 
@@ -46,6 +56,11 @@ function android_setWifiDetails(xmlDataString)
 	var encryption = xmlDataString.split("</wifi_encryption>")[0].split("<wifi_encryption>")[1];
 	var auth = xmlDataString.split("</wifi_authentication>")[0].split("<wifi_authentication>")[1];
 	
+	//Show WiFi details UI if it's not currently being shown
+	var currentState = main_currentState();
+	if (currentState != "wifidetails")
+		main_showState("wifidetails", true);
+		
 	//UI
 	$("#wifi_ssid").val(ssid);
 	$("#wifi_password").val(passwordMask);
@@ -54,8 +69,13 @@ function android_setWifiDetails(xmlDataString)
 function android_setAccountDetails(xmlDataString)
 {
 	var username = xmlDataString.split("</chumby_username>")[0].split("<chumby_username>")[1];
-	var passwordMask = xmlDataString.split("</chumby_password>")[0].split("<chumby_password>")[1];
+	var passwordMask = xmlDataString.split("</chumby_password>")[0].split("<chumby_password>")[1];			//xxxxx mask only, for security reason
 	var devicename = xmlDataString.split("</chumby_device_name>")[0].split("<chumby_device_name>")[1];
+	
+	//Show account details UI if it's not currently being shown
+	var currentState = main_currentState();
+	if (currentState != "accountdetails")
+		main_showState("accountdetails", true);
 	
 	//UI
 	$("#chumby_username").val(ssid);
