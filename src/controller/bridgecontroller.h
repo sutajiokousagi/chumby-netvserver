@@ -4,7 +4,20 @@
 #include "httprequesthandler.h"
 #include "socketrequesthandler.h"
 
-#define TAG         "NeTVServer"
+#define TAG                                 "NeTVServer"
+#define BRIDGE_RETURN_STATUS_UNIMPLEMENTED  "0"
+#define BRIDGE_RETURN_STATUS_SUCCESS        "1"
+#define BRIDGE_RETURN_STATUS_ERROR          "2"
+#define BRIDGE_RETURN_STATUS_UNAUTHORIZED   "3"
+
+#define ARGS_SPLIT_TOKEN    "|~|"
+
+#define STRING_AUTHORIZED_CALLER            "Authorized-Caller"
+#define STRING_COMMAND                      "cmd"
+#define STRING_DATA                         "data"
+#define STRING_VALUE                        "value"
+
+
 
 class BridgeController : public QObject, public HttpRequestHandler, public SocketRequestHandler
 {
@@ -31,6 +44,10 @@ public slots:
     void slot_DeviceAdded(QByteArray objPath);
     void slot_DeviceRemoved(QByteArray objPath);
 
+    // For delayed AccessPoint mode
+    void slot_StopAP();
+    void slot_StartAP();
+
 signals:
 
     // To InputDevice module
@@ -44,13 +61,11 @@ private:
     QString networkConfigFile;
     QString accountConfigFile;
 
-    /** Process Utilities */
-    QByteArray Execute(const QString &fullPath);
-    QByteArray Execute(const QString &fullPath, QStringList args);
-
-    /** Helper */
+    /** High level helper functions */
     bool IsAuthorizedCaller(QByteArray headerValue);
     bool SetNetworkConfig(QHash<QString, QString> parameters);
+    void StartAPwithDelay(int msec = 1000);
+    void StopAPwithDelay(int msec = 1000);
 
     /** Parameters */
     QSettings * parameters;
@@ -59,6 +74,10 @@ private:
     void SetParameter(QString name, QString value);
     void LoadParameters(QString * filename = NULL);
     void SaveParameters(QString * filename = NULL);
+
+    /** Process Utilities */
+    QByteArray Execute(const QString &fullPath);
+    QByteArray Execute(const QString &fullPath, QStringList args);
 
     /** File Utilities */
     bool FileExists(const QString &fullPath);
@@ -77,7 +96,9 @@ private:
     /** Other Utilities */
     bool IsHexString(QString testString);
     QString XMLEscape(QString inputString);
+    QString XMLUnescape(QString inputString);
 
+    /** HTTP response */
     void DumpStaticFile(QByteArray path, HttpResponse& response);
     void SetContentType(QString fileName, HttpResponse& response) const;
 };
