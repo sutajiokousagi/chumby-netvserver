@@ -60,6 +60,12 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     if (authorizedCaller.length() < 1 && xmlparameters.contains(STRING_AUTHORIZED_CALLER))
         authorizedCaller = xmlparameters.value(STRING_AUTHORIZED_CALLER).toUpper();
 
+    //Allow XML style parameters passing
+    if (cmdString.length() < 1 && xmlparameters.contains(STRING_COMMAND))
+        cmdString = xmlparameters.value(STRING_COMMAND).toUpper();
+    if (dataString.length() < 1 && xmlparameters.contains(STRING_VALUE))
+        dataString = xmlparameters.value(STRING_VALUE);
+
     //-----------------------------------------------------------
 
     if (cmdString == "SETURL")
@@ -175,10 +181,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "widget_engine");
 
         //Reply to JavaScriptCore/ControlPanel
-        if (numClient > 0)
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>Command forwarded to widget rendering engine</value></data></xml>", true);
-        else
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No widget rendering engine found</value></data></xml>", true);
+        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>Command forwarded to widget rendering engine</value></data></xml>", true);
+        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No widget rendering engine found</value></data></xml>", true);
     }
 
     else if (cmdString == "SETWIDGETSIZE")
@@ -187,10 +191,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "widget_engine");
 
         //Reply to JavaScriptCore/ControlPanel
-        if (numClient > 0)
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>Command forwarded to widget rendering engine</value></data></xml>", true);
-        else
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No widget rendering engine found</value></data></xml>", true);
+        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>Command forwarded to widget rendering engine</value></data></xml>", true);
+        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No widget rendering engine found</value></data></xml>", true);
     }
 
     else if (cmdString == "REMOTECONTROL")
@@ -199,10 +201,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXmlString + "</data></xml>", "all");
 
         //Reply to JavaScriptCore/ControlPanel
-        if (numClient > 0)
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>Command forwarded to browser</value></data></xml>", true);
-        else
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
+        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>Command forwarded to browser</value></data></xml>", true);
+        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
     }
 
     else if (cmdString == "KEY")
@@ -211,10 +211,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataString + "</data></xml>", "all");
 
         //Reply to JavaScriptCore/ControlPanel
-        if (numClient > 0)
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", true);
-        else
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No client running</value></data></xml>", true);
+        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", true);
+        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No client running</value></data></xml>", true);
     }
 
     //-----------
@@ -294,8 +292,17 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         // <time> is time formatted in GMT time as "yyyy.mm.dd-hh:mm:ss"
         // <timezone> is standard timezone ID string formated as "Asia/Singapore"
         // see http://developer.android.com/reference/java/util/TimeZone.html#getID()
-        QString time = request.getParameter("time");
-        QString timezone = request.getParameter("timezone");
+        QString time, timezone;
+        if (xmlparameters.size() > 0)
+        {
+            time = xmlparameters.value("time", "");
+            timezone = xmlparameters.value("timezone", "");
+        }
+        else
+        {
+            time = request.getParameter("time");
+            timezone = request.getParameter("timezone");
+        }
 
         QStringList argsList;
         argsList.append(time);
