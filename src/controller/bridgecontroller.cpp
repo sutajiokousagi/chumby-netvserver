@@ -547,6 +547,18 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         buffer = QByteArray();
     }
 
+    else if (cmdString == "REBOOT")
+    {
+        if (!IsAuthorizedCaller(authorizedCaller)) {
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
+            return;
+        }
+
+        QByteArray buffer = this->Execute("reboot");
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+        buffer = QByteArray();
+    }
+
     //A generic command to execute name-alike scripts
     else if (FileExists(docroot + "/scripts/" + cmdString.toLower() + ".sh"))
     {
@@ -1030,6 +1042,16 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         if (dataString.length() < 1)
             dataString = "start-chumby";
         QByteArray buffer = this->Execute("/etc/init.d/sshd", QStringList(QString(dataString)));
+
+        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setCommand(cmdString);
+        response.setParameter(STRING_VALUE, buffer.trimmed());
+        response.write();
+    }
+
+    else if (cmdString == "REBOOT")
+    {
+        QByteArray buffer = this->Execute("reboot");
 
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setCommand(cmdString);
