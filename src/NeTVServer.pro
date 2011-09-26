@@ -38,7 +38,7 @@ SOURCES += $$PWD/controller/scriptcontroller.cpp
 
 # Hardware bridge
 HEADERS += $$PWD/controller/bridgecontroller.h
-SOURCES += $$PWD/controller/bridgecontroller.cpp
+SOURCES += $$PWD/controller/bridgecontroller.cpp controller/bridgecontroller_utils.cpp controller/bridgecontroller_slots.cpp
 
 
 OTHER_FILES += \
@@ -85,3 +85,5 @@ MOC_DIR = $$PWD/tmp/$$BUILD_NAME
 UI_DIR = $$PWD/tmp/$$BUILD_NAME
 RCC_DIR = $$PWD/tmp/$$BUILD_NAME
 DESTDIR = $$PWD/bin
+
+
