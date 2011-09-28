@@ -13,11 +13,32 @@ function onLoad()
 	
 	//Init loading view
 	main_showState('loading', false);
+	//main_showState('wifidetails', false);
 	
 	mNetConfig = cNetConfig.fGetInstance();
 	mNetConfig.fInit();
 
 	setTimeout("onLoadLater()", 200);
+	
+	//support native keyboard events
+	$(document).keydown(function(e)
+	{
+		if (e.keyCode == 37)		{		main_onRemoteControl('left');		return false;		}
+		else if (e.keyCode == 39)	{		main_onRemoteControl('right');		return false;		}
+		else if (e.keyCode == 38)	{		main_onRemoteControl('up');			return false;		}
+		else if (e.keyCode == 40)	{		main_onRemoteControl('down');		return false;		}
+		else if (e.keyCode == 13)	{		main_onRemoteControl('center');		return false;		}
+		else if (e.keyCode == 33)	{		main_onRemoteControl('cpanel');		return false;		}
+		else if (e.keyCode == 34)	{		main_onRemoteControl('widget');		return false;		}
+		return true;
+	});
+	
+	//support native mouse events
+	$("#wifi_security_none_wrapper").click(onRadioFieldClick);
+	$("#wifi_security_wep_wrapper").click(onRadioFieldClick);
+	$("#wifi_security_wpa_wrapper").click(onRadioFieldClick);
+	$("#wifi_ssid_wrapper").click(onInputFieldClick);
+	$("#wifi_password_wrapper").click(onInputFieldClick);
 }
 
 function onLoadLater()
@@ -95,15 +116,6 @@ function main_showState(vStateName, animated)
 		$("#div_accountMain").fadeOut(duration);
 		$("#div_configuringMain").fadeOut(duration);
 	}
-	else if (vStateName == "accountdetails")
-	{
-		//accountdetails_init();
-		$("#div_loadingMain").fadeOut(duration);
-		$("#div_wifiListMain").fadeOut(duration);
-		$("#div_wifiDetailsMain").fadeOut(duration)
-		setTimeout("$('#div_accountMain').fadeIn("+(duration+50)+");", duration);
-		$("#div_configuringMain").fadeOut(duration);
-	}
 	else if (vStateName == "configuring")
 	{
 		configuring_init();
@@ -112,6 +124,15 @@ function main_showState(vStateName, animated)
 		$("#div_wifiDetailsMain").fadeOut(duration);
 		$("#div_accountMain").fadeOut(duration);
 		setTimeout("$('#div_configuringMain').fadeIn("+(duration+50)+");", duration);
+	}
+	else if (vStateName == "accountdetails")
+	{
+		//accountdetails_init();
+		$("#div_loadingMain").fadeOut(duration);
+		$("#div_wifiListMain").fadeOut(duration);
+		$("#div_wifiDetailsMain").fadeOut(duration)
+		setTimeout("$('#div_accountMain').fadeIn("+(duration+50)+");", duration);
+		$("#div_configuringMain").fadeOut(duration);
 	}
 	else
 	{
@@ -131,4 +152,21 @@ function main_onRemoteControl(vButtonName)
 	else if ( $("#div_wifiDetailsMain").is(":visible") )		wifidetails_onRemoteControl(vButtonName);
 	else if ( $("#div_configuringMain").is(":visible") )		configuring_onRemoteControl(vButtonName);
 	//else if ( $("#div_accountMain").is(":visible") )			account_onRemoteControl(vButtonName);
+}
+
+function onRadioFieldClick()
+{
+	$('.radio_wrapper_selected').removeClass('radio_wrapper_selected');
+	$(this).addClass('radio_wrapper_selected');
+	$('.radio', this).attr('checked', true);
+}
+
+function onInputFieldClick()
+{
+	$(':input').blur();
+	$(':input').removeClass('input_focus');
+	$(this).children(':input').focus();
+	$(this).children(':input').addClass('input_focus');
+	$('.input_wrapper_focus').removeClass('input_wrapper_focus');
+	$(this).addClass('input_wrapper_focus');
 }

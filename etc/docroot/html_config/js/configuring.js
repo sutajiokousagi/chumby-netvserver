@@ -4,6 +4,8 @@ var activationTime;
 
 function configuring_init()
 {
+	wifilist_stopWifiScanTimer();
+	
 	activationState = '';
 	activationTime = null;
 	activationTimer = null;

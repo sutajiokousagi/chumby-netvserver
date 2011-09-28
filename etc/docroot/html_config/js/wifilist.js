@@ -21,10 +21,10 @@ function wifilist_init()
 
 function onWifiScanTimer()
 {
+	if (mNetConfig == null)
+		return;
 	mNetConfig.WifiScan(true);
 	mNetConfig.wifiScanCallback = wifilist_updateWifiList;
-	
-	wifiScanTimer = null;
 	wifilist_resetWifiScanTimer();
 }
 
@@ -35,6 +35,8 @@ function wifilist_startWifiScan()
 
 function wifilist_resetWifiScanTimer(duration)
 {
+	if (mNetConfig == null)
+		return;
 	wifilist_stopWifiScanTimer();
 	mNetConfig.wifiScanCallback = wifilist_updateWifiList;
 	wifiScanTimer = setTimeout("onWifiScanTimer()", !duration ? 30000 : duration);
@@ -42,6 +44,8 @@ function wifilist_resetWifiScanTimer(duration)
 
 function wifilist_stopWifiScanTimer()
 {
+	if (mNetConfig == null)
+		return;
 	mNetConfig.wifiScanCallback = null;
 	if (wifiScanTimer != null)
 		clearTimeout(wifiScanTimer);
@@ -178,7 +182,7 @@ function wifilist_onRemoteControl(vButtonName)
 {
 	if (vButtonName == "up")
 	{
-		var previousSSID = "";
+		var previousIndex = 0;
 		for (var objectIndex in currentWifiList)
 		{
 			var oneWifiData = currentWifiList[objectIndex];
@@ -186,21 +190,24 @@ function wifilist_onRemoteControl(vButtonName)
 				continue;
 			var ssid = oneWifiData['ssid'];
 			
-			if (ssid == selectedSSID)
+			if (ssid == selectedSSID) {
+				previousIndex = objectIndex;
 				break;
-			previousSSID = ssid;
+			}
 		}
-		if (previousSSID != "") {
-			selectedSSID = previousSSID;
-			selectedIndex = objectIndex-1;
-		}
+
+		//Convert from index to ssid name
+		selectedIndex = previousIndex-1;
+		if (selectedIndex < 0)
+			selectedIndex = currentWifiList.length - 1;
+		selectedSSID = currentWifiList[selectedIndex]['ssid'];
 			
 		fadeInWifiList(false);
 		wifilist_resetWifiScanTimer();
 	}
 	else if (vButtonName == "down")
 	{
-		var found = false;
+		var previousIndex = 0;
 		for (var objectIndex in currentWifiList)
 		{
 			var oneWifiData = currentWifiList[objectIndex];
@@ -208,15 +215,18 @@ function wifilist_onRemoteControl(vButtonName)
 				continue;
 			var ssid = oneWifiData['ssid'];
 
-			if (found == true) {
-				selectedSSID = ssid;
-				selectedIndex = objectIndex;
+			if (ssid == selectedSSID) {
+				previousIndex = objectIndex;
 				break;
 			}
-		
-			if (ssid == selectedSSID)
-				found = true;
 		}
+		
+		//Convert from index to ssid name
+		selectedIndex = parseInt(previousIndex) + 1;
+		if (selectedIndex >= currentWifiList.length)
+			selectedIndex = 0;
+		selectedSSID = currentWifiList[selectedIndex]['ssid'];
+		
 		fadeInWifiList(false);
 		wifilist_resetWifiScanTimer();
 	}
@@ -229,13 +239,13 @@ function wifilist_onRemoteControl(vButtonName)
 			return;
 			
 		wifilist_stopWifiScanTimer();
+		wifidetails_setSelectedSSID(selectedSSID);
 				
 		if (selectedSSID == "Other...")
 		{
-			wifidetails_highlightItem("ssid");
 			main_showState("wifidetails", true);
 		}
-		else if (oneWifiData['encryption'] == 'NONE')
+		else if (oneWifiData['encryption'] == null || oneWifiData['encryption'].toUpperCase() == 'NONE' || oneWifiData['encryption'].toUpperCase() == 'OPEN')
 		{
 			mNetConfig.SetNetwork(selectedSSID, '');
 			main_showState("configuring", true);
@@ -243,8 +253,6 @@ function wifilist_onRemoteControl(vButtonName)
 		else
 		{
 			main_showState("wifidetails", true);
-			wifidetails_setItemValue("ssid", selectedSSID);
-			wifidetails_highlightItem("password");
 		}
 	}
 }

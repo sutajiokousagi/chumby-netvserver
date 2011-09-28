@@ -37,7 +37,7 @@ function keyboard_init()
 	row1 = ['$','&amp;','&lt;','&gt;','{','}','~','`','^'];
 	row2 = ['#','?','[',']','%','|','+','-',''];
 	row3 = ['@','!','(',')',':',';','*','=',''];
-	row4 = ['.',',','\\','/','\'','"','_','',''];
+	row4 = ['.',',','\\','/','&apos;','&quot;','_','',''];
 	row5 = ['abc','abc','shift','shift','space','space','space','<--','<--'];
 	keyboard_keysArray2 = [ row1, row2, row3, row4, row5 ];
 	
@@ -49,22 +49,28 @@ function keyboard_init()
 	keyboard_setLayout(0);
 }
 
+function keyboard_selectFirstKey()
+{
+	keyboard_currentX = 0;
+	keyboard_currentY = 0;
+	keyboard_clearHighlight();
+	keyboard_setHighlightKey(keyboard_currentX, keyboard_currentY, true);
+}
+
 // -------------------------------------------------------------------------------------------------
 //	Internal use
 // -------------------------------------------------------------------------------------------------
 
 function keyboard_clearHighlight()
 {
-	for (var y in keyboard_keysIDArray)
-		for (var x in keyboard_keysIDArray[y])
-			keyboard_setHighlightKey(x,y,false);
+	$(".mac_key_selected").removeClass("mac_key_selected").addClass("mac_key");
 }
 
 function keyboard_setHighlightKey(x,y,isHighlight)
 {
 	if (x<0 || y<0 || y>=keyboard_keysIDArray.length || x>=keyboard_keysIDArray[y].length)
 		return keyboard_clearHighlight();
-	
+		
 	var id = "#key_" + keyboard_keysIDArray[y][x];
 	if (isHighlight)		$(id).removeClass("mac_key").addClass("mac_key_selected");
 	else					$(id).removeClass("mac_key_selected").addClass("mac_key");
@@ -85,12 +91,13 @@ function keyboard_onRemoteControl(direction, elementID)
 	}
 	
 	var returnFocus = false;
+	var bounce = false;
 	
 	switch (keyboard_wrapYMode)
 	{
 		case 0:
-			if (newY >= keyboard_keysIDArray.length)		newY = keyboard_keysIDArray.length-1;
-			else if (newY < 0)								newY = 0;
+			if (newY >= keyboard_keysIDArray.length)	{	newY = keyboard_keysIDArray.length-1;		bounce = true;		}
+			else if (newY < 0)							{	newY = 0;									bounce = true;		}
 			break;
 		case 1:
 			if (newY >= keyboard_keysIDArray.length)		newY = 0;
@@ -108,8 +115,8 @@ function keyboard_onRemoteControl(direction, elementID)
 		switch (keyboard_wrapXMode)
 		{
 			case 0:
-				if (newX >= keyboard_keysIDArray[newY].length)	newX = keyboard_keysIDArray[newY].length-1;
-				else if (newX < 0)								newX = 0;
+				if (newX >= keyboard_keysIDArray[newY].length)	{	newX = keyboard_keysIDArray[newY].length-1;		bounce = true;		}
+				else if (newX < 0)								{	newX = 0;										bounce = true;		}
 				break;
 			case 1:
 				if (newX >= keyboard_keysIDArray[newY].length)	newX = 0;
@@ -124,11 +131,16 @@ function keyboard_onRemoteControl(direction, elementID)
 		}
 	}
 	
-	keyboard_setHighlightKey(keyboard_currentX,keyboard_currentY, false);
+	keyboard_clearHighlight();
+	var oldValue = keyboard_getCurrentKey();
+	var newValue = keyboard_getKeyValue(newX,newY);
 	keyboard_setHighlightKey(newX,newY, true);
 	keyboard_currentX = newX;
 	keyboard_currentY = newY;
-	return returnFocus;
+	if (oldValue != newValue || newValue == "" || oldValue == "" || bounce == true)
+		return returnFocus;
+		
+	return keyboard_onRemoteControl(direction, elementID);
 }
 
 // ----------------------------
@@ -157,11 +169,16 @@ function keyboard_getLayout()
 
 // ------------------------------
 
+function keyboard_getKeyValue(x,y)
+{
+	if (x<0 || y<0 || y>=keyboard_keysIDArray.length || x>=keyboard_keysIDArray[y].length)
+		return "";
+	return keyboard_keysIDArray[y][x];
+}
+
 function keyboard_getCurrentKey()
 {
-	if (keyboard_currentX<0 || keyboard_currentY<0 || keyboard_currentY>=keyboard_keysIDArray.length || keyboard_currentX>=keyboard_keysIDArray[keyboard_currentY].length)
-		return "";
-	return keyboard_keysIDArray[keyboard_currentY][keyboard_currentX];
+	return keyboard_getKeyValue(keyboard_currentX,keyboard_currentY);
 }
 
 function keyboard_applyCurrentKey(elementID)
@@ -174,6 +191,8 @@ function keyboard_applyCurrentKey(elementID)
 	if (currentKeyValue == "&amp;")				currentKeyValue = "&";
 	else if (currentKeyValue == "&lt;")			currentKeyValue = "<";
 	else if (currentKeyValue == "&gt;")			currentKeyValue = ">";
+	else if (currentKeyValue == "&quot;")		currentKeyValue = "\"";
+	else if (currentKeyValue == "&apos;")		currentKeyValue = "'";
 		
 	var currentValue = $("#"+elementID).val();
 	switch (currentKeyID)
@@ -190,7 +209,9 @@ function keyboard_applyCurrentKey(elementID)
 			if (keyboard_getLayout() == 0) 		keyboard_setLayout(1);
 			else								keyboard_setLayout(0);
 			break;
-		default:				currentValue += currentKeyValue;											break;
+		default:				currentValue += currentKeyValue;									break;
 	}
 	$("#"+elementID).val(currentValue);
+	$("#"+elementID).blur();
+	$("#"+elementID).focus();
 }

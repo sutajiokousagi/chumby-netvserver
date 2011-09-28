@@ -77,20 +77,26 @@ cNetConfig.prototype.StopAP = function ()
 	xmlhttpPost("", "post", { 'cmd' : 'stop_ap' }, null );
 }
 
-cNetConfig.prototype.SetNetwork = function (ssid, key, encryption, auth)
+cNetConfig.prototype.SetNetwork = function (ssid, key, security)
 {
 	var param = [];
 	param['cmd'] = 'SetNetwork';
 	
 	var oneWifiData = cNetConfig.instance.getWifiData(ssid);
 	
+	//Manual network ssid
 	if (oneWifiData == null)
 	{
 		param['wifi_ssid'] = ssid;
-		if (auth != null && auth != '')					param['wifi_auth'] = auth;
-		if (encryption != null && encryption != '')		param['wifi_encryption'] = encryption;	
 		if (key != null && key != '')					param['wifi_password'] = key;
+		if (!security)
+		{
+			if (security.toUpperCase() == "WEP")		{	param['wifi_encryption'] = "WEP";		param['wifi_authentication'] = "WEPAUTO";	}
+			else if (security.toUpperCase() == "WPA")	{	param['wifi_encryption'] = "AES";		param['wifi_authentication'] = "WPA2PSK";	}
+			else										{	param['wifi_encryption'] = "NONE";		param['wifi_authentication'] = "OPEN";		}
+		}
 	}
+	//Auto
 	else
 	{
 		param['wifi_ssid'] = oneWifiData['ssid'];

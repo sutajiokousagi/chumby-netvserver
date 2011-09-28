@@ -66,17 +66,37 @@
 
 				<div id="div_wifiListDetails0" class="div_wifiDetailsItem_normal">
 					<div class="spacer">&nbsp;</div>
-						<div style="float:left; text-align: right; width: 140px;">SSID</div>
-						<div id="wifi_ssid_wrapper" class="input_wrapper"><input type="text" id="wifi_ssid"></div>
+						<div style="float:left; text-align: right; width: 120px; margin-right: 15px;">SSID</div>
+						<div id="wifi_ssid_wrapper" class="input_wrapper"><input type="text" id="wifi_ssid" size="20"></div>
 					<div class="spacer">&nbsp;</div>
 				</div>
 				<div id="div_wifiListDetails1" class="div_wifiDetailsItem_normal">
 					<div class="spacer">&nbsp;</div>
-						<div style="float:left; text-align: right; width: 140px;">Password</div>
-						<div id="wifi_password_wrapper" class="input_wrapper"><input type="text" id="wifi_password"></div>
+						<div style="float:left; text-align: right; width: 120px; margin-right: 15px;">Password</div>
+						<div id="wifi_password_wrapper" class="input_wrapper"><input type="text" id="wifi_password" size="20"></div>
 					<div class="spacer">&nbsp;</div>
 				</div>
+				
 				<div id="div_wifiListDetails2" class="div_wifiDetailsItem_normal">
+					<div class="spacer">&nbsp;</div>
+						<div style="float:left; text-align: right; width: 120px; margin-right: 15px;">&nbsp;</div>
+						<div id="wifi_security_none_wrapper" class="radio_wrapper"><input type="radio" name="wifi_security_radio" id="wifi_security_none" checked value="NONE" style="visibility:hidden;" ><label>None</label></div>
+					<div class="spacer">&nbsp;</div>
+				</div>
+				<div id="div_wifiListDetails3" class="div_wifiDetailsItem_normal">
+					<div class="spacer">&nbsp;</div>
+						<div style="float:left; text-align: right; width: 120px; margin-right: 15px;">Security</div>
+						<div id="wifi_security_wep_wrapper" class="radio_wrapper"><input type="radio" name="wifi_security_radio" id="wifi_security_wep" value="WEP" style="visibility:hidden;" ><label>WEP</label></div>
+					<div class="spacer">&nbsp;</div>
+				</div>
+				<div id="div_wifiListDetails4" class="div_wifiDetailsItem_normal">
+					<div class="spacer">&nbsp;</div>
+						<div style="float:left; text-align: right; width: 120px; margin-right: 15px;">&nbsp;</div>
+						<div id="wifi_security_wpa_wrapper" class="radio_wrapper"><input type="radio" name="wifi_security_radio" id="wifi_security_wpa" value="WPA" style="visibility:hidden;" ><label>WPA/WPA2</label></div>
+					<div class="spacer">&nbsp;</div>
+				</div>
+
+				<div id="div_wifiListDetails5" class="div_wifiDetailsItem_normal">
 					<div id="keyboard">
 						<div style="float: top;">
 							<div class="mac_key" id="key_a">a</div>
@@ -131,10 +151,10 @@
 					</div>
 					<div class="spacer">&nbsp;</div>
 				</div>
-				<div id="div_wifiListDetails3" class="div_wifiDetailsItem_normal" style="text-align: center; margin-top: 10px">
+				<div id="div_wifiListDetails6" class="div_wifiDetailsItem_normal" style="text-align: center; margin-top: 10px">
 					<div>Next</div>
 				</div>
-				<div id="div_wifiListDetails4" class="div_wifiDetailsItem_normal" style="text-align: center;">
+				<div id="div_wifiListDetails7" class="div_wifiDetailsItem_normal" style="text-align: center;">
 					<div>Select another WiFi</div>
 				</div>
 			</div>
