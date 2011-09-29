@@ -123,6 +123,10 @@ sub cleanUpCurrentWifi ()
 			{
 				$encryption = "AES";		#Change encryprtion to AES
 			}
+			else
+			{
+				$encryption = "TKIP";
+			}
 			$auth = $auth . $authSuite;		#WPAPSK, WPAEAP, WPA2PSK, WPA2EAP
 		}
 	}
