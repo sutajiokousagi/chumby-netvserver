@@ -17,8 +17,7 @@ function wifidetails_highlightItem(itemName)
 {
 	//Clear previous selection
 	wifidetails_selectedIndex = 0;
-	for (var i=0; i<5; i++)
-		$("#div_wifiListDetails"+i).removeClass("div_wifiDetailsItem_selected").addClass("div_wifiDetailsItem_normal");
+	$('.div_wifiDetailsItem_selected').removeClass('div_wifiDetailsItem_selected').addClass('div_wifiDetailsItem_normal');
 		
 	switch (itemName)
 	{
@@ -230,7 +229,7 @@ function wifidetails_onRemoteControl(vButtonName)
 	}
 	
 	//Highlight new item, avoid 5 (keyboard)
-	$("#div_wifiListDetails"+wifidetails_selectedIndex).removeClass("div_wifiDetailsItem_selected").addClass("div_wifiDetailsItem_normal");
+	$(".div_wifiDetailsItem_selected").removeClass("div_wifiDetailsItem_selected").addClass("div_wifiDetailsItem_normal");
 	if (newY != 5)
 	{
 		$("#div_wifiListDetails"+newY).removeClass("div_wifiDetailsItem_normal").addClass("div_wifiDetailsItem_selected");
