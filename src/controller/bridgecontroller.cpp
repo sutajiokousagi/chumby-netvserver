@@ -1168,13 +1168,13 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
     //Note that QXmlStreamWriter doesn't escape apostrophe (')
     QXmlStreamWriter xmlWriter(&file);
     xmlWriter.writeStartElement("configuration");
-    if (type.length() > 1)              xmlWriter.writeAttribute("type", type);
-    if (allocation.length() > 1)        xmlWriter.writeAttribute("allocation", allocation);
-    if (ssid.length() > 1)              xmlWriter.writeAttribute("ssid", ssid);
-    if (auth.length() > 1)              xmlWriter.writeAttribute("auth", auth);
-    if (encryption.length() > 1)        xmlWriter.writeAttribute("encryption", encryption);
-    if (key.length() > 1)               xmlWriter.writeAttribute("key", key);
-    if (encoding.length() > 1)          xmlWriter.writeAttribute("encoding", encoding);
+    if (type.length() > 0)              xmlWriter.writeAttribute("type", type);
+    if (allocation.length() > 0)        xmlWriter.writeAttribute("allocation", allocation);
+    if (ssid.length() > 0)              xmlWriter.writeAttribute("ssid", ssid);
+    if (auth.length() > 0)              xmlWriter.writeAttribute("auth", auth);
+    if (encryption.length() > 0)        xmlWriter.writeAttribute("encryption", encryption);
+    if (key.length() > 0)               xmlWriter.writeAttribute("key", key);
+    if (encoding.length() > 0)          xmlWriter.writeAttribute("encoding", encoding);
     xmlWriter.writeEndElement();
     file.close();
     if (file.error())
