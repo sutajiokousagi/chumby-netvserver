@@ -89,7 +89,7 @@ cNetConfig.prototype.SetNetwork = function (ssid, key, security)
 	{
 		param['wifi_ssid'] = ssid;
 		if (key != null && key != '')					param['wifi_password'] = key;
-		if (!security)
+		if (security)
 		{
 			if (security.toUpperCase() == "WEP")		{	param['wifi_encryption'] = "WEP";		param['wifi_authentication'] = "WEPAUTO";	}
 			else if (security.toUpperCase() == "WPA")	{	param['wifi_encryption'] = "AES";		param['wifi_authentication'] = "WPA2PSK";	}

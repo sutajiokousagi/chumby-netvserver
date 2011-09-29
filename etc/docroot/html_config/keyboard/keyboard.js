@@ -43,8 +43,8 @@ function keyboard_init()
 	
 	keyboard_currentX = 0;
 	keyboard_currentY = -1;
-	keyboard_wrapXMode = 0;
-	keyboard_wrapYMode = 2;
+	keyboard_wrapXMode = 1;			//wrap around
+	keyboard_wrapYMode = 2;			//follow through
 	keyboard_clearHighlight();
 	keyboard_setLayout(0);
 }
@@ -167,6 +167,18 @@ function keyboard_getLayout()
 	return 0;
 }
 
+function keyboard_toggle_special()
+{
+	if (keyboard_getLayout() != 2)		keyboard_setLayout(2);
+	else								keyboard_setLayout(0);
+}
+
+function keyboard_toggle_shift()
+{
+	if (keyboard_getLayout() == 0) 		keyboard_setLayout(1);
+	else								keyboard_setLayout(0);
+}
+
 // ------------------------------
 
 function keyboard_getKeyValue(x,y)
@@ -200,15 +212,9 @@ function keyboard_applyCurrentKey(elementID)
 		case "space":			currentValue += " ";												break;
 		case "backspace":		currentValue = currentValue.substring(0, currentValue.length-1);	break;
 		case "back":
-		case "next":
-		case "special":
-			if (keyboard_getLayout() != 2)		keyboard_setLayout(2);
-			else								keyboard_setLayout(0);
-			break;
-		case "shift":
-			if (keyboard_getLayout() == 0) 		keyboard_setLayout(1);
-			else								keyboard_setLayout(0);
-			break;
+		case "next":			break;
+		case "special":			keyboard_toggle_special();											break;
+		case "shift":			keyboard_toggle_shift();											break;
 		default:				currentValue += currentKeyValue;									break;
 	}
 	$("#"+elementID).val(currentValue);

@@ -51,12 +51,9 @@ function wifidetails_setItemValue(itemName, newValue)
 }
 
 function wifidetails_setSecurity(securityName)
-{
-	$("#wifi_security_none").removeAttr("checked");
-	$("#wifi_security_wep").removeAttr("checked");
-	$("#wifi_security_wpa").removeAttr("checked");
-			
+{		
 	securityName = securityName.toUpperCase();
+
 	if (securityName == null || securityName == "NONE" || securityName == "OPEN" || securityName == "")
 		$("#wifi_security_none_wrapper").click();
 	else if (securityName == "WEP" || securityName == "WEPAUTO")
@@ -120,6 +117,15 @@ function wifidetails_setSelectedSSID(newSSID)
 
 function wifidetails_onRemoteControl(vButtonName)
 {
+	if (vButtonName == "cpanel") {
+		keyboard_toggle_special();
+		return;
+	}
+	if (vButtonName == "widget") {
+		keyboard_toggle_shift();
+		return;
+	}
+	
 	var newY = wifidetails_selectedIndex;
 	if (newY == 0)
 	{
@@ -187,10 +193,7 @@ function wifidetails_onRemoteControl(vButtonName)
 			$('.input_focus_error').removeClass('input_focus_error');
 			selectedSSID = $("#wifi_ssid").val();
 			var password = $("#wifi_password").val();
-			var security = "";
-			if ($("input:radio[name=wifi_security_radio]:checked") != null)
-				if ($("input:radio[name=wifi_security_radio]:checked").val() != null)
-					security = $("input:radio[name=wifi_security_radio]:checked").val().toUpperCase();
+			var security = $(":checked").val();
 			
 			//Validate input fields
 			if (selectedSSID == "")

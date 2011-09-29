@@ -158,7 +158,8 @@ function onRadioFieldClick()
 {
 	$('.radio_wrapper_selected').removeClass('radio_wrapper_selected');
 	$(this).addClass('radio_wrapper_selected');
-	$('.radio', this).attr('checked', true);
+	$(':radio').attr('checked', false);
+	$(this).children(':radio').attr('checked', true);
 }
 
 function onInputFieldClick()
