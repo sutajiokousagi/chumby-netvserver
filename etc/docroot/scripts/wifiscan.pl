@@ -24,7 +24,7 @@ foreach (@myLines)
 		if ($currNum > 0)
 		{
 			cleanUpCurrentWifi();
-			printOneLine($essid, $quality, $sigLvl, $channel, $mode, $encryption, $auth);
+			printOneLine($essid, $quality, $sigLvl, $channel, $mode, $encryption, $auth, $address);
 			varInit();
 		}
 		$currNum++;
@@ -32,7 +32,11 @@ foreach (@myLines)
 
     $cellArr[$currNum] = $cellArr[$currNum]."$_"."\n";
 
-	if($_ =~ "Channel:")
+	if($_ =~ "Address:")
+    {
+		handleAddress($_);
+    }
+	elsif($_ =~ "Channel:")
     {
 		handleChannel($_);
     }
@@ -75,7 +79,7 @@ if ($currNum > 0)
 {
 	#last one
 	cleanUpCurrentWifi();
-    printOneLine($essid, $quality, $sigLvl, $channel, $mode, $encryption, $auth);
+    printOneLine($essid, $quality, $sigLvl, $channel, $mode, $encryption, $auth, $address);
 }
 else
 {
@@ -90,7 +94,7 @@ sub printOneLine()
 {
 	$_[0] =~ s/&/&amp;/g;	$_[0] =~ s/\</&lt;/g;	$_[0] =~ s/\>/&gt;/g;	$_[0] =~ s/\"/&quot;/g;
 	#$_[0] =~ s/\'/&apos;/g;
-    printf("<wifi><ssid>%s</ssid><qty>%s</qty><lvl>%s</lvl><ch>%s</ch><mode>%s</mode><encryption>%s</encryption><auth>%s</auth></wifi>\n",$_[0], $_[1], $_[2], $_[3], $_[4], $_[5], $_[6]);
+    printf("<wifi><ssid>%s</ssid><qty>%s</qty><lvl>%s</lvl><ch>%s</ch><mode>%s</mode><encryption>%s</encryption><auth>%s</auth><address>%s</address></wifi>\n",$_[0], $_[1], $_[2], $_[3], $_[4], $_[5], $_[6], $_[7] );
 }
 
 sub varInit()
@@ -105,6 +109,7 @@ sub varInit()
 	$cipher = "";
 	$mode = "";
 	$channel = "";
+	$address = "";
 }
 
 sub cleanUpCurrentWifi ()
@@ -193,4 +198,10 @@ sub handleMode ()
 sub handleChannel ()
 {
     $channel = (split(":", $_[0]))[1];
+}
+
+sub handleAddress ()
+{
+	#Eg.: Address: 00:11:22:33:44:55
+    $address = (split(": ", $_[0]))[1];
 }

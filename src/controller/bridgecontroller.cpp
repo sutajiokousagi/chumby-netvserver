@@ -1142,8 +1142,8 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
 
         bool isHex = IsHexString(key);
         if (isHex && (key.length()==10 || key.length()==26))   encoding = "hex";        //this is a good condition
-        else if (key.length()==5 || key.length()==13)          encoding = "hex";        //trying our luck here
-        else                                                   encoding = "ascii";
+        else if (key.length()==5 || key.length()==13)          encoding = "hex";        //NetworkManager will convert each character to ascii-code in hex directly
+        else                                                   encoding = "ascii";      //NetworkManager will md5 this & cut first 26 characters
     }
     else
     {
