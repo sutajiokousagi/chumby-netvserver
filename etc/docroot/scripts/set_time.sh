@@ -12,7 +12,8 @@ timezone=$2
 # Set timezone (non-volatile)
 if [ -e /usr/share/zoneinfo/$2 ];
 then
-	cp /usr/share/zoneinfo/$2 /psp/localtime
+	cp -f /usr/share/zoneinfo/$2 /psp/localtime
+	sync
 fi
 
 # Set time (volatile)
