@@ -1182,6 +1182,9 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
         qDebug("%s, cannot write network config file %s", TAG, qPrintable(filename) );
         return false;
     }
+
+    //Make sure the file is written to disk
+    Sync();
     return true;
 }
 

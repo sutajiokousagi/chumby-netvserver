@@ -85,6 +85,11 @@ QByteArray BridgeController::Execute(const QString &fullPath, QStringList args)
 // File Utilities
 //-----------------------------------------------------------------------------------------------------------
 
+void BridgeController::Sync(void)
+{
+    this->Execute("/bin/sync");
+}
+
 bool BridgeController::FileExists(const QString &fullPath)
 {
     QFile file(fullPath);
@@ -130,6 +135,9 @@ bool BridgeController::SetFileContents(const QString &fullPath, QByteArray data)
         return false;
     }
     file.close();
+
+    //Make sure the file is written to disk
+    Sync();
     return true;
 }
 

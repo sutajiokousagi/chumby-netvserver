@@ -80,6 +80,7 @@ private:
     QByteArray Execute(const QString &fullPath, QStringList args);
 
     /** File Utilities */
+    void Sync(void);
     bool FileExists(const QString &fullPath);
     bool FileExecutable(const QString &fullPath);
     qint64  GetFileSize(const QString &fullPath);
