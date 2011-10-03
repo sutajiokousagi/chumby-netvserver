@@ -181,6 +181,10 @@ function onRadioFieldClick()
 	$(this).addClass('radio_wrapper_selected');
 	$(':radio').attr('checked', false);
 	$(this).children(':radio').attr('checked', true);
+	
+	var security = $(":checked").val();
+	if (security != null && security == "WEP")					wifidetails_showWEPWarning(true);
+	else														wifidetails_showWEPWarning(false);
 }
 
 function onInputFieldClick()

@@ -112,6 +112,12 @@ function wifidetails_setSelectedSSID(newSSID)
 	wifidetails_showSecurity(false);
 }
 
+function wifidetails_showWEPWarning(isShow)
+{
+	if (isShow == true)		$("#div_wifiListDetailsMessage").show();
+	else					$("#div_wifiListDetailsMessage").hide();
+}
+
 //-----------------------------------------------------------
 
 function wifidetails_onRemoteControl(vButtonName)
