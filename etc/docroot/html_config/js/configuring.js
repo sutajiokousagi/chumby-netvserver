@@ -59,6 +59,16 @@ function configuring_onActivationTimer()
 		mNetConfig.Hello();
 }
 
+function configuring_onNetworkManagerState(vEventName)
+{
+	//not performing activation, don't care
+	if (activationState == '')
+		return;
+		
+	if (activationState == "waiting" && vEventName == "connected")
+		mNetConfig.Hello();
+}
+
 function configuring_helloCallback(helloData)
 {
 	//Not performing activation
@@ -94,7 +104,7 @@ function configuring_helloCallback(helloData)
 		return;
 	}
 	
-	//Got a valid IP
+	//Got a valid IP (Note: We should check that we really have Internet here)
 	if (activationState == "waiting")
 	{
 		if (internet != 'true' && internet != true)

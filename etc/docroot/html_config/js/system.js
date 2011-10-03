@@ -36,11 +36,12 @@ function fHDMIEvents( vEventName )
 // -------------------------------------------------------------------------------------------------
 function fNMStateChanged( vEventName )
 {
+	configuring_onNetworkManagerState(vEventName);
+	/*
 	//not performing activation, don't care
 	if (activationState == '')
 		return;
-	//$("#div_activationStatus").append("<br>" + vEventName);
-	
+
 	switch (vEventName)
 	{
 		case "unknown":			break;
@@ -49,6 +50,7 @@ function fNMStateChanged( vEventName )
 		case "disconnected":	break;
 		case "connected":		break;
 	}
+	*/
 }
 
 function fNMDeviceAdded(  )

@@ -1,4 +1,5 @@
 var mNetConfig;
+var main_x;
 var main_y;
 var leftMargin = 20;
 
@@ -6,14 +7,18 @@ function onLoad()
 {
 	onResize();
 
-	main_y = $("#div_center").offset().top;
-	main_hideMainPanel(100);
+	//Save initial panel position
+	main_y = $("#div_center").css('top').split('px')[0];
+	main_x = $("#div_center").css('left').split('px')[0];
+	$("#div_loadingMain").fadeIn(0);
+	
+	//Hide everything immediately, slide in later
+	main_hideMainPanel();
 	
 	keyboard_init();
 	
 	//Init loading view
 	main_showState('loading', false);
-	//main_showState('wifidetails', false);
 	
 	mNetConfig = cNetConfig.fGetInstance();
 	mNetConfig.fInit();
@@ -47,7 +52,8 @@ function onLoadLater()
 	wifilist_init();
 	wifilist_startWifiScan();
 	
-	main_showMainPanel();
+	//Gracefully show the update panel
+	main_showMainPanel(1650);
 }
 
 function onResize()
@@ -68,12 +74,27 @@ function onResize()
 function main_showMainPanel(duration)
 {
 	$("#div_center").css('visibility', 'visible');
-	$("#div_center").animate({ top: main_y }, !duration ? 1600 : duration);
+	
+	if (!duration || duration == 0)		$("#div_center").css('left', main_x + 'px');
+	else								$("#div_center").animate({ left: main_x }, !duration ? 1600 : duration);
 }
 
 function main_hideMainPanel(duration)
 {
-	$("#div_center").animate({ top: main_y + $(window).height() }, !duration ? 1600 : duration);
+	if (!duration || duration == 0)		$("#div_center").css('left', $(window).width() + 'px');
+	else								$("#div_center").animate({ left: $(window).width() }, !duration ? 1600 : duration);
+}
+
+//-----------------------------------------------------------
+
+function GET( paramName )
+{
+	paramName = paramName.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+	var regexS = "[\\?&]"+paramName+"=([^&#]*)";
+	var regex = new RegExp( regexS );
+	var results = regex.exec( window.location.href );
+	if( results == null )    	return "";
+	else					   	return results[1];
 }
 
 //-----------------------------------------------------------
