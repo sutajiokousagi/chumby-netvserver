@@ -1,4 +1,5 @@
 var mNetConfig;
+var main_x;
 var main_y;
 var leftMargin = 20;
 
@@ -6,11 +7,14 @@ function onLoad()
 {
 	onResize();
 
-	main_y = $("#div_center").offset().top;
-	main_hideMainPanel(100);
+	//Save initial panel position
+	main_y = $("#div_center").css('top').split('px')[0];
+	main_x = $("#div_center").css('left').split('px')[0];
+	$("#div_loadingMain").fadeIn(0);
 	
-	//keyboard_init();
-	
+	//Hide everything immediately, slide in later
+	main_hideMainPanel();
+		
 	//Init loading view
 	main_showState('loading', false);
 		
@@ -18,6 +22,26 @@ function onLoad()
 	mNetConfig.fInit();
 
 	setTimeout("onLoadLater()", 200);
+	
+	//support native keyboard events
+	$(document).keydown(function(e)
+	{
+		if (e.keyCode == 37)		{		main_onRemoteControl('left');		return false;		}
+		else if (e.keyCode == 39)	{		main_onRemoteControl('right');		return false;		}
+		else if (e.keyCode == 38)	{		main_onRemoteControl('up');			return false;		}
+		else if (e.keyCode == 40)	{		main_onRemoteControl('down');		return false;		}
+		else if (e.keyCode == 13)	{		main_onRemoteControl('center');		return false;		}
+		else if (e.keyCode == 33)	{		main_onRemoteControl('cpanel');		return false;		}
+		else if (e.keyCode == 34)	{		main_onRemoteControl('widget');		return false;		}
+		return true;
+	});
+	
+	//support native mouse events
+	$("#wifi_security_none_wrapper").click(onRadioFieldClick);
+	$("#wifi_security_wep_wrapper").click(onRadioFieldClick);
+	$("#wifi_security_wpa_wrapper").click(onRadioFieldClick);
+	$("#wifi_ssid_wrapper").click(onInputFieldClick);
+	$("#wifi_password_wrapper").click(onInputFieldClick);
 }
 
 function onLoadLater()
@@ -27,7 +51,8 @@ function onLoadLater()
 	//wifilist_startWifiScan();
 	wifilist_init();
 	
-	main_showMainPanel();
+	//Gracefully show the panel
+	main_showMainPanel(1650);
 }
 
 function onResize()
@@ -48,12 +73,27 @@ function onResize()
 function main_showMainPanel(duration)
 {
 	$("#div_center").css('visibility', 'visible');
-	$("#div_center").animate({ top: main_y }, !duration ? 1600 : duration);
+	
+	if (!duration || duration == 0)		$("#div_center").css('left', main_x + 'px');
+	else								$("#div_center").animate({ left: main_x }, !duration ? 1600 : duration);
 }
 
 function main_hideMainPanel(duration)
 {
-	$("#div_center").animate({ top: main_y + $(window).height() }, !duration ? 1600 : duration);
+	if (!duration || duration == 0)		$("#div_center").css('left', $(window).width() + 'px');
+	else								$("#div_center").animate({ left: $(window).width() }, !duration ? 1600 : duration);
+}
+
+//-----------------------------------------------------------
+
+function GET( paramName )
+{
+	paramName = paramName.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+	var regexS = "[\\?&]"+paramName+"=([^&#]*)";
+	var regex = new RegExp( regexS );
+	var results = regex.exec( window.location.href );
+	if( results == null )    	return "";
+	else					   	return results[1];
 }
 
 //-----------------------------------------------------------
@@ -134,4 +174,26 @@ function main_onRemoteControl(vButtonName)
 	else if ( $("#div_configuringMain").is(":visible") )		configuring_onRemoteControl(vButtonName);
 	//else if ( $("#div_accountMain").is(":visible") )			account_onRemoteControl(vButtonName);
 	*/
+}
+
+function onRadioFieldClick()
+{
+	$('.radio_wrapper_selected').removeClass('radio_wrapper_selected');
+	$(this).addClass('radio_wrapper_selected');
+	$(':radio').attr('checked', false);
+	$(this).children(':radio').attr('checked', true);
+	
+	var security = $(":checked").val();
+	if (security != null && security == "WEP")					wifidetails_showWEPWarning(true);
+	else														wifidetails_showWEPWarning(false);
+}
+
+function onInputFieldClick()
+{
+	$(':input').blur();
+	$(':input').removeClass('input_focus');
+	$(this).children(':input').focus();
+	$(this).children(':input').addClass('input_focus');
+	$('.input_wrapper_focus').removeClass('input_wrapper_focus');
+	$(this).addClass('input_wrapper_focus');
 }

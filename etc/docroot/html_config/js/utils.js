@@ -10,6 +10,7 @@ function fDbg2(v)
 // -------------------------------------------------------------------------------------------------
 //  string utility
 // -------------------------------------------------------------------------------------------------
+
 function XmlEscape(s)
 {
 	var el = document.createElement("div");
@@ -48,6 +49,73 @@ function HTMLEncode(str)
     }
    }
   return aRet.join('');    
+}
+
+//------------------------------------------------------------------------
+// Small non-UI utilities
+//------------------------------------------------------------------------
+
+function isArray(o)
+{
+    return Object.prototype.toString.call(o) === '[object Array]';
+}
+
+function getObjectType(o)
+{
+    return Object.prototype.toString.call(o);
+}
+
+function myLog(text)
+{
+    console.log(text)
+}
+
+function stringEndsWith(text, searchText)
+{
+    return (text.match(searchText+"$")==searchText);
+}
+
+function stringStartsWith(text, searchText)
+{
+    return (text.indexOf(searchText) === 0) ? true : false;
+}
+
+function stringContains(text, searchText)
+{
+    return (text.indexOf(searchText) != -1);
+}
+
+function truncate(_value)
+{
+    if (_value<0)   return Math.ceil(_value);
+    else            return Math.floor(_value);
+}
+
+function isNumber(n)
+{
+    if (n == null)
+        return false;
+    return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+function getSign(value)
+{
+    return value / Math.abs(value);
+}
+
+function trim(s)
+{
+    var l=0; var r=s.length -1;
+    while(l < s.length && s[l] == ' ')
+    {	l++;    }
+    while(r > l && s[r] == ' ')
+    {	r-=1;	}
+    return s.substring(l, r+1);
+}
+
+function trimNewLine(s)
+{
+    return s.replace(new RegExp("\\n", "g"), "").replace(new RegExp("\\r", "g"), "");
 }
 
 // -------------------------------------------------------------------------------------------------

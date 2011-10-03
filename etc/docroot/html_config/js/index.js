@@ -2,6 +2,7 @@ var mNetConfig;
 var main_x;
 var main_y;
 var leftMargin = 20;
+var isLocalhost = stringContains(document.location.href, "localhost");
 
 function onLoad()
 {
@@ -13,7 +14,8 @@ function onLoad()
 	$("#div_loadingMain").fadeIn(0);
 	
 	//Hide everything immediately, slide in later
-	main_hideMainPanel();
+	if (isLocalhost)
+		main_hideMainPanel();
 	
 	keyboard_init();
 	
@@ -52,7 +54,7 @@ function onLoadLater()
 	wifilist_init();
 	wifilist_startWifiScan();
 	
-	//Gracefully show the update panel
+	//Gracefully show the panel
 	main_showMainPanel(1650);
 }
 
