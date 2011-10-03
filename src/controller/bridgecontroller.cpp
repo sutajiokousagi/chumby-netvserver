@@ -554,7 +554,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             return;
         }
 
-        QByteArray buffer = this->Execute("reboot");
+        QByteArray buffer = this->Execute("/sbin/reboot");
         response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
         buffer = QByteArray();
     }
