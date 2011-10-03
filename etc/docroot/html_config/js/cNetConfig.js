@@ -61,7 +61,7 @@ cNetConfig.prototype.WifiScan = function (useForce)
 
 cNetConfig.prototype.Hello = function ()
 {
-	fDbg2("Scanning for wifi...");
+	fDbg2("Waiting for handshake response...");
 	xmlhttpPost("", "post", { 'cmd' : 'Hello' }, cNetConfig.instance.rawHelloCallback );
 }
 
