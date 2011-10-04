@@ -8,6 +8,7 @@ function fAndroidEvents( vEventName, vEventData )
 	switch (vEventName)
 	{
 		case "changeview":			android_changeView(vEventData);			break;
+		case "testconsole":			android_testConsole(vEventData);		break;
 	}
 }
 
@@ -21,4 +22,11 @@ function android_changeView(xmlDataString)
 	{
 		main_showState(xmlDataString, true);
 	}
+}
+
+function android_testConsole(console_string)
+{
+	htmlString = $("#div_androidTestMain_info").html();
+	htmlString += console_string + "<br/>";
+	$("#div_androidTestMain_info").html( htmlString );
 }

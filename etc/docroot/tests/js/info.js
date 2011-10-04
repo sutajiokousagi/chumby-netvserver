@@ -27,6 +27,5 @@ function helloCallback(helloData)
 	htmlString += "MAC: <font color='6598EB'>" + helloData['mac'] + "</font><br/><br/>";
 	htmlString += "Firmware: " + helloData['fwver'] + "<br/><br/>";
 	htmlString += "GUID: " + helloData['guid'] + "<br/><br/>";
-	htmlString += "IP: " + helloData['ip'] + "<br/><br/>";
 	$("#div_androidTestInfo_info").html(htmlString);
 }
