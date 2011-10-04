@@ -22,7 +22,9 @@ then
 fi
 
 # Bring up network interface
-ifconfig $(ls -1 /sys/class/net/ | grep wlan | head -1) up
+INTIF=$(ls -1 /sys/class/net/ | grep wlan | head -1)
+INTIF=$(echo ${INTIF//mon./})
+ifconfig ${INTIF} up
 
 # Start NetworkManager
 /etc/init.d/NetworkManager restart

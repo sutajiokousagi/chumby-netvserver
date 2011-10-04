@@ -23,6 +23,12 @@ then
 	exit
 fi
 
+# MAC address (last 5 characters)
+INTIF=$(ls -1 /sys/class/net/ | grep wlan | head -1)
+INTIF=$(echo ${INTIF//mon./})
+MAC=$(ifconfig ${INTIF} | grep ${INTIF} | tr -s ' ' | cut -d ' ' -f5)
+SSID=$(echo "${MAC}" | cut -c 12-17)
+
 # Stop previous AP
 echo "Stopping previous AP"
 if [ ! -z "$(pidof hostapd)" ];
@@ -54,7 +60,7 @@ CHANNEL=$(echo $[($RANDOM % 10) + 1])
 # Run hostapd, to set up the access point
 cp -f ${CONFPATH} /tmp/hostapd.conf
 echo "interface=${INTIF}" >> /tmp/hostapd.conf
-echo "ssid=NeTV" >> /tmp/hostapd.conf
+echo "ssid=NeTV${SSID}" >> /tmp/hostapd.conf
 echo "channel=${CHANNEL}" >> /tmp/hostapd.conf
 hostapd -B /tmp/hostapd.conf
 
