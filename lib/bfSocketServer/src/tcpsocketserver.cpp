@@ -91,7 +91,8 @@ void TcpSocketServer::read()
         QByteArray hardwareType = request->getParameter("value");
         if (hardwareType == "")
             hardwareType = request->getParameter("type");
-        connectionsType.insert(socket, hardwareType);
+        if (hardwareType != "")
+            connectionsType.insert(socket, hardwareType);
     }
 
     //Post processing by higher level classes

@@ -215,6 +215,30 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No client running</value></data></xml>", true);
     }
 
+    else if (cmdString == "ANDROID" || cmdString == "IOS")
+    {
+        //Allow user to use both normal POST style API as well as XML style passing
+        if (xmlparameters.size() <= 0)
+        {
+            xmlparameters.insert("eventname", XMLEscape(request.getParameter("eventname")).toLatin1() );
+            xmlparameters.insert("eventdata", XMLEscape(request.getParameter("eventdata")).toLatin1() );
+        }
+
+        QByteArray dataXML = "";
+        QHashIterator<QByteArray, QByteArray> m(xmlparameters);
+        while (m.hasNext()) {
+            m.next();
+            dataXML += "<" + m.key() + ">" + m.value() + "</" + m.key() + ">";
+        }
+
+        //Forward to browser
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXML + "</data></xml>", "browser");
+
+        //Reply to JavaScriptCore/ControlPanel
+        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", true);
+        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No client running</value></data></xml>", true);
+    }
+
     //-----------
 
     else if (cmdString == "CONTROLPANEL")
@@ -640,7 +664,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    else if (cmdString == "ANDROID")
+    else if (cmdString == "ANDROID" || cmdString == "IOS")
     {
         QByteArray eventName = request.getParameter("eventname").trimmed();
         QByteArray eventData = request.getParameter("eventdata").trimmed();     //already URI encoded
