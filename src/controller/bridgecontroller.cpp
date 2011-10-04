@@ -356,7 +356,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
         //Allow time for HTTP response to complete before we bring down the network
         if (!isTest)
-            StopAPwithDelay(1000);
+            StopAPwithDelay(500);
     }
 
     else if (cmdString == "SETACCOUNT")
@@ -383,6 +383,24 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         //Reply to JavaScriptCore/ControlPanel
         if (!fileOK)                response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
         else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+    }
+
+    //-----------
+
+    else if (cmdString == "STOPAP")
+    {
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+        StopAPwithDelay();
+    }
+    else if (cmdString == "STARTAP")
+    {
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+        StartAPwithDelay();
+    }
+    else if (cmdString == "STARTAPFACTORY")
+    {
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+        StartAPFactorywithDelay();
     }
 
     //-----------
@@ -766,7 +784,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
         //Allow time for socket response to complete before we bring down the network
         if (!isTest)
-            StopAPwithDelay(1000);
+            StopAPwithDelay(500);
     }
 
     else if (cmdString == "SETACCOUNT")
@@ -903,6 +921,30 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.setParameter(STRING_VALUE, md5sum);
         response.setParameter("path", dataString);
         response.write();
+    }
+
+    //-----------
+
+    else if (cmdString == "STOPAP")
+    {
+        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setCommand(cmdString);
+        response.write();
+        StopAPwithDelay();
+    }
+    else if (cmdString == "STARTAP")
+    {
+        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setCommand(cmdString);
+        response.write();
+        StartAPwithDelay();
+    }
+    else if (cmdString == "STARTAPFACTORY")
+    {
+        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setCommand(cmdString);
+        response.write();
+        StartAPFactorywithDelay();
     }
 
     //-----------
@@ -1188,12 +1230,17 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
     return true;
 }
 
-void BridgeController::StartAPwithDelay(int msec /* = 1000 */)
+void BridgeController::StartAPwithDelay(int msec /* = 500 */)
 {
     QTimer::singleShot(msec, this, SLOT(slot_StartAP()));
 }
 
-void BridgeController::StopAPwithDelay(int msec /* = 1000 */)
+void BridgeController::StartAPFactorywithDelay(int msec /* = 500 */)
+{
+    QTimer::singleShot(msec, this, SLOT(slot_StartAP_Factory()));
+}
+
+void BridgeController::StopAPwithDelay(int msec /* = 500 */)
 {
     QTimer::singleShot(msec, this, SLOT(slot_StopAP()));
 }

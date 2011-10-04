@@ -51,3 +51,8 @@ void BridgeController::slot_StartAP()
 {
     this->Execute(docroot + "/scripts/start_ap.sh");
 }
+
+void BridgeController::slot_StartAP_Factory()
+{
+    this->Execute(docroot + "/scripts/start_ap_factory.sh");
+}

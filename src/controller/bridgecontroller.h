@@ -47,6 +47,7 @@ public slots:
     // For delayed AccessPoint mode
     void slot_StopAP();
     void slot_StartAP();
+    void slot_StartAP_Factory();
 
 signals:
 
@@ -64,8 +65,9 @@ private:
     /** High level helper functions */
     bool IsAuthorizedCaller(QByteArray headerValue);
     bool SetNetworkConfig(QHash<QString, QString> parameters);
-    void StartAPwithDelay(int msec = 1000);
-    void StopAPwithDelay(int msec = 1000);
+    void StartAPwithDelay(int msec = 500);
+    void StartAPFactorywithDelay(int msec = 500);
+    void StopAPwithDelay(int msec = 500);
 
     /** Parameters */
     QSettings * parameters;
