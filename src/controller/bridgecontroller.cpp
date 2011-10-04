@@ -232,7 +232,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         }
 
         //Forward to browser
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXML + "</data></xml>", "browser");
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXML + "</data></xml>", "netvbrowser");
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", true);
