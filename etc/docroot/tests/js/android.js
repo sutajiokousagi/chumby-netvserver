@@ -21,6 +21,7 @@ function android_changeView(xmlDataString)
 	else
 	{
 		main_showState(xmlDataString, true);
+		$("#div_androidTestMain_info").html("");
 	}
 }
 
