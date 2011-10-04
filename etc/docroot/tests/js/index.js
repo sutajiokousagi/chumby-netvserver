@@ -9,7 +9,7 @@ function onLoad()
 	
 	//Init first view
 	irremote_init(0);
-	main_showState('androidtest', false);
+	main_showState('androidwait', false);
 
 	setTimeout("onLoadLater()", 100);
 }
@@ -17,6 +17,8 @@ function onLoad()
 function onLoadLater()
 {
 	main_showMainPanel();
+	
+	Hello();
 }
 
 //-----------------------------------------------------------
@@ -37,6 +39,7 @@ function main_hideMainPanel(duration)
 function main_currentState()
 {
 	if ( $("#div_irRemoteMain").is(":visible") )				return "irremote";
+	else if ( $("#div_androidTestInfo").is(":visible") )		return "androidwait";
 	else if ( $("#div_androidTestMain").is(":visible") )		return "androidtest";
 	else if ( $("#div_resetBtnMain").is(":visible") )			return "resetbtn";
 	else if ( $("#div_allDoneMain").is(":visible") )			return "done";
@@ -48,13 +51,23 @@ function main_showState(vStateName, animated)
 	if (vStateName == "irremote")
 	{
 		irremote_init(0);
+		$("#div_androidTestInfo").fadeOut(duration);
 		$("#div_androidTestMain").fadeOut(duration);
 		setTimeout("$('#div_irRemoteMain').fadeIn("+(duration+50)+");", duration);
 		$("#div_resetBtnMain").fadeOut(duration);
 		$("#div_allDoneMain").fadeOut(duration);
 	}
+	else if (vStateName == "androidwait")
+	{
+		setTimeout("$('#div_androidTestInfo').fadeIn("+(duration+50)+");", duration);
+		$("#div_androidTestMain").fadeOut(duration);
+		$("#div_irRemoteMain").fadeOut(duration);
+		$("#div_resetBtnMain").fadeOut(duration);
+		$("#div_allDoneMain").fadeOut(duration);
+	}
 	else if (vStateName == "androidtest")
 	{
+		$("#div_androidTestInfo").fadeOut(duration);
 		setTimeout("$('#div_androidTestMain').fadeIn("+(duration+50)+");", duration);
 		$("#div_irRemoteMain").fadeOut(duration);
 		$("#div_resetBtnMain").fadeOut(duration);
@@ -63,6 +76,7 @@ function main_showState(vStateName, animated)
 	else if (vStateName == "resetbtn")
 	{
 		resetbtn_init(0);
+		$("#div_androidTestInfo").fadeOut(duration);
 		$("#div_androidTestMain").fadeOut(duration);
 		$("#div_irRemoteMain").fadeOut(duration);
 		setTimeout("$('#div_resetBtnMain').fadeIn("+(duration+50)+");", duration);
@@ -70,6 +84,7 @@ function main_showState(vStateName, animated)
 	}
 	else if (vStateName == "done")
 	{
+		$("#div_androidTestInfo").fadeOut(duration);
 		$("#div_androidTestMain").fadeOut(duration);
 		$("#div_irRemoteMain").fadeOut(duration);
 		$("#div_resetBtnMain").fadeOut(duration);
@@ -77,6 +92,7 @@ function main_showState(vStateName, animated)
 	}
 	else
 	{
+		$("#div_androidTestInfo").fadeOut(duration);
 		$("#div_androidTestMain").fadeOut(duration);
 		$("#div_irRemoteMain").fadeOut(duration);
 		$("#div_resetBtnMain").fadeOut(duration);

@@ -12,7 +12,7 @@ function irremote_init(testIndex)
 		
 	buttonPressedArray['widget'] = false;
 		
-	fDbg2("Refresh IR Remote view");
+	fDbg("Refresh IR Remote view");
 	refreshIRRemote();
 	
 	if (irremote_testIndex == 0)

@@ -7,6 +7,7 @@
 <script type='text/javascript' src='js/utils.js'></script>
 <script type='text/javascript' src='js/index.js'></script>
 <script type='text/javascript' src='js/system.js'></script>
+<script type='text/javascript' src='js/info.js'></script>
 <script type='text/javascript' src='js/irremote.js'></script>
 <script type='text/javascript' src='js/resetbtn.js'></script>
 <script type='text/javascript' src='js/android.js'></script>
@@ -24,6 +25,22 @@
 					<div style="float: left; width: 80px; height: 48px; background-image: url('../../images/chumby_logo_48x48.png'); background-repeat: no-repeat; background-position:center"></div>
 					<div style="float: left; height: 48px; line-height:48px; font-size: 18px; font-weight:bold;">NeTV Factory Tests</div>
 				<div class="spacer">&nbsp;</div>
+			</div>
+			
+			<!-- -------------------- Info page, Wait for Android -------------------- -->
+			<div id="div_androidTestInfo">
+				<div class="div_title_wrapper">
+					<div class="div_title">Please start the Android app</div>
+				</div>
+				
+				<div id="div_androidTestInfo_info" style="text-align: center; margin-top: 90px;">
+					MAC: xx:xx:xx:xx:xx:xx
+					Firmware: xx
+					GUID: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+				</div>
+				<div style="text-align: center; margin-top: 20px; color: #6598EB">
+					Select the correct NeTV on<br/>Android app to start testing
+				</div>
 			</div>
 			
 			<!-- ----------------------- Android Automatic Test ---------------------- -->
@@ -60,7 +77,7 @@
 						</ul>
 					</div>
 				</div>
-							
+				
 				<div class="div_irRemoteMain_row">
 					<div class="navwrap">
 						<ul>
@@ -88,9 +105,9 @@
 						Plug in the <font color="6598EB"><b>IR Extender</b></font> & perform this test.<br>Remember to put your hand inside the shield box.
 					</div>
 				</div>
-								
+			
 			</div>
-						
+			
 			<!-- ----------------------- Reset Button Test ---------------------- -->
 			<div id="div_resetBtnMain">
 				<div class="div_title_wrapper">

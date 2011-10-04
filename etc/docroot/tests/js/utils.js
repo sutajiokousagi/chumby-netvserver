@@ -2,20 +2,9 @@
 // -------------------------------------------------------------------------------------------------
 //	override fDbg() function
 // -------------------------------------------------------------------------------------------------
+
 function fDbg(v)
 {
-	//$("#div_dbg").html($("#div_dbg").html() + "<br />" + v);
-	//document.getElementById("div_dbg").scrollTop = document.getElementById("div_dbg").scrollHeight;
-}
-function fDbg2(v)
-{
-	/*
-	if ($("#div_dbg").length > 0)
-	{
-		$("#div_dbg").html($("#div_dbg").html() + "<br />" + v);
-		document.getElementById("div_dbg").scrollTop = document.getElementById("div_dbg").scrollHeight;
-	}
-	*/
 	console.log("|~|" + v);
 }
 

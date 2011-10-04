@@ -8,7 +8,7 @@
 // -------------------------------------------------------------------------------------------------
 function fServerReset()
 {
-	fDbg2("fServerReset()");
+	fDbg("fServerReset()");
 	return "ignore";
 }
 
