@@ -220,15 +220,15 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         //Allow user to use both normal POST style API as well as XML style passing
         if (xmlparameters.size() <= 0)
         {
-            xmlparameters.insert("eventname", XMLEscape(request.getParameter("eventname")).toLatin1() );
-            xmlparameters.insert("eventdata", XMLEscape(request.getParameter("eventdata")).toLatin1() );
+            xmlparameters.insert("eventname", request.getParameter("eventname") );
+            xmlparameters.insert("eventdata", request.getParameter("eventdata") );
         }
 
         QByteArray dataXML = "";
         QHashIterator<QByteArray, QByteArray> m(xmlparameters);
         while (m.hasNext()) {
             m.next();
-            dataXML += "<" + m.key() + ">" + m.value() + "</" + m.key() + ">";
+            dataXML += "<" + m.key() + ">" + XMLEscape(QString(m.value())).toLatin1() + "</" + m.key() + ">";
         }
 
         //Forward to browser
