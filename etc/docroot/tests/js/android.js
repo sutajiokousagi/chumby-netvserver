@@ -26,6 +26,9 @@ function android_changeView(xmlDataString)
 
 function android_testConsole(console_string)
 {
+	//Temporary
+	console_string = console_string.replace("+", " ");
+	
 	htmlString = $("#div_androidTestMain_info").html();
 	htmlString += console_string + "<br/>";
 	$("#div_androidTestMain_info").html( htmlString );
