@@ -119,5 +119,7 @@ function android_timeout()
 	if (androidClearTimeout == true)
 		return;
 	fDbg2("Android html_config timeout...");
-	location.href="http://localhost/";
+	
+	//Comment out for now. clearTimeout is working as documented.
+	//location.href="http://localhost/";
 }
