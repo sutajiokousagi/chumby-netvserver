@@ -43,7 +43,8 @@ fi
 
 # MAC & IP address
 INTIF=$(ls -1 /sys/class/net/ | grep wlan | head -1)
-MAC=$(ifconfig | grep ${INTIF} | tr -s ' ' | cut -d ' ' -f5)
+INTIF=$(echo ${INTIF//mon./})
+MAC=$(ifconfig ${INTIF} | grep ${INTIF} | tr -s ' ' | cut -d ' ' -f5)
 IP=$(/sbin/ifconfig ${INTIF} | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 
 # Public Internet IP address
