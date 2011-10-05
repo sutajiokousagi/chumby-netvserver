@@ -217,22 +217,23 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "ANDROID" || cmdString == "IOS")
     {
+        QByteArray eventName, eventData;
+
         //Allow user to use both normal POST style API as well as XML style passing
         if (xmlparameters.size() <= 0)
         {
-            xmlparameters.insert("eventname", request.getParameter("eventname") );
-            xmlparameters.insert("eventdata", request.getParameter("eventdata") );
+            eventName = request.getParameter("eventname").trimmed();
+            eventData = request.getParameter("eventdata").trimmed();
         }
-
-        QByteArray dataXML = "";
-        QHashIterator<QByteArray, QByteArray> m(xmlparameters);
-        while (m.hasNext()) {
-            m.next();
-            dataXML += "<" + m.key() + ">" + XMLEscape(QString(m.value())).toLatin1() + "</" + m.key() + ">";
+        else
+        {
+            eventName = xmlparameters.value("eventname", "").trimmed();
+            eventData = xmlparameters.value("eventdata", "").trimmed();
         }
+        QByteArray javaScriptString = "fAndroidEvents(\"" + eventName + "\",\"" + eventData + "\");";
 
-        //Forward to browser
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data>" + dataXML + "</data></xml>", "netvbrowser");
+        //Forward to browser only
+        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>JavaScript</cmd><data><value>") + javaScriptString + "</value></data></xml>", "netvbrowser");
 
         //Reply to JavaScriptCore/ControlPanel
         if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", true);
