@@ -23,7 +23,7 @@ function initForm(form_id, element_name, init_txt)
 function sendSingleValueCommand(cmd, dataString)
 {
 	//Which address to submit to
-	var web_address = "./bridge";
+	var web_address = "../bridge";
 	if (ipaddress && ipaddress != "")
 		web_address = "http://" + ipaddress + "/bridge";
 
@@ -54,7 +54,7 @@ function sendSingleValueCommand(cmd, dataString)
 function sendMultiValueCommand(cmd, dataArray)
 {
 	//Which address to submit to
-	var web_address = "./bridge";
+	var web_address = "../bridge";
 	if (ipaddress && ipaddress != "")
 		web_address = "http://" + ipaddress + "/bridge";
 		
@@ -99,6 +99,47 @@ function getCheckedValue(radioObj)
 			return radioObj[i].value;
 	
 	return "";
+}
+
+// -------------------------------------------------------------------------------------------------
+//  String utility
+// -------------------------------------------------------------------------------------------------
+
+function XmlEscape(s)
+{
+	var el = document.createElement("div");
+	el.innerText = el.textContent = s;
+	s = el.innerHTML;
+	delete el;
+	return s;
+}
+function XmlUnescape(s)
+{
+	/*
+	s = s.replace("&amp;", "&");
+	s = s.replace("&quot;", "\"");
+	s = s.replace("&apos;", "'");
+	s = s.replace("&lt;", "<");
+	s = s.replace("&gt;", ">");
+	*/
+	var el = document.createElement("div");
+	el.innerHTML = s;
+	s = el.innerText;
+	delete el;
+	return s;	
+}
+function HTMLEncode(str)
+{
+	var i = str.length;
+	var aRet = [];
+
+	while (i--)
+	{
+		var iC = str[i].charCodeAt();
+		if (iC < 65 || iC > 127 || (iC>90 && iC<97))		aRet[i] = '&#'+iC+';';
+		else												aRet[i] = str[i];
+	}
+	return aRet.join('');    
 }
 
 //----------------------------------------------------------------
@@ -501,5 +542,22 @@ function NeCommand()
 	else
 	{
 		sendSingleValueCommand('NeCommand', dataString);
+	}
+}
+
+function Android()
+{
+	var dataString1 = document.form_Android.inputField.value;
+	var dataString2 = document.form_Android.inputField2.value;
+	var dataArray = { eventname:dataString1, eventdata:dataString2 };
+
+	if (dataString1 == '' || dataString2 == '') 
+	{
+		alert('Input field(s) are required');
+		console.log('Input field(s) are empty');
+	}
+	else
+	{
+		sendMultiValueCommand('Android', dataArray);
 	}
 }

@@ -1,7 +1,7 @@
 <html>
 <head>
 <title>NeTVServer HTTP Interface Test</title>
-<script type='text/javascript' src='./html_test/test.js'></script>
+<script type='text/javascript' src='test.js'></script>
 <style>
 	body {
 		font-family: Verdana;
@@ -59,9 +59,7 @@
 	}
 
 	.td_button { 
-		padding: 5px;
-		border: 0px;
-		color: #444444;
+		width: 64px
 	}
 
 	input:hover {
@@ -115,8 +113,8 @@
 			<td>
 				(no input required)
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="Hello()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="Hello()">
 			</td>
 		</tr>
 		</form>
@@ -133,8 +131,8 @@
 			<td>
 				(no input required)
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="WifiScan()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="WifiScan()">
 			</td>
 		</tr>
 		</form>
@@ -153,8 +151,8 @@
 				<input type="radio" name="inputField" value="restart">restart<br/>
 				<input type="radio" name="inputField" value="stop">stop
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="EnableSSH()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="EnableSSH()">
 			</td>
 		</tr>
 		</form>
@@ -171,8 +169,8 @@
 			<td>
 				<input type="text" size="256" name="inputField" value="cpanel" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="RemoteControl()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="RemoteControl()">
 			</td>
 		</tr>
 		</form>
@@ -189,8 +187,8 @@
 			<td>
 				<input type="text" size="256" name="inputField" value="/psp/network_config" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="FileExists()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="FileExists()">
 			</td>
 		</tr>
 		</form>
@@ -207,8 +205,8 @@
 			<td>
 				<input type="text" size="256" name="inputField" value="timezone" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="GetParam()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="GetParam()">
 			</td>
 		</tr>
 		</form>
@@ -226,8 +224,8 @@
 				<input type="text" size="256" name="inputField" value="username" > (key)<br/>
 				<input type="text" size="256" name="inputField2" value="torin" > (value)
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="SetParam()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="SetParam()">
 			</td>
 		</tr>
 		</form>
@@ -248,8 +246,8 @@
 				<input type="text" size="256" name="inputField4" value="" > (type)<br/>
 				<input type="text" size="256" name="inputField5" value="" > (level)
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="TickerEvent()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="TickerEvent()">
 			</td>
 		</tr>
 		</form>
@@ -271,8 +269,8 @@
 			<td>
 				<input type="text" size="256" name="inputField" value="http://localhost" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="SetUrl()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="SetUrl()">
 			</td>
 		</tr>
 		</form>
@@ -289,8 +287,8 @@
 			<td>
 				<input type="text" size="256" name="inputField" value="http://xml.chumby.com/xml/chumbies/?id=4FCD4051-9867-006A-9DC1-443BD3477E8E&nocache=4682&dcid_skin=0000" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="GetXML()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="GetXML()">
 			</td>
 		</tr>
 		</form>
@@ -308,8 +306,8 @@
 				<input type="text" size="256" name="inputField" value="http://s3movies.chumby.com/cdn/xmlthumbnail/86976CD4-C50E-11DF-91A6-001B24E044BE" > (url)<br/>
 				<input type="text" size="128" name="inputField2" value="param1=value1&param2=value2" > (post)
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="GetUrl()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="GetUrl()">
 			</td>
 		</tr>
 		</form>
@@ -326,8 +324,8 @@
 			<td>
 				<input type="text" size="256" name="inputField" value="http://images.chumby.com/images/en_us/cms/chumby8_200x150.jpg" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="GetJPG()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="GetJPG()">
 			</td>
 		</tr>
 		</form>
@@ -346,8 +344,8 @@
 			<td>
 				<input type="text" size="256" name="inputField" value="http://s3movies.chumby.com/cdn/xmlmovie/F3A86472-05F6-11DF-A1F8-001B24E044BE" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="PlayWidget()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="PlayWidget()">
 			</td>
 		</tr>
 		</form>
@@ -364,8 +362,8 @@
 			<td>
 				<input type="text" size="256" name="inputField" value="http://www.flashscene.org/flash/EvenMoreExplosionsInTheSkies/explosionsinthesky.swf" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="PlaySWF()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="PlaySWF()">
 			</td>
 		</tr>
 		</form>
@@ -382,8 +380,8 @@
 			<td>
 				<input type="text" size="128" name="inputField" value="400 300 160 120" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="SetWidgetSize()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="SetWidgetSize()">
 			</td>
 		</tr>
 		</form>
@@ -400,8 +398,8 @@
 			<td>
 				<input type="text" size="128" name="inputField" value="TBD" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="WidgetEngine()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="WidgetEngine()">
 			</td>
 		</tr>
 		</form>
@@ -421,8 +419,8 @@
 				<input type="radio" name="inputField" value="off" checked>off<br/>
 				<input type="radio" name="inputField" value="on">on
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="SetChromaKeyOnOff()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="SetChromaKeyOnOff()">
 			</td>
 		</tr>
 		</form>
@@ -439,8 +437,8 @@
 			<td>
 				<input type="text" size="128" name="inputField" value="Maximize" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="ControlPanel()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="ControlPanel()">
 			</td>
 		</tr>
 		</form>
@@ -457,8 +455,8 @@
 			<td>
 				(no input required)
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="GetAllParams()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="GetAllParams()">
 			</td>
 		</tr>
 		</form>
@@ -475,8 +473,8 @@
 			<td>
 				<input type="text" size="256" name="inputField" value="/psp/network_config" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="GetFileContents()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="GetFileContents()">
 			</td>
 		</tr>
 		</form>
@@ -494,8 +492,8 @@
 				<input type="text" size="256" name="inputField" value="/tmp/abc_some_filename" > (path)<br/>
 				<input type="text" size="256" name="inputField2" value="some long content" > (content)
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="SetFileContents()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="SetFileContents()">
 			</td>
 		</tr>
 		</form>
@@ -512,8 +510,8 @@
 			<td>
 				<input type="text" size="256" name="inputField" value="/psp/network_config" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="GetFileSize()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="GetFileSize()">
 			</td>
 		</tr>
 		</form>
@@ -530,8 +528,8 @@
 			<td>
 				<input type="text" size="256" name="inputField" value="/psp/network_config" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="UnlinkFile()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="UnlinkFile()">
 			</td>
 		</tr>
 		</form>
@@ -549,8 +547,8 @@
 				<input type="text" size="256" name="inputField" value="yyyy.mm.dd-hh:mm:ss" > (time)<br/>
 				<input type="text" size="256" name="inputField2" value="Asia/Singapore" > (timezone)
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="SetTime()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="SetTime()">
 			</td>
 		</tr>
 		</form>
@@ -572,8 +570,8 @@
 				<input type="radio" name="inputField6" value="false" checked>false (test)<br>
 				<input type="radio" name="inputField6" value="stop">true (test)
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="SetNetwork()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="SetNetwork()">
 			</td>
 		</tr>
 		</form>
@@ -592,8 +590,8 @@
 				<input type="text" size="256" name="inputField2" value="mypassword" > (password)<br/>
 				<input type="text" size="256" name="inputField3" value="NeTV Living Room" > (device name)
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="SetAccount()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="SetAccount()">
 			</td>
 		</tr>
 		</form>
@@ -610,11 +608,31 @@
 			<td>
 				<input type="text" size="256" name="inputField" value="/bin/ps ax" >
 			</td>
-			<td class="td_button">
-				<input type="button" value="GO!" onclick="NeCommand()">
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="NeCommand()">
 			</td>
 		</tr>
 		</form>
+		
+		<!-- Android -->
+		<form name="form_Android" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				Android
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="changeview"> (eventname)<br/>
+				<input type="text" size="256" name="inputField2" value="androidtest"> (eventdata)
+			</td>
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="Android()">
+			</td>
+		</tr>
+		</form>
+		
 		
 		
 	</table>
