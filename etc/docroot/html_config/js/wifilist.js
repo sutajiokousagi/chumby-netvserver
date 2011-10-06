@@ -52,6 +52,17 @@ function wifilist_stopWifiScanTimer()
 }
 
 //-----------------------------------------------------------
+
+function wifilist_getCount()
+{
+	if (!currentWifiList)
+		return 0;
+	var count = 0;
+	for (var objectIndex in currentWifiList)
+		count++;
+	return count;
+}
+
 function wifilist_setSelectedSSID(newSSID)
 {
 	for (var objectIndex in currentWifiList)
@@ -110,7 +121,7 @@ function refreshWifiList(animated)
 	}
 }	
 
-function fadeInWifiList(animated)
+function fadeInWifiList(animated, startIndex)
 {
 	//No list to display
 	if (currentWifiList == null)
@@ -120,13 +131,20 @@ function fadeInWifiList(animated)
 	$('#div_wifiListMain_list').html('');
 	
 	//Scroll the display list
-	if (selectedSSID == 'Other...')
-		selectedIndex = currentWifiList.length-1;
-	if (selectedIndex < startingIndex)
-		startingIndex = selectedIndex;
-	if (selectedIndex >= startingIndex + maxWifiDisplay - 1)
-		startingIndex = selectedIndex - maxWifiDisplay + 1;
-		
+	if (startIndex)
+	{
+		startingIndex = startIndex;
+	}
+	else
+	{
+		if (selectedSSID == 'Other...')
+			selectedIndex = currentWifiList.length-1;
+		if (selectedIndex < startingIndex)
+			startingIndex = selectedIndex;
+		if (selectedIndex >= startingIndex + maxWifiDisplay - 1)
+			startingIndex = selectedIndex - maxWifiDisplay + 1;
+	}
+	
 	//more... arrow indicator
 	if (startingIndex > 0)												$("#div_wifiListMain_moretop").fadeIn(400);
 	else																$("#div_wifiListMain_moretop").fadeOut(400);
@@ -144,7 +162,7 @@ function fadeInWifiList(animated)
 		if (selectedSSID == '')
 			selectedSSID = ssid;
 		
-		//The row		
+		//The row
 		var div_string = '<div class="';
 		if (ssid == selectedSSID)	div_string += 'div_wifiListItem_selected';
 		else						div_string += 'div_wifiListItem_normal';
@@ -173,7 +191,36 @@ function fadeInWifiList(animated)
 		div_string += '</div></div>';
 		$("#div_wifiListMain_list").append(div_string);
 	}
+	
+	//native mouse support
+	$(".div_wifiListItem_normal").click(wifilist_onClickItem);
+	$(".div_wifiListItem_normal").mouseover(function() {
+		$(this).css('cursor','pointer');
+	});
+	
 	$('#div_wifiListMain_list').fadeIn( animated ? 350 : 0);
+}
+
+function wifilist_onClickItem()
+{
+	var ssid = $(this).children('.div_wifiListItem_ssid').text();
+	fDbg2("Click on SSID: " + ssid);
+	if (!ssid || ssid == "")
+		return;
+	wifilist_setSelectedSSID(ssid);
+}
+
+function wifilist_onWheel(delta)
+{
+	var newIndex = startingIndex - delta;
+	if (newIndex < 0)
+		return;
+		
+	var count = wifilist_getCount();
+	if (newIndex + maxWifiDisplay > count)
+		return;
+
+	fadeInWifiList(false, newIndex);
 }
 
 //-----------------------------------------------------------

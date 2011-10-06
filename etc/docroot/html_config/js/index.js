@@ -46,6 +46,11 @@ function onLoad()
 	$("#wifi_security_wpa_wrapper").click(onRadioFieldClick);
 	$("#wifi_ssid_wrapper").click(onInputFieldClick);
 	$("#wifi_password_wrapper").click(onInputFieldClick);
+	
+	//mouse wheel scrolling
+	if (window.addEventListener)
+		window.addEventListener('DOMMouseScroll', onWheel, false);
+	window.onmousewheel = document.onmousewheel = onWheel;
 }
 
 function onLoadLater()
@@ -197,4 +202,22 @@ function onInputFieldClick()
 	$(this).children(':input').addClass('input_focus');
 	$('.input_wrapper_focus').removeClass('input_wrapper_focus');
 	$(this).addClass('input_wrapper_focus');
+}
+
+function onWheel(event)
+{
+	var delta = 0;
+	if (!event)
+		event = window.event;
+	if (event.wheelDelta)
+	{
+		delta = event.wheelDelta / 120; 
+		if (window.opera)
+			delta = -delta;
+	}
+	else if (event.detail)
+	{
+		delta = -event.detail / 3;
+	}
+	wifilist_onWheel(delta);
 }
