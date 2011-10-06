@@ -43,6 +43,7 @@ function resetActivationTimer(duration)
 
 function configuring_onRemoteControl(vButtonName)
 {
+	//Accept no buttons
 	return;
 }
 
@@ -80,7 +81,7 @@ function configuring_helloCallback(helloData)
 	var secondsSinceActivation = ((new Date()).getTime() - activationTime.getTime()) / 1000;
 
 	//Taking too long
-	if (secondsSinceActivation > 60)
+	if (secondsSinceActivation > 50)
 	{
 		stopActivation();
 		$("#div_activationStatus").removeClass('div_activationStatus_success').addClass('div_activationStatus_error');
@@ -98,9 +99,9 @@ function configuring_helloCallback(helloData)
 	//Failed to connect or trying connecting
 	if (ip == '')
 	{
-		if (secondsSinceActivation > 45)			$("#div_activationStatus").html("Be patient...");
-		else if (secondsSinceActivation > 35)		$("#div_activationStatus").html("Hold on...");
-		else if (secondsSinceActivation > 20)		$("#div_activationStatus").html("Keep waiting...");
+		if (secondsSinceActivation > 35)			$("#div_activationStatus").html("Be patient...");
+		else if (secondsSinceActivation > 25)		$("#div_activationStatus").html("Hold on...");
+		else if (secondsSinceActivation > 15)		$("#div_activationStatus").html("Keep waiting...");
 		return;
 	}
 	

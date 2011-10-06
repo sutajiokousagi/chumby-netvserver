@@ -138,7 +138,7 @@ function main_showState(vStateName, animated)
 	}
 	else if (vStateName == "configuring")
 	{
-		//configuring_init();
+		configuring_init();
 		$("#div_loadingMain").fadeOut(duration);
 		$("#div_wifiListMain").fadeOut(duration);
 		$("#div_wifiDetailsMain").fadeOut(duration);
@@ -147,7 +147,6 @@ function main_showState(vStateName, animated)
 	}
 	else if (vStateName == "accountdetails")
 	{
-		//configuring_init();
 		$("#div_loadingMain").fadeOut(duration);
 		$("#div_wifiListMain").fadeOut(duration);
 		$("#div_wifiDetailsMain").fadeOut(duration);	
