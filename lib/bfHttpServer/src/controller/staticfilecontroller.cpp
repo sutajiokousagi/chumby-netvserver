@@ -119,21 +119,32 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
     file.close();
 }
 
-void StaticFileController::setContentType(QString fileName, HttpResponse& response) const {
+void StaticFileController::setContentType(QString fileName, HttpResponse& response) const
+{
     if (fileName.endsWith(".png")) {
         response.setHeader("Content-Type", "image/png");
     }
-    else if (fileName.endsWith(".jpg")) {
+    else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
         response.setHeader("Content-Type", "image/jpeg");
     }
     else if (fileName.endsWith(".gif")) {
         response.setHeader("Content-Type", "image/gif");
     }
     else if (fileName.endsWith(".txt")) {
-        response.setHeader("Content-Type", qPrintable("text/plain; charset="+encoding));
+        response.setHeader("Content-Type", "text/plain; charset=UTF-8");
     }
     else if (fileName.endsWith(".html") || fileName.endsWith(".htm")) {
-        response.setHeader("Content-Type", qPrintable("text/html; charset=charset="+encoding));
+        response.setHeader("Content-Type", "text/html; charset=UTF-8");
+    }
+    else if (fileName.endsWith(".js")) {
+        response.setHeader("Content-Type", "application/x-javascript");
+    }
+    else if (fileName.endsWith(".css")) {
+        response.setHeader("Content-Type", "text/css");
+    }
+    else
+    {
+        response.setHeader("Content-Type", "text/plain; charset=UTF-8");
     }
     // Todo: add all of your content types
 }
