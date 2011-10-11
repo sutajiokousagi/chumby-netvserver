@@ -43,6 +43,10 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     QByteArray dataString = request.getParameter(STRING_VALUE);
     QByteArray dataXmlString = request.getParameter(STRING_DATA);
 
+    //This happens when we POST only 'value' (and not 'data' in XML format)
+    if (dataString.length() != 0 && dataXmlString.length() == 0)
+        dataXmlString = "<value>" + dataString + "</value>";
+
     //A specialize QHash for received parameters in XML format
     QHash<QByteArray,QByteArray> xmlparameters;
     QMapIterator<QByteArray,QByteArray> i(request.getParameterMap());
