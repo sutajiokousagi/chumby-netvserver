@@ -1,43 +1,42 @@
-<html>
-	<head>
-		<script>
-			$(function()
-			{
-				$("button", ".remote_panel").button();
-				$("button").click(function() { remote_control( $(this).attr("name") ); });
-			});
-			function remote_control(btnName)
-			{
-				if (global_parameters['log_remotecontrol_btn'])
-					log( btnName );
-				xmlhttpPost(serverUrl, "post", { 'cmd' : 'RemoteControl', 'value' : btnName }, null );
-			}
-		</script>
-	</head>
-	
-	<body>
-		<div style="width:100%; height:100%" class="remote_panel">
-			<div style="width:360px; height:600px">
-				<div style="clear:both; width:100%; text-align: center;">
-					<button name="cpanel" style="float:left;"><img src="images/btn_controlpanel.png"></button>
-					<button name="widget" style="float:right;"><img src="images/btn_widget.png"></button>
-				</div>
-				<div style="clear:both; width:100%; height:40px;"></div>
-				<div style="clear:both; width:100%; text-align: center;">
-					<button name="up" style="float:center;"><img src="images/btn_up.png"></button>
-				</div>
-				<div style="clear:both; width:100%; height:10px;"></div>
-				<div style="clear:both; width:100%; text-align: center;">
-					<button name="left" style="float:left;"><img src="images/btn_left.png"></button>
-					<button name="center" style="float:center;"><img src="images/btn_center.png"></button>
-					<button name="right" style="float:right;"><img src="images/btn_right.png"></button>
-				</div>
-				<div style="clear:both; width:100%; height:10px;"></div>
-				<div style="clear:both; width:100%; text-align: center;">
-					<button name="down" style="float:center;"><img src="images/btn_down.png"></button>
-				</div>
-			</div>
+<!--
+	See index.js for useful global variables
+-->
+
+<script>
+	$(function()
+	{
+		$("button", ".remote_panel").button();
+		$("button").click(function() { send_remote_control( $(this).attr("name") ); });
+	});
+	function send_remote_control(btnName)
+	{
+		if (global_parameters['log_remotecontrol_btn'])
+			log( btnName );
+		//xmlhttpPost(serverUrl + "?cmd=RemoteControl&value=" + btnName, "post", { }, function(data){ log(data)} );			//works on iPad, not on desktop
+		//xmlhttpPost(serverUrl, "post", { 'cmd' : 'RemoteControl', 'value' : btnName }, function(data){ log(data)} );		//works on desktop, not on iPad
+		$.post(serverUrl + "?cmd=RemoteControl&value=" + btnName, function(data) { /* log(data); */	});						//works on both, return Document object
+	}
+</script>
+
+<div style="width:100%; height:100%" class="remote_panel">
+	<div style="width:360px; height:600px; margin:auto;">
+		<div style="clear:both; width:100%; text-align: center;">
+			<button name="cpanel" style="float:left;"><img src="images/btn_controlpanel.png"></button>
+			<button name="widget" style="float:right;"><img src="images/btn_widget.png"></button>
 		</div>
-	</body>
-	
-</html>
+		<div style="clear:both; width:100%; height:40px;"></div>
+		<div style="clear:both; width:100%; text-align: center;">
+			<button name="up" style="float:center;"><img src="images/btn_up.png"></button>
+		</div>
+		<div style="clear:both; width:100%; height:10px;"></div>
+		<div style="clear:both; width:100%; text-align: center;">
+			<button name="left" style="float:left;"><img src="images/btn_left.png"></button>
+			<button name="center" style="float:center;"><img src="images/btn_center.png"></button>
+			<button name="right" style="float:right;"><img src="images/btn_right.png"></button>
+		</div>
+		<div style="clear:both; width:100%; height:10px;"></div>
+		<div style="clear:both; width:100%; text-align: center;">
+			<button name="down" style="float:center;"><img src="images/btn_down.png"></button>
+		</div>
+	</div>
+</div>
