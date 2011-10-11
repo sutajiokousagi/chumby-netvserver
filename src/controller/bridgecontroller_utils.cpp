@@ -255,7 +255,7 @@ void BridgeController::SetContentType(QString fileName, HttpResponse& response) 
     if (fileName.endsWith(".png")) {
         response.setHeader("Content-Type", "image/png");
     }
-    else if (fileName.endsWith(".jpg")) {
+    else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
         response.setHeader("Content-Type", "image/jpeg");
     }
     else if (fileName.endsWith(".gif")) {
@@ -266,6 +266,12 @@ void BridgeController::SetContentType(QString fileName, HttpResponse& response) 
     }
     else if (fileName.endsWith(".html") || fileName.endsWith(".htm")) {
         response.setHeader("Content-Type", "text/html; charset=UTF-8");
+    }
+    else if (fileName.endsWith(".js")) {
+        response.setHeader("Content-Type", "application/x-javascript");
+    }
+    else if (fileName.endsWith(".css")) {
+        response.setHeader("Content-Type", "text/css");
     }
     else
     {
