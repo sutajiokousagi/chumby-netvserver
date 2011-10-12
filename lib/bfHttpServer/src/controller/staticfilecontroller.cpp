@@ -5,8 +5,7 @@
 
 StaticFileController::StaticFileController(QSettings* settings) : HttpRequestHandler()
 {
-    encoding=settings->value("encoding","UTF-8").toString();
-    docroot=settings->value("path",".").toString();
+    docroot = settings->value("path",".").toString();
 
     // Convert relative path to absolute, based on the directory of the config file.
 #ifdef Q_OS_WIN32
@@ -16,9 +15,9 @@ StaticFileController::StaticFileController(QSettings* settings) : HttpRequestHan
 #endif
     {
         QFileInfo configFile(settings->fileName());
-        docroot=QFileInfo(configFile.absolutePath(),docroot).absoluteFilePath();
+        docroot = QFileInfo(configFile.absolutePath(),docroot).absoluteFilePath();
     }
-    qDebug("StaticFileController: docroot=%s, encoding=%s",qPrintable(docroot),qPrintable(encoding));
+    qDebug("StaticFileController: docroot=%s", qPrintable(docroot));
 }
 
 

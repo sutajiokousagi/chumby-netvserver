@@ -12,12 +12,9 @@
   The following settings are required:
   <code><pre>
   path=docroot
-  encoding=UTF-8
   </pre></code>
   The path is relative to the directory of the config file. In case of windows, if the
   settings are in the registry, the path is relative to the current working directory.
-  <p>
-  The encoding is sent to the web browser in case of text and html files.
 */
 
 class StaticFileController : public HttpRequestHandler
@@ -35,9 +32,6 @@ public:
     static void SetContentType(QString file, HttpResponse& response);
 
 private:
-
-    /** Encoding of text files */
-    QString encoding;
 
     /** Root directory of documents */
     QString docroot;
