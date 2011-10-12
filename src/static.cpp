@@ -4,14 +4,15 @@
 #include <QFile>
 #include <QString>
 
-QString Static::configDir=0;
+QString Static::configDir = NULL;
 
-StaticFileController* Static::staticFileController=0;
-HttpSessionStore* Static::sessionStore=0;
-ScriptController* Static::scriptController=0;
-TcpSocketServer* Static::tcpSocketServer=0;
-UdpSocketServer* Static::udpSocketServer=0;
-BridgeController* Static::bridgeController=0;
+StaticFileController* Static::staticFileController = NULL;
+HttpSessionStore* Static::sessionStore = NULL;
+HttpListener* Static::httpListener = NULL;
+ScriptController* Static::scriptController = NULL;
+TcpSocketServer* Static::tcpSocketServer = NULL;
+UdpSocketServer* Static::udpSocketServer = NULL;
+BridgeController* Static::bridgeController = NULL;
 
 #ifdef ENABLE_DBUS_STUFF
     DBusMonitor* Static::dbusMonitor=0;

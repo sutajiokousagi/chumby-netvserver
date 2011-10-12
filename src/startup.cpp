@@ -16,6 +16,9 @@ Startup::Startup(QObject* parent) : QObject(parent)
 
 void Startup::start()
 {
+    //-------------------------------------------------------------------------
+    // Handlers
+
     // Initialize the core application
     QString configFileName=Static::getConfigDir()+"/"+APPNAME+".ini";
 
@@ -37,27 +40,38 @@ void Startup::start()
     bridgeSettings->beginGroup("bridge-controller");
     Static::bridgeController=new BridgeController(bridgeSettings,this);
 
+    RequestMapper *requestMapper = new RequestMapper();
+
+    //-------------------------------------------------------------------------
+    // Servers
+
     // Configure Flash policy server
     QSettings* flashpolicySettings=new QSettings(configFileName,QSettings::IniFormat);
     flashpolicySettings->beginGroup("flash-policy-server");
     new FlashPolicyServer(flashpolicySettings, this);
 
-    RequestMapper *requestMapper = new RequestMapper();
-
     // Configure and start the TCP listener
     QSettings* listenerSettings=new QSettings(configFileName,QSettings::IniFormat);
     listenerSettings->beginGroup("listener");
-    new HttpListener(listenerSettings, requestMapper, this);
+    HttpListener *httpListener = new HttpListener(listenerSettings, requestMapper, this);
+    if (!httpListener->isListening()) {
+        delete httpListener;
+        Static::httpListener = NULL;
+    }
 
     // Configure TCP socket server
     QSettings* tcpServerSettings=new QSettings(configFileName,QSettings::IniFormat);
     tcpServerSettings->beginGroup("tcp-socket-server");
-    Static::tcpSocketServer=new TcpSocketServer(tcpServerSettings, requestMapper, this);
+    Static::tcpSocketServer = new TcpSocketServer(tcpServerSettings, requestMapper, this);
+    if (!Static::tcpSocketServer->isListening()) {
+        delete Static::tcpSocketServer;
+        Static::tcpSocketServer = NULL;
+    }
 
     // Configure UDP socket server
     QSettings* udpServerSettings=new QSettings(configFileName,QSettings::IniFormat);
     udpServerSettings->beginGroup("udp-socket-server");
-    Static::udpSocketServer=new UdpSocketServer(udpServerSettings, requestMapper, this);
+    Static::udpSocketServer = new UdpSocketServer(udpServerSettings, requestMapper, this);
 
     // DBus monitor
 #ifdef ENABLE_DBUS_STUFF
@@ -82,7 +96,7 @@ void Startup::receiveArgs(const QString &argsString)
     argsList.removeFirst();
     argCount = argsList.count();
 
-    printf("Received argument: %s", command.toLatin1().constData());
+    qDebug("Received argument: %s", qPrintable(command));
 
     QByteArray string = processStatelessCommand(command.toLatin1(), argsList);
     if (string != UNIMPLEMENTED)            printf("NeTVServer: %s", string.constData());

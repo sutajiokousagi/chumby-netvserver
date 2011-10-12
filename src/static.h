@@ -3,6 +3,7 @@
 
 #include <QString>
 #include "httpsessionstore.h"
+#include "httplistener.h"
 #include "tcpsocketserver.h"
 #include "udpsocketserver.h"
 #include "controller/staticfilecontroller.h"
@@ -50,6 +51,9 @@ public:
 
     /** Storage for session cookies */
     static HttpSessionStore* sessionStore;
+
+    /** HTTP Listener (the web server) */
+    static HttpListener* httpListener;
 
     /** TCP Socket server for Flash player */
     static TcpSocketServer* tcpSocketServer;
