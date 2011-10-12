@@ -28,7 +28,7 @@ public:
 
 public slots:
 
-    void receiveArgs(const QString &argsString);
+    bool receiveArgs(const QString &argsString);
 
 protected:
 

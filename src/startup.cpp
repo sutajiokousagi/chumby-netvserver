@@ -83,7 +83,7 @@ void Startup::start()
 #endif
 }
 
-void Startup::receiveArgs(const QString &argsString)
+bool Startup::receiveArgs(const QString &argsString)
 {
     QStringList argsList = argsString.split(ARGS_SPLIT_TOKEN);
     int argCount = argsList.count();
@@ -101,6 +101,7 @@ void Startup::receiveArgs(const QString &argsString)
     QByteArray string = processStatelessCommand(command.toLatin1(), argsList);
     if (string != UNIMPLEMENTED)            printf("NeTVServer: %s", string.constData());
     else                                    printf("NeTVServer: Invalid argument");
+    return false;
 }
 
 QByteArray Startup::processStatelessCommand(QByteArray command, QStringList argsList)
