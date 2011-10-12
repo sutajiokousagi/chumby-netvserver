@@ -166,16 +166,18 @@ void HttpRequest::readBody(QTcpSocket& socket) {
     }
 }
 
+//Extract and decode POST/GET request parameters
 void HttpRequest::decodeRequestParams()
 {
-#ifdef SUPERVERBOSE
-    //qDebug("HttpRequest: extract and decode request parameters");
-#endif
     QByteArray rawParameters;
-    if (headers.value("Content-Type")=="application/x-www-form-urlencoded") {
+    if (headers.value("Content-Type")=="application/x-www-form-urlencoded")
+    {
+        //POST
         rawParameters=bodyData;
     }
-    else {
+    else
+    {
+        //GET
         int questionMark=path.indexOf('?');
         if (questionMark>=0) {
             rawParameters=path.mid(questionMark+1);
@@ -187,12 +189,14 @@ void HttpRequest::decodeRequestParams()
     foreach (QByteArray part, list)
     {
         int equalsChar=part.indexOf('=');
-        if (equalsChar>=0) {
+        if (equalsChar>=0)
+        {
             QByteArray name=part.left(equalsChar).trimmed();
             QByteArray value=part.mid(equalsChar+1).trimmed();
             parameters.insert(urlDecode(name),urlDecode(value));
         }
-        else if (!part.isEmpty()){
+        else if (!part.isEmpty())
+        {
             // Name without value
             parameters.insert(urlDecode(part),"");
         }
