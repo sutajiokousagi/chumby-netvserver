@@ -1,9 +1,3 @@
-/**
-  @file
-  @author Stefan Frings
-  @version $Id: httplistener.h 918 2010-10-24 08:57:25Z stefan $
-*/
-
 #ifndef LISTENER_H
 #define LISTENER_H
 
@@ -25,7 +19,8 @@
   </pre></code>
 */
 
-class HttpListener : public QTcpServer {
+class HttpListener : public QTcpServer
+{
     Q_OBJECT
     Q_DISABLE_COPY(HttpListener)
 public:
