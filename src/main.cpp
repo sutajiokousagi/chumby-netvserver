@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
     Startup startup;
     bool toBeReturn = startup.receiveArgs(argsString);
-    if (toBeReturn)
+    if (toBeReturn == true)
         return 0;
 
     return instance.exec();

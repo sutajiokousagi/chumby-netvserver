@@ -88,7 +88,7 @@ bool Startup::receiveArgs(const QString &argsString)
     QStringList argsList = argsString.split(ARGS_SPLIT_TOKEN);
     int argCount = argsList.count();
     if (argCount < 2)
-        return;
+        return false;
 
     QString execPath = argsList[0];
     QString command = argsList[1];
