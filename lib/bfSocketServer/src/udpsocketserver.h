@@ -52,14 +52,15 @@ public:
     void start();
     void terminate();
     void msleep(unsigned long msecs);
+    bool isRunning();
+    bool isStopping();
 
     void queueMessage( QMap<QString, QString> params );
     QByteArray getSerializedInfoXML( const QMap<QString, QString> params );
 
 private:
 
-    bool isRunning();
-    bool hasToStop();
+    /** Main loop of the thread */
     void run();
 
     /** Request handler for the server */

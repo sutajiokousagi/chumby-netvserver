@@ -28,7 +28,7 @@ UdpSocketServer::~UdpSocketServer()
     terminate();
 
     while(isRunning())
-        msleep(20);
+        msleep(40);
 
     qDebug("UdpSocketServer: closed");
 }
@@ -57,7 +57,18 @@ void UdpSocketServer::msleep(unsigned long msecs)
     QThread::msleep(msecs);
 }
 
-bool UdpSocketServer::hasToStop()
+bool UdpSocketServer::isRunning()
+{
+    bool isRunning = true;
+    if (mutex.tryLock())
+    {
+        isRunning = bRunning;
+        mutex.unlock();
+    }
+    return isRunning;
+}
+
+bool UdpSocketServer::isStopping()
 {
     bool isStopping = false;
     if (mutex.tryLock())
@@ -66,17 +77,6 @@ bool UdpSocketServer::hasToStop()
         mutex.unlock();
     }
     return isStopping;
-}
-
-bool UdpSocketServer::isRunning()
-{
-    bool isRunning = true;
-    if (mutex.tryLock())
-    {
-        isRunning = bRunning;
-       mutex.unlock();
-    }
-    return isRunning;
 }
 
 //----------------------------------------------------------------------------------
@@ -89,10 +89,12 @@ void UdpSocketServer::run()
         return;
     if (bRunning)
     {
+        //Some how the thread is already started, we quit here
         mutex.unlock();
         return;
     }
 
+    bStop = false;
     bRunning = true;
     mutex.unlock();
 
@@ -110,7 +112,7 @@ void UdpSocketServer::run()
     //Get own IP addresses
     QList <QHostAddress> list = QHostInfo::fromName(QHostInfo::localHostName()).addresses();
 
-    while(!hasToStop())
+    while(!bStop)
     {
         msleep(SERVICE_INTERVAL);
 
@@ -127,13 +129,13 @@ void UdpSocketServer::run()
                 continue;
             }
 
-            //Check loopback
+            //This interface is mainly used for external mobile device only
+            //So it doesn't accept loopback connection
             bool isLoopback = false;
             for (int i = 0; i < list.size(); i++)
                 if (peerAddress.toString() == list.at(i).toString())
                     isLoopback = true;
 
-            //This interface is mainly used for external mobile device only
             if (!isLoopback)
             {
                 SocketRequest *request = new SocketRequest(QByteArray(buf, byteRead), peerAddress.toString().toLatin1(), port);
