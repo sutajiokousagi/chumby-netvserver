@@ -60,7 +60,6 @@ private:
     QString docroot;
     QString paramsFile;
     QString networkConfigFile;
-    QString accountConfigFile;
 
     /** High level helper functions */
     bool IsAuthorizedCaller(QByteArray headerValue);

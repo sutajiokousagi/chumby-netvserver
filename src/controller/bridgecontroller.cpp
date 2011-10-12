@@ -17,7 +17,6 @@ BridgeController::BridgeController(QSettings* settings, QObject* parent) : QObje
     docroot=settings->value("path",".").toString();
     paramsFile=settings->value("paramsFile",".").toString();
     networkConfigFile=settings->value("networkConfigFile",".").toString();
-    accountConfigFile=settings->value("accountConfigFile",".").toString();
 
     //Load non-volatile parameters
     parameters = NULL;
@@ -386,32 +385,6 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         //Allow time for HTTP response to complete before we bring down the network
         if (!isTest)
             StopAPwithDelay(500);
-    }
-
-    else if (cmdString == "SETACCOUNT")
-    {
-        //Do NOT use this command. Not safe to store username/password in /psp
-
-        QString activated = request.getParameter("activated");
-        QString username = request.getParameter("chumby_username");
-        QString password = request.getParameter("chumby_password");
-        QString device_name = request.getParameter("chumby_device_name");
-
-        if (activated == "")        activated = "false";
-        if (device_name == "")      device_name = "NeTV";
-
-        QString account_config = QString("<configuration username=\"%1\" password=\"%2\" device_name=\"%3\" />").arg(username).arg(password).arg(device_name);
-        bool fileOK = SetFileContents(accountConfigFile, account_config.toLatin1());
-
-        //We should ask the JSCore to do something here.
-        //QByteArray buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
-        QByteArray buffer;
-        if (!fileOK)                buffer = this->GetFileContents(accountConfigFile);
-        else                        buffer = activated.toLatin1();
-
-        //Reply to JavaScriptCore/ControlPanel
-        if (!fileOK)                response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
-        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
     }
 
     //-----------
@@ -814,37 +787,6 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         //Allow time for socket response to complete before we bring down the network
         if (!isTest)
             StopAPwithDelay(500);
-    }
-
-    else if (cmdString == "SETACCOUNT")
-    {
-        //Do NOT use this command. Not safe to store username/password in /psp
-        fprintf(stderr,"Receiving SetAccount command\n");
-
-        QString activated = request.getParameter("activated");
-        QString username = request.getParameter("chumby_username");
-        QString password = request.getParameter("chumby_password");
-        QString device_name = request.getParameter("chumby_device_name");
-
-        if (activated == "")    activated = "false";
-        if (device_name == "")  device_name = "NeTV";
-
-        QString account_config = QString("<configuration username=\"%1\" password=\"%2\" device_name=\"%3\" />").arg(username).arg(password).arg(device_name);
-        bool fileOK = SetFileContents(accountConfigFile, account_config.toLatin1());
-
-        //We should ask the JSCore to do something here.
-        //QByteArray buffer = this->Execute(docroot + "/scripts/stop_ap.sh");
-        QByteArray buffer;
-        if (!fileOK)                qDebug("%s, Error writing account config file", TAG);
-        else                        qDebug("%s, Writing account config file OK", TAG);
-
-        if (!fileOK)                buffer = this->GetFileContents(accountConfigFile);
-        else                        buffer = activated.toLatin1();
-
-        response.setStatus(fileOK ? BRIDGE_RETURN_STATUS_SUCCESS : BRIDGE_RETURN_STATUS_ERROR);
-        response.setCommand(cmdString);
-        response.setParameter(STRING_DATA, buffer.trimmed());
-        response.write();
     }
 
     //-----------
