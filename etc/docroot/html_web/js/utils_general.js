@@ -98,7 +98,7 @@ function xmlhttpPost(
 	{
 		var parameters = "";
 		for (var o in vData)
-			parameters += o + "=" + encodeURIComponent(vData[o]) + "&";	
+			parameters += o + "=" + encodeURIComponent(vData[o]) + "&";
 		parameters = parameters.substring(0, parameters.length-1);
 			
 		xmlHttpReq.send(parameters);

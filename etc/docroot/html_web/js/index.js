@@ -19,6 +19,9 @@ function onLoad()
 	$.getJSON("http://jsonip.appspot.com?callback=?", function(da){ publicIP = da.ip; });
 	
 	setTimeout("onLoadLater()", 1000);
+	
+	//Testing Chinese character & UTF-8 encoding
+	//xmlhttpPost(serverUrl, "post", { cmd : 'RemoteControl', value : '测试' } );
 }
 
 function onLoadLater()
