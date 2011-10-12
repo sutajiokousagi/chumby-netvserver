@@ -13,7 +13,7 @@
   Example for the required configuration settings:
   <code><pre>
   minThreads=1
-  maxThreads=10
+  maxThreads=20
   cleanupInterval=1000
   </pre></code>
   The pool is empty initially and grows with the number of concurrent
@@ -54,6 +54,9 @@ private:
 
     /** Timer to clean-up unused connection handler */
     QTimer cleanupTimer;
+
+    int minThreads;
+    int maxThreads;
 
 private slots:
 
