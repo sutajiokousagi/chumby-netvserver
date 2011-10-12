@@ -5,9 +5,9 @@
 
 StaticFileController::StaticFileController(QSettings* settings) : HttpRequestHandler()
 {
-    maxAge=settings->value("maxAge","60000").toInt();
     encoding=settings->value("encoding","UTF-8").toString();
     docroot=settings->value("path",".").toString();
+
     // Convert relative path to absolute, based on the directory of the config file.
 #ifdef Q_OS_WIN32
     if (QDir::isRelativePath(docroot) && settings->format()!=QSettings::NativeFormat)
@@ -18,11 +18,7 @@ StaticFileController::StaticFileController(QSettings* settings) : HttpRequestHan
         QFileInfo configFile(settings->fileName());
         docroot=QFileInfo(configFile.absolutePath(),docroot).absoluteFilePath();
     }
-    qDebug("StaticFileController: docroot=%s, encoding=%s, maxAge=%i",qPrintable(docroot),qPrintable(encoding),maxAge);
-    maxCachedFileSize=settings->value("maxCachedFileSize","65536").toInt();
-    cache.setMaxCost(settings->value("cacheSize","1000000").toInt());
-    cacheTimeout=settings->value("cacheTime","60000").toInt();
-    qDebug("StaticFileController: cache timeout=%i, size=%i",cacheTimeout,cache.maxCost());
+    qDebug("StaticFileController: docroot=%s, encoding=%s",qPrintable(docroot),qPrintable(encoding));
 }
 
 
@@ -30,60 +26,39 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
 {
     QByteArray path = request.getPath();
 
+    // Path will always start with "/" character
+
     // Forbid access to files outside the docroot directory
     if (path.startsWith("/.."))
     {
         response.setStatus(403,"forbidden");
         response.write("403 forbidden",true);
-    }
-
-    // Check if we have the file in cache
-    qint64 now=QDateTime::currentMSecsSinceEpoch();
-    CacheEntry* entry=cache.object(path);
-    if (entry && (cacheTimeout==0 || entry->created>now-cacheTimeout))
-    {
-        qDebug("StaticFileController: Cache hit for %s",path.data());
-        SetContentType(path,response);
-        response.setHeader("Cache-Control","max-age="+QByteArray::number(maxAge/1000));
-        response.write(entry->document);
         return;
     }
 
-    // The file is not in cache.
-
-    // If the filename is a directory, append index.html.
+    // If the filename is a directory, append index.html
     if (QFileInfo(docroot+path).isDir())
-        path+="/index.html";
+    {
+        //Redirect to home page
+        if (!path.endsWith('/'))
+        {
+            response.setStatus(301,"moved permanently");
+            response.setHeader("Location", request.getHeader("Referer") + path + "/");
+            response.write("301 moved permanently",true);
+            return;
+        }
+
+        path += "index.html";
+    }
 
     // Try opening the file
     QFile file(docroot+path);
     if (!file.exists())
-    {
-        // Redirect to homepage
-        path = "/index.html";
-        QFile anotherFile(docroot+path);
-
-        // Even the homepage is missing!! Then we throw a 404 error
-        if (!anotherFile.exists())
-        {
-            response.setStatus(404,"not found");
-            response.write("404 not found",true);
-            return;
-        }
-
-        // Error opening the file
-        if (!anotherFile.open(QIODevice::ReadOnly))
-        {
-            response.setStatus(403,"forbidden");
-            response.write("403 forbidden",true);
-            return;
-        }
-
-        SetContentType(path,response);
-        // Return the file content, do not store in cache
-        while (!anotherFile.atEnd() && !anotherFile.error())
-            response.write(anotherFile.read(65536));
-        anotherFile.close();
+    {       
+        //Redirect to home page
+        response.setStatus(301,"moved permanently");
+        response.setHeader("Location", "http://" + request.getHeader("Host"));
+        response.write("301 moved permanently",true);
         return;
     }
 
@@ -95,27 +70,15 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
         return;
     }
 
+    //Set MIME type for the response
     SetContentType(path,response);
-    response.setHeader("Cache-Control","max-age=" + QByteArray::number(maxAge/1000));
-    if (file.size()<=maxCachedFileSize)
-    {
-        // Return the file content and store it also in the cache
-        entry=new CacheEntry();
-        while (!file.atEnd() && !file.error()) {
-            QByteArray buffer=file.read(65536);
-            response.write(buffer);
-            entry->document.append(buffer);
-        }
-        entry->created=now;
-        cache.insert(request.getPath(),entry,entry->document.size());
-    }
-    else
-    {
-        // Return the file content, do not store in cache
-        while (!file.atEnd() && !file.error()) {
-            response.write(file.read(65536));
-        }
-    }
+
+    //We don't implement Cache-Control at all
+    response.setHeader("Cache-Control", "no-cache");
+
+    // Blast out the file content
+    while (!file.atEnd() && !file.error())
+        response.write(file.read(65536));
     file.close();
 }
 
