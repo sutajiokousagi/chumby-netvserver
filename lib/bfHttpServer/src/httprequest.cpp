@@ -51,53 +51,61 @@ void HttpRequest::readRequest(QTcpSocket& socket)
     }
 }
 
+/*
+    Host: 192.168.1.207
+    Origin: http://192.168.1.207
+    User-Agent: Mozilla/5.0 (iPad; U; CPU OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J3 Safari/6533.18.5
+    Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+    Referer: http://192.168.1.207/html_web/
+    Accept: * / *   <---- extra spacing added
+    Accept-Language: en-us
+    Accept-Encoding: gzip, deflate
+    Content-Length: 30
+    Connection: keep-alive
+    cmd=RemoteControl&value=widget
+*/
 void HttpRequest::readHeader(QTcpSocket& socket)
 {
-    int toRead=maxSize-currentSize+1; // allow one byte more to be able to detect overflow
-    QByteArray newData=socket.readLine(toRead).trimmed();
-    currentSize+=newData.size();
-    int colon=newData.indexOf(':');
-    if (colon>0)  {
+    int toRead = maxSize-currentSize+1; // allow one byte more to be able to detect overflow
+    QByteArray newLine = socket.readLine(toRead).trimmed();
+    currentSize += newLine.size();
+    int colonIndex=newLine.indexOf(':');
+
+    if (colonIndex>0)
+    {
         // Received a line with a colon - a header
-        currentHeader=newData.left(colon);
-        QByteArray value=newData.mid(colon+1).trimmed();
+        currentHeader = newLine.left(colonIndex);
+        QByteArray value = newLine.mid(colonIndex+1).trimmed();
         headers.insert(currentHeader,value);
-#ifdef SUPERVERBOSE
-        //qDebug("HttpRequest: received header %s: %s",currentHeader.data(),value.data());
-#endif
     }
-    else if (!newData.isEmpty()) {
+    else if (!newLine.isEmpty())
+    {
         // received another line - belongs to the previous header
-#ifdef SUPERVERBOSE
-        //qDebug("HttpRequest: read additional line of header");
-#endif
         // Received additional line of previous header
-        if (headers.contains(currentHeader)) {
-            headers.insert(currentHeader,headers.value(currentHeader)+" "+newData);
+        if (headers.contains(currentHeader))
+        {
+            headers.insert(currentHeader,headers.value(currentHeader)+" "+newLine);
         }
     }
-    else {
+    else
+    {
         // received an empty line - end of headers reached
-#ifdef SUPERVERBOSE
-        //qDebug("HttpRequest: headers completed");
-#endif
         // Empty line received, that means all headers have been received
         // Check for multipart/form-data
-        QByteArray contentType=headers.value("Content-Type");
-        if (contentType.startsWith("multipart/form-data")) {
+        QByteArray contentType = headers.value("Content-Type");
+        if (contentType.toLower().contains("multipart/form-data"))
+        {
             int posi=contentType.indexOf("boundary=");
             if (posi>=0) {
                 boundary=contentType.mid(posi+9);
             }
         }
+
         QByteArray contentLength=getHeader("Content-Length");
         if (!contentLength.isEmpty()) {
             expectedBodySize=contentLength.toInt();
         }
         if (expectedBodySize==0) {
-#ifdef SUPERVERBOSE
-            //qDebug("HttpRequest: expect no body");
-#endif
             status=complete;
         }
         else if (boundary.isEmpty() && expectedBodySize+currentSize>maxSize) {
@@ -109,9 +117,6 @@ void HttpRequest::readHeader(QTcpSocket& socket)
             status=abort;
         }
         else {
-#ifdef SUPERVERBOSE
-            //qDebug("HttpRequest: expect %i bytes body",expectedBodySize);
-#endif
             status=waitForBody;
         }
     }
@@ -170,10 +175,23 @@ void HttpRequest::readBody(QTcpSocket& socket) {
 void HttpRequest::decodeRequestParams()
 {
     QByteArray rawParameters;
-    if (headers.value("Content-Type")=="application/x-www-form-urlencoded")
+    QByteArray contentType = headers.value("Content-Type");
+    contentType = contentType.toLower();
+    //qDebug("NeTVServer: contentType: %s", contentType.constData());
+
+    //NOTE: Mobile Safari will send extra charset like this "application/x-www-form-urlencoded; charset=UTF-8"
+    //Enable this when needed
+    /*
+    int semicolonIndex = contentType.indexOf(';');
+    QByteArray charset;
+    if (semicolonIndex > 0 && contentType.contains("charset"))
+        charset = contentType.mid(semicolonIndex+1).trimmed();
+    */
+
+    if (contentType.contains("application/x-www-form-urlencoded"))
     {
         //POST
-        rawParameters=bodyData;
+        rawParameters = bodyData;
     }
     else
     {
@@ -184,6 +202,7 @@ void HttpRequest::decodeRequestParams()
             path=path.left(questionMark);
         }
     }
+
     // Split the parameters into pairs of value and name
     QList<QByteArray> list=rawParameters.split('&');
     foreach (QByteArray part, list)
