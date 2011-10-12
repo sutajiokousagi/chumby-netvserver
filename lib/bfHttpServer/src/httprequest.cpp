@@ -179,6 +179,9 @@ void HttpRequest::decodeRequestParams()
     contentType = contentType.toLower();
     //qDebug("NeTVServer: contentType: %s", contentType.constData());
 
+    //bodyData should be already UTF-8 encoded here
+    //Example: 测试 --> %E6%B5%8B%E8%AF%95
+
     //NOTE: Mobile Safari will send extra charset like this "application/x-www-form-urlencoded; charset=UTF-8"
     //Enable this when needed
     /*
@@ -192,6 +195,7 @@ void HttpRequest::decodeRequestParams()
     {
         //POST
         rawParameters = bodyData;
+        //qDebug("NeTVServer: body: %s", bodyData.constData());
     }
     else
     {
