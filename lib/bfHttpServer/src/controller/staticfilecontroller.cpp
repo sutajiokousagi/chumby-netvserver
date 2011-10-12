@@ -43,7 +43,7 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
     if (entry && (cacheTimeout==0 || entry->created>now-cacheTimeout))
     {
         qDebug("StaticFileController: Cache hit for %s",path.data());
-        setContentType(path,response);
+        SetContentType(path,response);
         response.setHeader("Cache-Control","max-age="+QByteArray::number(maxAge/1000));
         response.write(entry->document);
         return;
@@ -79,7 +79,7 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
             return;
         }
 
-        setContentType(path,response);
+        SetContentType(path,response);
         // Return the file content, do not store in cache
         while (!anotherFile.atEnd() && !anotherFile.error())
             response.write(anotherFile.read(65536));
@@ -95,7 +95,7 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
         return;
     }
 
-    setContentType(path,response);
+    SetContentType(path,response);
     response.setHeader("Cache-Control","max-age=" + QByteArray::number(maxAge/1000));
     if (file.size()<=maxCachedFileSize)
     {
@@ -119,32 +119,69 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
     file.close();
 }
 
-void StaticFileController::setContentType(QString fileName, HttpResponse& response) const
+// Static function
+void StaticFileController::SetContentType(QString fileName, HttpResponse& response)
 {
     if (fileName.endsWith(".png")) {
         response.setHeader("Content-Type", "image/png");
     }
-    else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
+    else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".jpe")) {
         response.setHeader("Content-Type", "image/jpeg");
     }
     else if (fileName.endsWith(".gif")) {
         response.setHeader("Content-Type", "image/gif");
     }
+    else if (fileName.endsWith(".bmp")) {
+        response.setHeader("Content-Type", "image/bmp");
+    }
+    else if (fileName.endsWith(".ico")) {
+        response.setHeader("Content-Type", "image/x-icon");
+    }
+
+    else if (fileName.endsWith(".wav")) {
+        response.setHeader("Content-Type", "audio/x-wav");
+    }
+    else if (fileName.endsWith(".mid") || fileName.endsWith(".rmi")) {
+        response.setHeader("Content-Type", "audio/mid");
+    }
+    else if (fileName.endsWith(".mp3")) {
+        response.setHeader("Content-Type", "audio/mpeg");
+    }
+    else if (fileName.endsWith(".avi")) {
+        response.setHeader("Content-Type", "video/x-msvideo");
+    }
+
     else if (fileName.endsWith(".txt")) {
         response.setHeader("Content-Type", "text/plain; charset=UTF-8");
     }
     else if (fileName.endsWith(".html") || fileName.endsWith(".htm")) {
         response.setHeader("Content-Type", "text/html; charset=UTF-8");
     }
-    else if (fileName.endsWith(".js")) {
-        response.setHeader("Content-Type", "application/x-javascript");
-    }
     else if (fileName.endsWith(".css")) {
         response.setHeader("Content-Type", "text/css");
     }
+
+    else if (fileName.endsWith(".js")) {
+        response.setHeader("Content-Type", "application/x-javascript");
+    }
+    else if (fileName.endsWith(".xml")) {
+        response.setHeader("Content-Type", "application/xml");
+    }
+    else if (fileName.endsWith(".gz")) {
+        response.setHeader("Content-Type", "application/x-gzip");
+    }
+    else if (fileName.endsWith(".tar")) {
+        response.setHeader("Content-Type", "application/x-tar");
+    }
+    else if (fileName.endsWith(".tgz")) {
+        response.setHeader("Content-Type", "application/x-compressed");
+    }
+    else if (fileName.endsWith(".zip")) {
+        response.setHeader("Content-Type", "application/zip");
+    }
+
     else
     {
         response.setHeader("Content-Type", "text/plain; charset=UTF-8");
     }
-    // Todo: add all of your content types
 }

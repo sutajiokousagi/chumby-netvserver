@@ -23,9 +23,6 @@ private:
 
     /** Root directory of documents */
     QString docroot;
-
-    /** Set a content-type header in the response depending on the ending of the filename */
-    void setContentType(QString file, HttpResponse& response) const;
 };
 
 #endif // ScriptController_H

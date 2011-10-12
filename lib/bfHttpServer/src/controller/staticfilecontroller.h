@@ -46,6 +46,9 @@ public:
     /** Generates the response */
     void service(HttpRequest& request, HttpResponse& response);
 
+    /** Set a content-type header in the response depending on the ending of the filename */
+    static void SetContentType(QString file, HttpResponse& response);
+
 private:
 
     /** Encoding of text files */
@@ -70,9 +73,6 @@ private:
 
     /** Cache storage */
     QCache<QString,CacheEntry> cache;
-
-    /** Set a content-type header in the response depending on the ending of the filename */
-    void setContentType(QString file, HttpResponse& response) const;
 };
 
 #endif // STATICFILECONTROLLER_H

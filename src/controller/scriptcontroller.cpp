@@ -2,6 +2,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QProcess>
+#include "bridgecontroller.h"
 
 ScriptController::ScriptController(QSettings* settings) : HttpRequestHandler()
 {
@@ -69,7 +70,7 @@ void ScriptController::service(HttpRequest& request, HttpResponse& response)
             return;
         }
 
-        setContentType(path,response);
+        BridgeController::SetContentType(path,response);
         // Return the file content, do not store in cache
         while (!anotherFile.atEnd() && !anotherFile.error())
             response.write(anotherFile.read(65536));
@@ -123,24 +124,4 @@ void ScriptController::service(HttpRequest& request, HttpResponse& response)
     delete newProc;
     newProc = NULL;
     arguments.clear();
-}
-
-void ScriptController::setContentType(QString fileName, HttpResponse& response) const
-{
-    if (fileName.endsWith(".png")) {
-        response.setHeader("Content-Type", "image/png");
-    }
-    else if (fileName.endsWith(".jpg")) {
-        response.setHeader("Content-Type", "image/jpeg");
-    }
-    else if (fileName.endsWith(".gif")) {
-        response.setHeader("Content-Type", "image/gif");
-    }
-    else if (fileName.endsWith(".txt")) {
-        response.setHeader("Content-Type", qPrintable("text/plain; charset="+encoding));
-    }
-    else if (fileName.endsWith(".html") || fileName.endsWith(".htm")) {
-        response.setHeader("Content-Type", qPrintable("text/html; charset=charset="+encoding));
-    }
-    // Todo: add all of your content types
 }

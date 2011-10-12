@@ -103,7 +103,9 @@ private:
 
     /** HTTP response */
     void DumpStaticFile(QByteArray path, HttpResponse& response);
-    void SetContentType(QString fileName, HttpResponse& response) const;
+
+public:
+    static void SetContentType(QString fileName, HttpResponse& response);
 };
 
 #endif // BridgeController_H
