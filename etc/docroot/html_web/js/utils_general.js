@@ -68,7 +68,7 @@ function xmlhttpPost(
 {
 	var xmlHttpReq = getXHR();
 	if (xmlHttpReq == null) {
-		aleart("Failed to get XMLHttpRequest");
+		alert("Failed to get XMLHttpRequest");
 		return;
 	}
 	

@@ -12,9 +12,12 @@
 	{
 		if (global_parameters['log_remotecontrol_btn'])
 			log( btnName );
-		//xmlhttpPost(serverUrl + "?cmd=RemoteControl&value=" + btnName, "post", { }, function(data){ log(data)} );			//works on iPad, not on desktop
-		//xmlhttpPost(serverUrl, "post", { 'cmd' : 'RemoteControl', 'value' : btnName }, function(data){ log(data)} );		//works on desktop, not on iPad
-		$.post(serverUrl + "?cmd=RemoteControl&value=" + btnName, function(data) { /* log(data); */	});						//works on both, return Document object
+		xmlhttpPost(serverUrl, "post", { cmd : 'RemoteControl', value : btnName }, on_remote_control_data );
+	}
+	function on_remote_control_data(data)
+	{
+		if (global_parameters['log_remotecontrol_btn'])
+			log( data );
 	}
 </script>
 
