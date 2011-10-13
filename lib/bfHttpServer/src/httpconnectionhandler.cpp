@@ -17,7 +17,7 @@ HttpConnectionHandler::HttpConnectionHandler(QSettings* settings, HttpRequestHan
     this->settings=settings;
     this->requestHandler=requestHandler;
     this->socket.close();
-    currentRequest=0;
+    currentRequest = NULL;
 
     // execute signals in my own thread
     moveToThread(this);
@@ -71,7 +71,7 @@ void HttpConnectionHandler::handleConnection(int socketDescriptor)
     // Start timer for read timeout
     int readTimeout=settings->value("readTimeout",10000).toInt();
     readTimer.start(readTimeout);
-    currentRequest=0;
+    currentRequest = NULL;
 }
 
 
@@ -87,7 +87,7 @@ void HttpConnectionHandler::readTimeout()
     socket.write("HTTP/1.1 408 request timeout\r\nConnection: close\r\n\r\n408 request timeout\r\n");
     socket.disconnectFromHost();
     delete currentRequest;
-    currentRequest=0;
+    currentRequest = NULL;
 }
 
 
@@ -96,7 +96,7 @@ void HttpConnectionHandler::disconnected()
     //qDebug("HttpConnectionHandler (%x): disconnected",(unsigned int) this);
     socket.close();
     delete currentRequest;
-    currentRequest=0;
+    currentRequest = NULL;
     readTimer.stop();
 }
 
@@ -123,7 +123,7 @@ void HttpConnectionHandler::read()
         socket.write("HTTP/1.1 413 entity too large\r\nConnection: close\r\n\r\n413 Entity too large\r\n");
         socket.disconnectFromHost();
         delete currentRequest;
-        currentRequest=0;
+        currentRequest = NULL;
     }
 
     // If the request is complete, let the request mapper dispatch it
@@ -142,7 +142,7 @@ void HttpConnectionHandler::read()
         // We can delete the request, but not the response
         if (response.isLongPoll()) {
             delete currentRequest;
-            currentRequest=0;
+            currentRequest = NULL;
             return;
         }
 
@@ -162,6 +162,6 @@ void HttpConnectionHandler::read()
         }
         // Prepare for next request
         delete currentRequest;
-        currentRequest=0;
+        currentRequest = NULL;
     }
 }
