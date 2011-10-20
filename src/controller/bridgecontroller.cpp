@@ -260,24 +260,24 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "TICKEREVENT")
     {
-        //All these should be URI encoded before passing to JavaScript
+        //All these variables should be URI encoded (%) before passing to JavaScript
         //Allow user to use both normal POST style API as well as XML style passing
         QByteArray title, message, image, type, level;
         if (xmlparameters.size() > 0)
         {
-            title = QUrl::toPercentEncoding(QString(xmlparameters.value("title", "")), "", "/'\"");
-            message = QUrl::toPercentEncoding(QString(xmlparameters.value("message", "")), "", "/'\"");
-            image = QUrl::toPercentEncoding(QString(xmlparameters.value("image", "")), "", "/'\"");
-            type = QUrl::toPercentEncoding(QString(xmlparameters.value("type", "")), "", "/'\"");
-            level = QUrl::toPercentEncoding(QString(xmlparameters.value("level", "")), "", "/'\"");
+            title = xmlparameters.value("title", "").toPercentEncoding();
+            message = xmlparameters.value("message", "").toPercentEncoding();
+            image = xmlparameters.value("image", "").toPercentEncoding();
+            type = xmlparameters.value("type", "").toPercentEncoding();
+            level = xmlparameters.value("level", "").toPercentEncoding();
         }
         else
         {
-            title = QUrl::toPercentEncoding(QString(request.getParameter("title")), "", "/'\"");
-            message = QUrl::toPercentEncoding(QString(request.getParameter("message")), "", "/'\"");
-            image = QUrl::toPercentEncoding(QString(request.getParameter("image")), "", "/'\"");
-            type = QUrl::toPercentEncoding(QString(request.getParameter("type")), "", "/'\"");
-            level = QUrl::toPercentEncoding(QString(request.getParameter("level")), "", "/'\"");
+            title = request.getParameter("title").toPercentEncoding();
+            message = request.getParameter("message").toPercentEncoding();
+            image = request.getParameter("image").toPercentEncoding();
+            type = request.getParameter("type").toPercentEncoding();
+            level = request.getParameter("level").toPercentEncoding();
         }
         QByteArray javaScriptString = "fTickerEvents(\"" + message + "\",\"" + title + "\",\"" + image + "\",\"" + type + "\",\"" + level + "\");";
 
@@ -685,11 +685,11 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     else if (cmdString == "TICKEREVENT")
     {
         //All these should be URI encoded
-        QByteArray message = QUrl::toPercentEncoding(QString(request.getParameter("message").trimmed()), "", "/'\"");
-        QByteArray title = QUrl::toPercentEncoding(QString(request.getParameter("title").trimmed()), "", "/'\"");
-        QByteArray image = QUrl::toPercentEncoding(QString(request.getParameter("image").trimmed()), "", "/'\"");
-        QByteArray type = QUrl::toPercentEncoding(QString(request.getParameter("type").trimmed()), "", "/'\"");
-        QByteArray level = QUrl::toPercentEncoding(QString(request.getParameter("level").trimmed()), "", "/'\"");
+        QByteArray message = request.getParameter("message").trimmed().toPercentEncoding();
+        QByteArray title = request.getParameter("title").trimmed().toPercentEncoding();
+        QByteArray image = request.getParameter("image").trimmed().toPercentEncoding();
+        QByteArray type = request.getParameter("type").trimmed().toPercentEncoding();
+        QByteArray level = request.getParameter("level").trimmed().toPercentEncoding();
         QByteArray javaScriptString = "fTickerEvents(\"" + message + "\",\"" + title + "\",\"" + image + "\",\"" + type + "\",\"" + level + "\");";
 
         //Forward to browser only
