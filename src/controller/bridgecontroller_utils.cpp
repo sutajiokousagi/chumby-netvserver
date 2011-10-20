@@ -292,7 +292,7 @@ void BridgeController::SetContentType(QString fileName, HttpResponse& response)
     }
 
     else if (fileName.endsWith(".js")) {
-        response.setHeader("Content-Type", "application/x-javascript");
+        response.setHeader("Content-Type", "application/x-javascript; charset=UTF-8");
     }
     else if (fileName.endsWith(".xml")) {
         response.setHeader("Content-Type", "application/xml");
