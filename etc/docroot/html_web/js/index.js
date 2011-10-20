@@ -5,6 +5,7 @@ var publicIP = "";
 var global_parameters = new Array();
 global_parameters['log_hostinfo'] = true;
 global_parameters['log_remotecontrol_btn'] = false;
+global_parameters['log_sharephoto_btn'] = true;
 
 function onLoad()
 {

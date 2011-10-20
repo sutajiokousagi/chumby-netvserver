@@ -2,29 +2,242 @@
 	See index.js for useful global variables
 -->
 
+<script src="js/jquery.MultiFile.js" type="text/javascript" language="javascript"></script>
+<style>
+#thumbs { padding-top: 10px; overflow: hidden; }
+#thumbs img, #largeImage {
+ border: 1px solid gray;
+ padding: 4px;
+ background-color: black;
+ cursor: pointer;
+}
+#thumbs img {
+ float: left;
+ margin-right: 6px;
+}
+</style>
+
 <script>
+	$(function()
+	{
+		$("button", ".sharephoto_panel").button();
+		$("button").click(function() { sharephoto_ui_event( $(this).attr("name") ); });
+		
+		//Initialize file selector
+		$('#addFiles').MultiFile({
+			onFileRemove: function(element, value, master_element){
+				//$('#F9-Log').append('<li>onFileRemove - '+value+'</li>')
+			},
+			afterFileRemove: function(element, value, master_element){
+				$('#F9-Log').append('<li>afterFileRemove - '+value+'</li>')
+			},
+			onFileAppend: function(element, value, master_element){
+				//$('#F9-Log').append('<li>onFileAppend - '+value+'</li>')
+				
+				var FS_ = null;
+				var output = document.getElementsByTagName('preview_img')[0];
+				
+				var src = createObjectURL(value);
+				var image = new Image();
+				image.src = src;
+			},
+			afterFileAppend: function(element, value, master_element){
+				$('#F9-Log').append('<li>afterFileAppend - '+value+'</li>')
+			},
+			onFileSelect: function(element, value, master_element){
+				//$('#F9-Log').append('<li>onFileSelect - '+value+'</li>')
+			},
+			afterFileSelect: function(element, value, master_element){
+				//$('#F9-Log').append('<li>afterFileSelect - '+value+'</li>')
+			}
+		});
+	});
+	function sharephoto_ui_event(btnName)
+	{
+		if (global_parameters['log_sharephoto_btn'])
+			log( btnName );
+		if (btnName == "add")
+		{
+		}
+		else if (btnName == "left")
+		{
+		}
+		else if (btnName == "right")
+		{
+		}
+		else if (btnName == "center")
+		{
+		}
+	}
+
+	//Preview selected images locally
 	
+	var FS_ = null;
+	window.URL = window.URL || window.webkitURL;
+	window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL || window.webkitResolveLocalFileSystemURL || window.resolveLocalFileSystemURI;
+	window.BlobBuilder = window.WebKitBlobBuilder || window.MozBlobBuilder || window.BlobBuilder;
+	window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
+
+	function errorCallback(e)
+	{
+		console.log('Error: ', e);
+	}
+
+	function buildThumbnail(src)
+	{
+		//var img = document.getElementById('preview_img');
+		var img = document.createElement('img');
+		img.src = src;
+		img.title = '' + img.src;
+		img.style.width = "150px";
+		
+		$('#thumbs img').click(function(){
+			$('#largeImage').attr('src',$(this).attr('src').replace('thumb','large'));
+			$('#description').html($(this).attr('alt'));
+		});
+
+		return img;
+	}
+
+	function onFileSelect(filename)
+	{
+		var output = document.getElementsByTagName('thumbnails')[0];
+		output.innerHTML = '';
+
+		FS_.root.getFile(filename, {create: false}, function(fileEntry)
+		{
+			var src = null;
+
+			// Get the File for this FileEntry.
+			fileEntry.file(function(file)
+			{
+				if (!file.type || !file.type.match(/image.*/))
+					return;
+
+				// Method 1: create a Blob URL to the file.
+				src = window.URL.createObjectURL(file);
+				output.appendChild(buildThumbnail(src));
+
+				// The browser will release Blob URL references when the page unloads, but
+				// it's always a good idea to free the memory if you're done using it.
+				// window.URL.revokeObjectURL(src);
+
+				// Method 2: use the FileReader API to read the contents into a dataURL.
+				/*
+				var reader = new FileReader();
+
+				// Closure to capture the file information.
+				reader.onload = function(e) {
+					src = e.target.result;
+					output.appendChild(buildThumbnail(src));
+				};
+
+				reader.readAsDataURL(file);
+				*/
+			});
+
+			// Method 3: use the FileSystem's Entry.toURL() to create a URL to the file.
+			//src = fileEntry.toURL ? fileEntry.toURL() : fileEntry.toURI()
+			//output.appendChild(buildThumbnail(src));
+
+		}, errorCallback);
+	}
+
+	function deleteFile(filesystemPath)
+	{
+		window.resolveLocalFileSystemURL(filesystemPath, function(fileEntry)
+		{
+			fileEntry.remove(function() {
+				readDirectories();
+			}, errorCallback);
+		}, errorCallback);
+	}
+
+	function readDirectories()
+	{
+		var dirReader = FS_.root.createReader();
+		var fragment = document.createDocumentFragment();
+		var filelist = document.getElementById('sharephoto_list');
+		filelist.innerHTML = '';
+
+		// Need to recursively read directories until there are no more results.
+		var readEntries = function()
+		{
+			dirReader.readEntries(function(entries)
+			{
+				if (entries.length)
+				{
+				for (var i = 0, entry; entry = entries[i]; ++i)
+				{
+					if (entry.isFile)
+					{
+						/*
+						var div = document.createElement('div');
+						div.innerHTML =
+							['<a href="javascript:onFileSelect(\'', entry.name, '\');">', entry.name,
+							 '</a>&nbsp;<a href="javascript:deleteFile(\'', entry.toURL ? entry.toURL() : entry.toURI(),
+							 '\');" class="remove">delete</a>'].join('');
+						fragment.appendChild(div);
+						*/
+						
+						onFileSelect(entry.name);
+					}
+				}
+				readEntries();
+				} else {
+				filelist.appendChild(fragment);
+				if (!filelist.childElementCount) {
+					filelist.textContent = "No image files in the app's filesystem. Import some above.";
+				}
+				}
+			}, errorCallback);
+		};
+
+		readEntries();
+	}
+
+	document.getElementById('addFiles').addEventListener('change', function(e)
+	{
+		for (var i = 0, file; file = this.files[i]; ++i)
+		{
+			// Capture current iteration's file in local scope for the getFile() callback.
+			(function(f) {
+				var filename = 'THIS_DEMO_' + file.name.replace(/\s/g, '_');
+				FS_.root.getFile(filename, {create: true, exclusive: true}, function(fileEntry) {
+				fileEntry.createWriter(function(fileWriter) {
+					fileWriter.write(f);
+				}, errorCallback);
+				}, errorCallback);
+			})(file);
+		}
+		readDirectories();
+	}, false);
+
+	window.requestFileSystem(TEMPORARY, 1024 * 1024,  function(fs)
+	{
+		FS_ = fs;
+		readDirectories();
+	}, errorCallback);
 </script>
 
-<div style="width:100%; height:100%" class="remote_panel">
-	<div style="width:360px; height:600px; margin:auto;">
-		<div style="clear:both; width:100%; text-align: center;">
-			<button name="cpanel" style="float:left;"><img src="images/btn_controlpanel.png"></button>
-			<button name="widget" style="float:right;"><img src="images/btn_widget.png"></button>
-		</div>
+<div style="width:100%; height:100%;" class="sharephoto_panel">
+	<div style="width:100%; height:100%; margin:auto;">
 		<div style="clear:both; width:100%; height:40px;"></div>
 		<div style="clear:both; width:100%; text-align: center;">
-			<button name="up" style="float:center;"><img src="images/btn_up.png"></button>
+			<input type='file' id='addFiles' name='Add photos...' multiple class="multi max-9 accept-gif|jpg|jpeg|bmp|png"/>
 		</div>
 		<div style="clear:both; width:100%; height:10px;"></div>
+		
 		<div style="clear:both; width:100%; text-align: center;">
-			<button name="left" style="float:left;"><img src="images/btn_left.png"></button>
-			<button name="center" style="float:center;"><img src="images/btn_center.png"></button>
-			<button name="right" style="float:right;"><img src="images/btn_right.png"></button>
+			<button name="left" style="float:left; font-weight:bold;">&lt;</button>
+			<div style="float:center; width:80%; height:30%;"><img id="preview_img" width="100%"></div>
+			<button name="right" style="float:right; font-weight:bold;">&gt;</button>
 		</div>
 		<div style="clear:both; width:100%; height:10px;"></div>
-		<div style="clear:both; width:100%; text-align: center;">
-			<button name="down" style="float:center;"><img src="images/btn_down.png"></button>
+		<div style="clear:both; width:100%; text-align: center;" id="thumbs">
+			<thumbnails></thumbnails>
 		</div>
+		<div style="clear:both; width:100%; height:10px;"></div>
+		<div style="clear:both; width:100%; text-align: center;" id="sharephoto_list"></div>
 	</div>
 </div>
