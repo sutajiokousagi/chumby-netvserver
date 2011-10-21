@@ -109,6 +109,47 @@ function xmlhttpPost(
 	}
 }
 
+function xmlhttpUploadFile(
+	vUrl,
+	vPath,
+	vFile,
+	vCompleteFunc
+)
+{
+	if (!vFile)
+		return;
+	
+	var xmlHttpReq = getXHR();
+	if (xmlHttpReq == null) {
+		alert("Failed to get XMLHttpRequest");
+		return;
+	}
+	
+	if (vUrl == '')
+		vUrl = "../bridge";
+	vUrl += "?cmd=UploadFile&path=" + encodeURIComponent(vPath);
+	xmlHttpReq.open('POST', vUrl, true);
+	xmlHttpReq.setRequestHeader("Cache-Control", "no-cache");
+	xmlHttpReq.setRequestHeader('Content-Type', 'multipart/form-data');
+	xmlHttpReq.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+	xmlHttpReq.setRequestHeader("X-File-Name", "filedata");
+
+	upload = xmlHttpReq.upload;
+	upload.addEventListener("progress", function (ev)
+	{
+		if (ev.lengthComputable)
+			console.log( (ev.loaded / ev.total) * 100 + "%" );
+	}, false);
+	
+	upload.addEventListener("load", function (ev) {
+		console.log("Upload completed");
+	}, false);
+	
+	upload.addEventListener("error", function (ev) {console.log(ev);}, false);
+	
+	xmlHttpReq.send(vFile);
+}
+
 //Get an XMLHttpRequest, object
 function getXHR()
 {

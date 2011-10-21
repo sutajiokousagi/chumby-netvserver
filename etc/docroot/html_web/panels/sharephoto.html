@@ -4,20 +4,72 @@
 
 <script src="js/jquery.MultiFile.js" type="text/javascript" language="javascript"></script>
 <style>
-#thumbs { padding-top: 10px; overflow: hidden; }
-#thumbs img, #largeImage {
- border: 1px solid gray;
- padding: 4px;
- background-color: black;
- cursor: pointer;
+#preview_img
+{
+	border: 1px solid grey;
+	overflow: hidden;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+	background-color: #333333;
+	background-image: url('');
+	display: inline-block;
 }
-#thumbs img {
- float: left;
- margin-right: 6px;
+
+.thumbnail
+{
+	border: 1px solid grey;
+	width: 150px;
+	height: 150px;
+	overflow: hidden;
+	float: left;
+	margin: 4px;
+	-webkit-transition: all 0.2s ease-in-out;
+	-moz-transition: all 0.2s ease;
+	-o-transition: all 0.2s ease;
+	cursor: auto;
+	background-color: #333333;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
 }
+
+.thumbnail:hover
+{
+	-webkit-transform: scale(1.05);
+	border: 1px solid yellow;
+}
+
+.thumbnail_corner_btn
+{
+	position: absolute;
+	top: 1px;
+	left: 131px;
+	width: 20px;
+	height: 20px;
+	background-image: url('images/btn_delete.png');
+	background-color: #808080;
+	background-repeat: no-repeat;
+	background-position: center;
+	cursor: pointer;
+	border: 0px;
+}
+
+.thumbnail_corner_btn:hover
+{
+	background-color: yellow;
+}
+
+.thumbnail img
+{
+	cursor: pointer;
+	display: inline-block;
+}
+
 </style>
 
 <script>
+	
 	$(function()
 	{
 		$("button", ".sharephoto_panel").button();
@@ -26,46 +78,34 @@
 		//Initialize file selector
 		$('#addFiles').MultiFile({
 			onFileRemove: function(element, value, master_element){
-				//$('#F9-Log').append('<li>onFileRemove - '+value+'</li>')
+				//$('#sharephoto_list').append('<li>onFileRemove - '+value+'</li>')
 			},
 			afterFileRemove: function(element, value, master_element){
-				$('#F9-Log').append('<li>afterFileRemove - '+value+'</li>')
+				$('#sharephoto_list').append('<li>afterFileRemove - '+value+'</li>')
 			},
 			onFileAppend: function(element, value, master_element){
-				//$('#F9-Log').append('<li>onFileAppend - '+value+'</li>')
-				
-				var FS_ = null;
-				var output = document.getElementsByTagName('preview_img')[0];
-				
-				var src = createObjectURL(value);
-				var image = new Image();
-				image.src = src;
+				$('#sharephoto_list').append('<li>onFileAppend - '+value+'</li>')
 			},
 			afterFileAppend: function(element, value, master_element){
-				$('#F9-Log').append('<li>afterFileAppend - '+value+'</li>')
+				$('#sharephoto_list').append('<li>afterFileAppend - '+value+'</li>')
 			},
-			onFileSelect: function(element, value, master_element){
-				//$('#F9-Log').append('<li>onFileSelect - '+value+'</li>')
+			buildThumbnail: function(element, value, master_element){
+				//$('#sharephoto_list').append('<li>buildThumbnail - '+value+'</li>')
 			},
 			afterFileSelect: function(element, value, master_element){
-				//$('#F9-Log').append('<li>afterFileSelect - '+value+'</li>')
+				//$('#sharephoto_list').append('<li>afterFileSelect - '+value+'</li>')
 			}
 		});
 	});
+	
 	function sharephoto_ui_event(btnName)
 	{
 		if (global_parameters['log_sharephoto_btn'])
 			log( btnName );
-		if (btnName == "add")
-		{
-		}
-		else if (btnName == "left")
+		if (btnName == "left")
 		{
 		}
 		else if (btnName == "right")
-		{
-		}
-		else if (btnName == "center")
 		{
 		}
 	}
@@ -82,28 +122,31 @@
 	{
 		console.log('Error: ', e);
 	}
-
-	function buildThumbnail(src)
-	{
-		//var img = document.getElementById('preview_img');
-		var img = document.createElement('img');
-		img.src = src;
-		img.title = '' + img.src;
-		img.style.width = "150px";
-		
-		$('#thumbs img').click(function(){
-			$('#largeImage').attr('src',$(this).attr('src').replace('thumb','large'));
-			$('#description').html($(this).attr('alt'));
-		});
-
-		return img;
-	}
-
+	
 	function onFileSelect(filename)
 	{
-		var output = document.getElementsByTagName('thumbnails')[0];
-		output.innerHTML = '';
+		$("#preview_img").css("background-image", "url('"+filename+"')");
+		$("#preview_img").click(function() { uploadFile(filename); });
+	}
+	
+	function onFileDelete(id, filepath)
+	{
+		$('#'+id).remove();
+		deleteFile(filepath);
+	}
+	
+	function deleteFile(filepath)
+	{
+		window.resolveLocalFileSystemURL(filepath, function(fileEntry)
+		{
+			fileEntry.remove(function() {
+				//readDirectories();
+			}, errorCallback);
+		}, errorCallback);
+	}
 
+	function buildThumbnail(filename, filepath)
+	{
 		FS_.root.getFile(filename, {create: false}, function(fileEntry)
 		{
 			var src = null;
@@ -116,7 +159,15 @@
 
 				// Method 1: create a Blob URL to the file.
 				src = window.URL.createObjectURL(file);
-				output.appendChild(buildThumbnail(src));
+				var id = src.split('/').join('').split(':').join('').split('.').join('').split('-').join('');
+				
+				var htmlString = "<div class='thumbnail' ";
+				htmlString += " style=\"background-image: url('" + src + "');\"";
+				htmlString += " id='" + id + "'";
+				htmlString += " onclick=\"onFileSelect('" + src + "');\" >";
+				htmlString += "<div class='thumbnail_corner_btn' onclick=\"onFileDelete('" + id + "','" + filepath + "');\"></div>";
+				htmlString += "</div>"
+				$("#thumbs").append(htmlString);
 
 				// The browser will release Blob URL references when the page unloads, but
 				// it's always a good idea to free the memory if you're done using it.
@@ -142,23 +193,47 @@
 
 		}, errorCallback);
 	}
-
-	function deleteFile(filesystemPath)
+	
+	function cleanAll()
 	{
-		window.resolveLocalFileSystemURL(filesystemPath, function(fileEntry)
+		cleanDirectories();
+		sharephoto_resetUI();
+	}
+	
+	function sharephoto_resetUI()
+	{
+		$("#sharephoto_list").html("");
+		$("#thumbs").html("");
+	}
+	
+	function cleanDirectories()
+	{
+		var dirReader = FS_.root.createReader();
+		
+		// Need to recursively read directories until there are no more results.
+		var readEntries2 = function()
 		{
-			fileEntry.remove(function() {
-				readDirectories();
+			dirReader.readEntries(function(entries)
+			{
+				if (entries.length)
+				{
+					for (var i = 0, entry; entry = entries[i]; ++i)
+					{
+						if (entry.isFile)		
+							deleteFile( entry.toURL ? entry.toURL() : entry.toURI() );
+					}
+					readEntries();
+				}
 			}, errorCallback);
-		}, errorCallback);
+		};
+
+		readEntries2();
 	}
 
 	function readDirectories()
 	{
 		var dirReader = FS_.root.createReader();
-		var fragment = document.createDocumentFragment();
-		var filelist = document.getElementById('sharephoto_list');
-		filelist.innerHTML = '';
+		sharephoto_resetUI();
 
 		// Need to recursively read directories until there are no more results.
 		var readEntries = function()
@@ -167,28 +242,20 @@
 			{
 				if (entries.length)
 				{
-				for (var i = 0, entry; entry = entries[i]; ++i)
-				{
-					if (entry.isFile)
+					for (var i = 0, entry; entry = entries[i]; ++i)
 					{
-						/*
-						var div = document.createElement('div');
-						div.innerHTML =
-							['<a href="javascript:onFileSelect(\'', entry.name, '\');">', entry.name,
-							 '</a>&nbsp;<a href="javascript:deleteFile(\'', entry.toURL ? entry.toURL() : entry.toURI(),
-							 '\');" class="remove">delete</a>'].join('');
-						fragment.appendChild(div);
-						*/
-						
-						onFileSelect(entry.name);
+						if (entry.isFile)
+						{
+							/*
+							var divString = ['<a href="javascript:buildThumbnail(\'', entry.name, '\');">', entry.name,
+											'</a>&nbsp;<a href="javascript:deleteFile(\'', entry.toURL ? entry.toURL() : entry.toURI(),
+											'\');" class="remove">delete</a></br>'].join('');
+							$("#sharephoto_list").append(divString);
+							*/
+							buildThumbnail(entry.name, entry.toURL ? entry.toURL() : entry.toURI());
+						}
 					}
-				}
-				readEntries();
-				} else {
-				filelist.appendChild(fragment);
-				if (!filelist.childElementCount) {
-					filelist.textContent = "No image files in the app's filesystem. Import some above.";
-				}
+					readEntries();
 				}
 			}, errorCallback);
 		};
@@ -196,47 +263,99 @@
 		readEntries();
 	}
 
+	//Called when the file list changes
 	document.getElementById('addFiles').addEventListener('change', function(e)
 	{
-		for (var i = 0, file; file = this.files[i]; ++i)
+		addFileListItems(this.files);
+		for (var i = 0, file; file = this.files[i]; i++)
 		{
 			// Capture current iteration's file in local scope for the getFile() callback.
-			(function(f) {
-				var filename = 'THIS_DEMO_' + file.name.replace(/\s/g, '_');
-				FS_.root.getFile(filename, {create: true, exclusive: true}, function(fileEntry) {
-				fileEntry.createWriter(function(fileWriter) {
-					fileWriter.write(f);
-				}, errorCallback);
+			(function(f)
+			{
+				var filename = 'NETV_SHAREPHOTO_' + file.name.replace(/\s/g, '_');
+				FS_.root.getFile(filename, {create: true, exclusive: true}, function(fileEntry)
+				{
+					fileEntry.createWriter(function(fileWriter) { fileWriter.write(f); }, errorCallback);
 				}, errorCallback);
 			})(file);
 		}
-		readDirectories();
+		readDirectories();		
 	}, false);
 
 	window.requestFileSystem(TEMPORARY, 1024 * 1024,  function(fs)
 	{
 		FS_ = fs;
+		//cleanDirectories();
 		readDirectories();
 	}, errorCallback);
+	
+	//New implementation
+	//-----------------------------------------------------------------
+	
+	var fileQueue = new Array();
+	var selectedFile = "";
+		
+	function addFileListItems(files)
+	{
+        for (var i = 0; i < files.length; i++)
+		{
+            var fr = new FileReader();
+            fr.file = files[i];
+            fr.onloadend = addFileToQueue;
+            fr.readAsDataURL( files[i] );
+        }
+    }
+	
+	var addFileToQueue = function (ev)
+	{
+        var file = ev.target.file;
+        if (!file)
+			return;
+			
+		//UI stuff here
+		
+		fileQueue.push({
+			file : file
+		});
+    }
+	
+	function uploadFile(filename)
+	{
+		for (var i = 0; i < fileQueue.length; i++)
+		{
+			var item = fileQueue.pop();
+			console.log(item.file.name);
+			console.log(filename);
+			//if (!stringContains(item.file.name, filename) && !stringContains(filename, item.file.name))
+			//	continue;
+			
+			xmlhttpUploadFile("", "/tmp/sharephoto_123.jpg", item.file);
+			break;
+        }
+	}
+	
 </script>
 
 <div style="width:100%; height:100%;" class="sharephoto_panel">
 	<div style="width:100%; height:100%; margin:auto;">
 		<div style="clear:both; width:100%; height:40px;"></div>
 		<div style="clear:both; width:100%; text-align: center;">
-			<input type='file' id='addFiles' name='Add photos...' multiple class="multi max-9 accept-gif|jpg|jpeg|bmp|png"/>
+			<form action="" method="post" enctype="multipart/form-data">
+				<input type='file' id='addFiles' name='filedata' text='Add photos...' multiple class="multi max-9 accept-gif|jpg|jpeg|bmp|png"/>
+				<input type='hidden' name='cmd' value='UploadFile'/>
+				<input type='hidden' name='path' value='/tmp/sharephoto123.jpg'/>
+				<input type="submit" value="Upload">
+			</form>
 		</div>
 		<div style="clear:both; width:100%; height:10px;"></div>
 		
 		<div style="clear:both; width:100%; text-align: center;">
-			<button name="left" style="float:left; font-weight:bold;">&lt;</button>
-			<div style="float:center; width:80%; height:30%;"><img id="preview_img" width="100%"></div>
-			<button name="right" style="float:right; font-weight:bold;">&gt;</button>
+<!--			<button name="left" style="float:left; font-weight:bold;">&lt;</button>		-->
+			<div style="float:center; width:533px; height:300px;" id="preview_img" />
+<!--			<button name="right" style="float:right; font-weight:bold;">&gt;</button>	-->
 		</div>
 		<div style="clear:both; width:100%; height:10px;"></div>
-		<div style="clear:both; width:100%; text-align: center;" id="thumbs">
-			<thumbnails></thumbnails>
-		</div>
+		<div style="clear:both; width:100%; text-align: center;" id="thumbs"></div>
 		<div style="clear:both; width:100%; height:10px;"></div>
 		<div style="clear:both; width:100%; text-align: center;" id="sharephoto_list"></div>
 	</div>
