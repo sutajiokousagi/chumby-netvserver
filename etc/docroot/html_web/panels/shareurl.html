@@ -3,24 +3,40 @@
 -->
 <style>
 
-#url
+#nav_bar
 {
 	background-color: white;
+	-moz-border-radius: 24px;
+	-webkit-border-radius: 24px;
+	-moz-border-radius: 24px;
+	border-radius: 24px;
 	border: 1px solid grey;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
+	width: 100%;
+	padding: 6px;
+}
+
+#url
+{
+	border: 0px;
+	float: center;
+	width: 50%;
+	height: 40px;
+	background:none;
+	outline:none;
+	margin-left: 10px;
+	margin-right: 10px;
 }
 
 #url:hover
 {
-	border: 1px solid blue;
+	
 }
 
 #shareurl_iframe
 {
 	border: 0px;
-	background-color: #646464;
+	border-radius: 20px;
+	margin-top: 20px;
 }
 
 </style>
@@ -29,8 +45,8 @@
 	$(function()
 	{
 		$("button", ".shareurl_panel").button();
-		$("button").click(function() { change_url( $("#url").val() ); });
-		
+		$("button").click(function() { shareurl_ui_event( $(this).attr("name") ); });
+
 		$('#shareurl_iframe').load(function() 
 		{
 			console.log("iframe loaded");
@@ -38,6 +54,19 @@
 			console.log( current_url );
 		});
 	});
+	
+	function shareurl_ui_event(btnName)
+	{
+		if (btnName == "go")
+		{
+			change_url( $("#url").val() );
+		}
+		else if (btnName == "back")
+		{
+			xmlhttpPost("", "post", { cmd : 'Multitab', tab : '1', options : 'hide' }, null );
+			$("#shareurl_iframe").attr('src', '');
+		}
+	}
 
 	function change_url(new_url)
 	{
@@ -50,9 +79,10 @@
 </script>
 
 <div style="width:100%; height:100%" class="shareurl_panel">
-	<div style="width:100%; height:48px; float:top; clear:both;">
+	<div id="nav_bar" style="width:100%; float:top; clear:both;">
+		<button name="back" style="float:left; height:42px; border-radius:20px;">&lt;</button>
 		<input type='text' name="url" id="url" value="www.chumby.com" />
-		<button name="go" style="float:right;"><img src="images/btn_widget.png"></button>
+		<button name="go" style="float:right; height:42px; border-radius:20px;">GO</button>
 	</div>
 	<div style="width:100%; height:100%; float:top; clear:both;" style="overflow:hidden;">
 		<iframe id="shareurl_iframe" name="shareurl_iframe" width="100%" height="100%">
