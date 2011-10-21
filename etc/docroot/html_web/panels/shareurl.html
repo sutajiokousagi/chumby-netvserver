@@ -1,0 +1,60 @@
+<!--
+	See index.js for useful global variables
+-->
+<style>
+
+#url
+{
+	background-color: white;
+	border: 1px solid grey;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+
+#url:hover
+{
+	border: 1px solid blue;
+}
+
+#shareurl_iframe
+{
+	border: 0px;
+	background-color: #646464;
+}
+
+</style>
+
+<script>
+	$(function()
+	{
+		$("button", ".shareurl_panel").button();
+		$("button").click(function() { change_url( $("#url").val() ); });
+		
+		$('#shareurl_iframe').load(function() 
+		{
+			console.log("iframe loaded");
+			var current_url = $("#shareurl_iframe").attr('src');
+			console.log( current_url );
+		});
+	});
+
+	function change_url(new_url)
+	{
+		if (!stringStartsWith(new_url, "http://") && !stringStartsWith(new_url, "https://"))
+			new_url = "http://" + new_url;
+		$("#shareurl_iframe").attr('src', new_url);
+		
+		xmlhttpPost("", "post", { cmd : 'Multitab', tab : '1', param : new_url, options : 'load' }, null );
+	}
+</script>
+
+<div style="width:100%; height:100%" class="shareurl_panel">
+	<div style="width:100%; height:48px; float:top; clear:both;">
+		<input type='text' name="url" id="url" value="www.chumby.com" />
+		<button name="go" style="float:right;"><img src="images/btn_widget.png"></button>
+	</div>
+	<div style="width:100%; height:100%; float:top; clear:both;" style="overflow:hidden;">
+		<iframe id="shareurl_iframe" name="shareurl_iframe" width="100%" height="100%">
+	</div>
+</div>

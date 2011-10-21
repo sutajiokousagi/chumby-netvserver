@@ -8,14 +8,14 @@ global_parameters['log_remotecontrol_btn'] = false;
 global_parameters['log_sharephoto_btn'] = true;
 
 function onLoad()
-{
+{	
 	//Initialize tabs with jQueryUI
 	$("#tabs").tabs().removeClass('ui-corner-all').removeClass('ui-widget-content');
     $("#tabs li").removeClass('ui-corner-top');
 	$("#tabs ul").removeClass('ui-widget-header').removeClass('ui-corner-all');
 	
-	$( "button" ).button();
-	$( "button" ).click(function() { return false; });
+	$("button").button();
+	$("button").click(function() { return false; });
 	
 	$.getJSON("http://jsonip.appspot.com?callback=?", function(da){ publicIP = da.ip; });
 	
