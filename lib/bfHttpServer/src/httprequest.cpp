@@ -379,6 +379,17 @@ QMultiMap<QByteArray,QByteArray> HttpRequest::getParameterMap() const {
     return parameters;
 }
 
+QByteArray HttpRequest::getParameterMapXML() const {
+    QMapIterator<QByteArray, QByteArray> i(getParameterMap());
+    QByteArray xmlString;
+    while (i.hasNext())
+    {
+        i.next();
+        xmlString += "<" + i.key() + ">" + XMLEscape(i.value()) + "</" + i.key() + ">";
+    }
+    return QByteArray("<xml>") + xmlString + QByteArray("</xml>");
+}
+
 QByteArray HttpRequest::getBody() const {
     return bodyData;
 }
@@ -515,8 +526,16 @@ QByteArray HttpRequest::getCookie(const QByteArray& name) const {
     return cookies.value(name);
 }
 
-/** Get the map of cookies */
 QMap<QByteArray,QByteArray>& HttpRequest::getCookieMap() {
     return cookies;
 }
 
+QByteArray HttpRequest::XMLEscape(QByteArray inputString) const
+{
+    return inputString.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");     //.replace("'", "&apos;");
+}
+
+QByteArray HttpRequest::XMLUnescape(QByteArray inputString) const
+{
+    return inputString.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&apos;", "'");
+}

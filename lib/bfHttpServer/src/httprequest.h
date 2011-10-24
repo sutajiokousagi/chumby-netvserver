@@ -114,6 +114,9 @@ public:
     /** Get all HTTP request parameters */
     QMultiMap<QByteArray,QByteArray> getParameterMap() const;
 
+    /** Get all HTTP request parameters as a XML string */
+    QByteArray getParameterMapXML() const;
+
     /** Get the HTTP request body  */
     QByteArray getBody() const;
 
@@ -220,6 +223,11 @@ private:
     /** Sub-procedure of readFromSocket(), extract cookies from headers */
     void extractCookies();
 
+    /** Escape special XML characters */
+    QByteArray XMLEscape(QByteArray inputString) const;
+
+    /** Unescape special XML characters */
+    QByteArray XMLUnescape(QByteArray inputString) const;
 };
 
 #endif // HTTPREQUEST_H
