@@ -8,7 +8,7 @@ void FileUploadController::service(HttpRequest& request, HttpResponse& response)
     if (request.getParameter("action")=="show")
     {
         response.setHeader("Content-Type", "image/jpeg");
-        QTemporaryFile* file=request.getUploadedFile("file1");
+        QTemporaryFile* file=request.getUploadedFile("filedata");
         if (file) {
             while (!file->atEnd() && !file->error())
             {
@@ -27,7 +27,7 @@ void FileUploadController::service(HttpRequest& request, HttpResponse& response)
         response.write("Upload a JPEG image file<p>");
         response.write("<form method=\"post\" enctype=\"multipart/form-data\">");
         response.write("  <input type=\"hidden\" name=\"action\" value=\"show\">");
-        response.write("  File: <input type=\"file\" name=\"file1\"><br>");
+        response.write("  File: <input type=\"file\" name=\"filedata\"><br>");
         response.write("  <input type=\"submit\">");
         response.write("</form>");
         response.write("</body></html>",true);
