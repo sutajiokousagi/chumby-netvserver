@@ -98,7 +98,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     //-----------
 
-    else if (cmdString == "SETCHROMAKEY")
+    else if (cmdString == "SETCHROMAKEY" || cmdString == "CHROMAKEY")
     {
         //Contruct arguments
         dataString = dataString.toLower();
@@ -120,7 +120,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         }
     }
 
-    else if (cmdString == "ENABLESSH")
+    else if (cmdString == "ENABLESSH" || cmdString == "SSH")
     {
         if (dataString.length() < 1)
             dataString = "start-chumby";
@@ -132,7 +132,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     //-----------
 
-    else if (cmdString == "REMOTECONTROL")
+    else if (cmdString == "REMOTECONTROL" || cmdString == "REMOTE")
     {
         //Forward to NeTVBrowser
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd>" + dataXmlString + "</xml>", "all");
@@ -142,7 +142,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
     }
 
-    else if (cmdString == "KEY")
+    else if (cmdString == "KEY" || cmdString == "KEYBOARD")
     {
         //Forward to all clients
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><value>" + dataString + "</value></xml>", "all");
@@ -515,7 +515,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     //-----------
     //Mostly from Android/iOS devices
 
-    else if (cmdString == "REMOTECONTROL")
+    else if (cmdString == "REMOTECONTROL" || cmdString == "REMOTE")
     {
         //Forward to all clients
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><value>" + dataString + "</value></xml>", "netvbrowser");
@@ -555,7 +555,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    else if (cmdString == "SETIFRAME" || cmdString == "MULTITAB")
+    else if (cmdString == "SETIFRAME" || cmdString == "MULTITAB" || cmdString == "TAB")
     {
         //Forward to NeTVBrowser
         int numClient = Static::tcpSocketServer->broadcast(request.getRawData(), "netvbrowser");
@@ -896,7 +896,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     //-----------
     //Mostly from Flash widget_engine.swf
 
-    else if (cmdString == "JAVASCRIPT")
+    else if (cmdString == "JAVASCRIPT" || cmdString == "JS")
     {
         //Forward to NeTVBrowser
         int numClient = Static::tcpSocketServer->broadcast(request.getRawData(), "netvbrowser");
@@ -916,7 +916,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
     //-----------
 
-    else if (cmdString == "NECOMMAND")
+    else if (cmdString == "NECOMMAND" || cmdString == "ANYCOMMAND" || cmdString == "SHELLCOMMAND" || cmdString == "SHELL")
     {
         if (!IsAuthorizedCaller(authorizedCaller)) {
             response.setStatus(BRIDGE_RETURN_STATUS_UNAUTHORIZED);
@@ -941,7 +941,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    else if (cmdString == "ENABLESSH")
+    else if (cmdString == "ENABLESSH" || cmdString == "SSH")
     {
         if (dataString.length() < 1)
             dataString = "start-chumby";
@@ -953,7 +953,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    else if (cmdString == "REBOOT")
+    else if (cmdString == "REBOOT" || cmdString == "RESTART")
     {
         QByteArray buffer = this->Execute("reboot");
 
