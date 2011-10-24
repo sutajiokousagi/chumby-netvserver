@@ -171,6 +171,21 @@ function RemoteControl()
 	}
 }
 
+function Key()
+{
+	var dataString = document.form_Key.inputField.value;
+	
+	if (dataString == '') 
+	{
+		alert('Input field is required');
+		console.log('Input field is empty');
+	}
+	else
+	{
+		sendSingleValueCommand('Key', dataString);
+	}
+}
+
 function FileExists()
 {
 	var dataString = document.form_FileExists.inputField.value;
@@ -311,69 +326,6 @@ function GetJPG()
 }
 
 //---------------------------------
-//Not in used
-
-function PlayWidget()
-{
-	var dataString = document.form_PlayWidget.inputField.value;
-	
-	if (dataString == '') 
-	{
-		alert('Input field is required');
-		console.log('Input field is empty');
-	}
-	else
-	{
-		sendSingleValueCommand('PlayWidget', dataString);
-	}
-}
-
-function PlaySWF()
-{
-	var dataString = document.form_PlaySWF.inputField.value;
-	
-	if (dataString == '') 
-	{
-		alert('Input field is required');
-		console.log('Input field is empty');
-	}
-	else
-	{
-		sendSingleValueCommand('PlaySWF', dataString);
-	}
-}
-
-function SetWidgetSize()
-{
-	var dataString = document.form_SetWidgetSize.inputField.value;
-	
-	if (dataString == '') 
-	{
-		alert('Input field is required');
-		console.log('Input field is empty');
-	}
-	else
-	{
-		sendMultiValueCommand('SetWidgetSize', dataArray);
-	}
-}
-
-function WidgetEngine()
-{
-	var dataString = document.form_WidgetEngine.inputField.value;
-	
-	if (dataString == '') 
-	{
-		alert('Input field is required');
-		console.log('Input field is empty');
-	}
-	else
-	{
-		sendSingleValueCommand('WidgetEngine', dataString);
-	}
-}
-
-//---------------------------------
 
 function SetChromaKeyOnOff()
 {
@@ -509,24 +461,6 @@ function SetNetwork()
 	else
 	{
 		sendMultiValueCommand('SetNetwork', dataArray);
-	}
-}
-
-function SetAccount()
-{
-	var dataString1 = document.form_SetAccount.inputField.value;
-	var dataString2 = document.form_SetAccount.inputField2.value;
-	var dataString3 = document.form_SetAccount.inputField3.value;
-	var dataArray = { chumby_username:dataString1, chumby_password:dataString2, chumby_device_name:dataString3 };
-	
-	if (dataString1 == '' || dataString2 == '') 
-	{
-		alert('Input field(s) are required');
-		console.log('Input field(s) are empty');
-	}
-	else
-	{
-		sendMultiValueCommand('SetAccount', dataArray);
 	}
 }
 

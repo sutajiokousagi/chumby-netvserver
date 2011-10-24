@@ -175,6 +175,24 @@
 		</tr>
 		</form>
 		
+		<!-- RemoteControl -->
+		<form name="form_Key" method="POST" action="">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				Key
+			</td>
+			<td>
+				<input type="text" size="256" name="inputField" value="pgup" >
+			</td>
+			<td class="td_button" >
+				<input type="button" value="GO!" class="td_button" onclick="Key()">
+			</td>
+		</tr>
+		</form>
+		
 		<!-- FileExists -->
 		<form name="form_FileExists" method="POST" action="">
 		<tr class="service_row">
@@ -326,80 +344,6 @@
 			</td>
 			<td class="td_button" >
 				<input type="button" value="GO!" class="td_button" onclick="GetJPG()">
-			</td>
-		</tr>
-		</form>
-		
-		<!------------------------------->
-			
-		<!-- PlayWidget -->
-		<form name="form_PlayWidget" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_in_progress">
-				not in used
-			</td>
-			<td>
-				PlayWidget
-			</td>
-			<td>
-				<input type="text" size="256" name="inputField" value="http://s3movies.chumby.com/cdn/xmlmovie/F3A86472-05F6-11DF-A1F8-001B24E044BE" >
-			</td>
-			<td class="td_button" >
-				<input type="button" value="GO!" class="td_button" onclick="PlayWidget()">
-			</td>
-		</tr>
-		</form>
-		
-		<!-- PlaySWF -->
-		<form name="form_PlaySWF" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_in_progress">
-				not in used
-			</td>
-			<td>
-				PlaySWF
-			</td>
-			<td>
-				<input type="text" size="256" name="inputField" value="http://www.flashscene.org/flash/EvenMoreExplosionsInTheSkies/explosionsinthesky.swf" >
-			</td>
-			<td class="td_button" >
-				<input type="button" value="GO!" class="td_button" onclick="PlaySWF()">
-			</td>
-		</tr>
-		</form>
-		
-		<!-- SetWidgetSize -->
-		<form name="form_SetWidgetSize" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_in_progress">
-				not in used
-			</td>
-			<td>
-				SetWidgetSize
-			</td>
-			<td>
-				<input type="text" size="128" name="inputField" value="400 300 160 120" >
-			</td>
-			<td class="td_button" >
-				<input type="button" value="GO!" class="td_button" onclick="SetWidgetSize()">
-			</td>
-		</tr>
-		</form>
-		
-		<!-- WidgetEngine -->
-		<form name="form_WidgetEngine" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_in_progress">
-				not in used
-			</td>
-			<td>
-				WidgetEngine
-			</td>
-			<td>
-				<input type="text" size="128" name="inputField" value="TBD" >
-			</td>
-			<td class="td_button" >
-				<input type="button" value="GO!" class="td_button" onclick="WidgetEngine()">
 			</td>
 		</tr>
 		</form>
@@ -575,27 +519,7 @@
 			</td>
 		</tr>
 		</form>
-		
-		<!-- SetAccount -->
-		<form name="form_SetAccount" method="POST" action="">
-		<tr class="service_row">
-			<td class="service_in_progress">
-				not in used
-			</td>
-			<td>
-				SetAccount
-			</td>
-			<td>
-				<input type="text" size="256" name="inputField" value="myusername" > (username)<br/>
-				<input type="text" size="256" name="inputField2" value="mypassword" > (password)<br/>
-				<input type="text" size="256" name="inputField3" value="NeTV Living Room" > (device name)
-			</td>
-			<td class="td_button" >
-				<input type="button" value="GO!" class="td_button" onclick="SetAccount()">
-			</td>
-		</tr>
-		</form>
-				
+						
 		<!-- NeCommand -->
 		<form name="form_NeCommand" method="POST" action="">
 		<tr class="service_row">
@@ -633,8 +557,26 @@
 		</tr>
 		</form>
 		
-		
-		
+		<!-- UploadFile -->
+		<form name="form_UploadFile" method="POST" action="../bridge" enctype="multipart/form-data">
+		<tr class="service_row">
+			<td class="service_done">
+				done
+			</td>
+			<td>
+				UploadFile
+			</td>
+			<td>
+				<input type="hidden" name="cmd" value="uploadfile">
+				<input type="text" size="256" name="path" value="/tmp/abc.jpg"> (path)<br/>
+				<input type="file" name="filedata"> (filedata)
+			</td>
+			<td class="td_button" >
+				<input type="submit" class="td_button">
+			</td>
+		</tr>
+		</form>
+	
 	</table>
 	
 </td>
