@@ -99,6 +99,8 @@ private:
     bool IsHexString(QString testString);
     QString XMLEscape(QString inputString);
     QString XMLUnescape(QString inputString);
+    QByteArray XMLEscape(QByteArray inputString);
+    QByteArray XMLUnescape(QByteArray inputString);
 
     /** HTTP response */
     void DumpStaticFile(QByteArray path, HttpResponse& response);

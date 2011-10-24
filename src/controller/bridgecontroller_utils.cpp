@@ -213,6 +213,16 @@ QString BridgeController::XMLUnescape(QString inputString)
     return inputString.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&apos;", "'");
 }
 
+QByteArray BridgeController::XMLEscape(QByteArray inputString)
+{
+    return inputString.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");     //.replace("'", "&apos;");
+}
+
+QByteArray BridgeController::XMLUnescape(QByteArray inputString)
+{
+    return inputString.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&apos;", "'");
+}
+
 
 //----------------------------------------------------------------------------------------------------
 // Copied from StaticFileController
