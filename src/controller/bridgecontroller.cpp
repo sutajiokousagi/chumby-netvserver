@@ -35,13 +35,20 @@ BridgeController::~BridgeController()
 
 void BridgeController::service(HttpRequest& request, HttpResponse& response)
 {
-    //Protocol documentation
-    //https://internal.chumby.com/wiki/index.php/JavaScript/HTML_-_Hardware_Bridge_protocol
+    //Documentation
+    //http://wiki.chumby.com/index.php/NeTV_web_services
+
+    //Allow Authorized-Caller to be passed through HTTP Header or regular POST parameters, or through XML style passing
+    QByteArray authorizedCaller = request.getHeader(STRING_AUTHORIZED_CALLER).toUpper();
+    if (authorizedCaller.length() < 1)
+        authorizedCaller = request.getParameter(STRING_AUTHORIZED_CALLER).toUpper();
+    request.removeParameter(STRING_AUTHORIZED_CALLER);
 
     //Extract the command name & most commonly used 'value' parameter (if any)
     QByteArray cmdString = request.getParameter(STRING_COMMAND).toUpper();
     QByteArray dataString = request.getParameter(STRING_VALUE);
     QByteArray dataXmlString = request.getParameter(STRING_DATA);
+    QByteArray rawXmlString = request.getParameterMapXML();
     request.removeParameter(STRING_COMMAND);
     request.removeParameter(STRING_VALUE);
 
@@ -49,10 +56,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     if (dataString.length() != 0 && dataXmlString.length() == 0)
         dataXmlString = "<value>" + dataString + "</value>";
 
-    //Allow Authorized-Caller to be passed through HTTP Header or regular POST parameters, or through XML style passing
-    QByteArray authorizedCaller = request.getHeader(STRING_AUTHORIZED_CALLER).toUpper();
-    if (authorizedCaller.length() < 1)
-        authorizedCaller = request.getParameter(STRING_AUTHORIZED_CALLER).toUpper();
+    //Some commands requires XML escape. This would be an option.
+    QByteArray xmlEscapeString = request.getParameter(STRING_XML_ESCAPE).toUpper();
+    bool xmlEscape = (xmlEscapeString == "1" || xmlEscapeString == "TRUE" || xmlEscapeString == "YES") ? true : false;
 
     //-----------------------------------------------------------
 
@@ -132,25 +138,27 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     //-----------
 
-    else if (cmdString == "REMOTECONTROL" || cmdString == "REMOTE")
+    else if (cmdString == "REMOTECONTROL" || cmdString == "REMOTE" || cmdString == "KEY" || cmdString == "KEYBOARD")
     {
-        //Forward to NeTVBrowser
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd>" + dataXmlString + "</xml>", "all");
+        //Forward to all TCP clients
+        int numClient = Static::tcpSocketServer->broadcast(rawXmlString, "all");
 
         //Reply to HTTP client
         if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>Command forwarded to browser</value></data></xml>", true);
         else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
     }
 
-    else if (cmdString == "KEY" || cmdString == "KEYBOARD")
+    else if (cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS")
     {
-        //Forward to all clients
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><value>" + dataString + "</value></xml>", "all");
+        //Forward to NeTVBrowser
+        int numClient = Static::tcpSocketServer->broadcast(rawXmlString, "netvbrowser");
 
         //Reply to HTTP client
-        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", true);
-        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>no client running</value></data></xml>", true);
+        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>Command forwarded to browser</value></data></xml>", true);
+        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
     }
+
+    //-----------
 
     else if (cmdString == "ANDROID" || cmdString == "IOS")
     {
@@ -182,6 +190,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
         //This is simply passed directly to NeTVBrowser
         QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
+        if (xmlEscape)
+            buffer = XMLEscape(buffer);
+
         response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
         buffer = QByteArray();
     }
@@ -205,21 +216,6 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
     }
 
-    else if (cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "SETIFRAME")
-    {
-        QByteArray param, options, tab;
-        param = request.getParameter("param");
-        options = request.getParameter("options");
-        tab = request.getParameter("tab");
-
-        //Forward to NeTVBrowser
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>" + cmdString + "</cmd><param>") + param + "</param><options>" + options + "</options><tab>" + tab + "</tab></xml>", "netvbrowser");
-
-        //Reply to HTTP client
-        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>OK</value></data></xml>", true);
-        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
-    }
-
     //-----------
 
     else if (cmdString == "SETTIME")
@@ -234,6 +230,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         argsList.append(time);
         argsList.append(timezone);
         QByteArray buffer = this->Execute(docroot + "/scripts/set_time.sh", argsList);
+        if (xmlEscape)
+            buffer = XMLEscape(buffer);
 
         //Reply to HTTP client
         if (time == "")    response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>time parameter is required</value></data></xml>", true);
@@ -261,6 +259,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         QByteArray buffer;
         if (isTest)                 buffer = this->GetFileContents(networkConfigFile + "_test");
         else                        buffer = this->GetFileContents(networkConfigFile);
+        if (xmlEscape)              buffer = XMLEscape(buffer);
 
         //Reply to HTTP client
         if (!fileOK)                response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
@@ -299,6 +298,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "GETPARAM")
     {
         QByteArray value = GetParameter(dataString);
+        if (xmlEscape)
+            value = XMLEscape(value);
         response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + value + "</value></data></xml>", true);
     }
 
@@ -325,6 +326,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "GETFILECONTENTS")
     {
         QByteArray filedata = GetFileContents(dataString);
+        if (xmlEscape)
+            filedata = XMLEscape(filedata);
+
         if (filedata == "file not found" || filedata == "no permission")
             response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + filedata + "</value></data></xml>", true);
         else
@@ -417,9 +421,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         }
 
         //Write the buffer to non-volatile disk
-        //MountRW();
         bool success = file->copy( pathString );
-        //MountRO();
 
         if (!success) {
             response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>error writing to disk (read-only partition?)</message><path>" + pathString.toLatin1() + "</path></data></xml>", true);
@@ -452,6 +454,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         for (int i=0; i<newArgsList.length(); i++)
             newArgs << newArgsList.at(i);
         QByteArray buffer = this->Execute(command, newArgs);
+        if (xmlEscape)
+            buffer = XMLEscape(buffer);
 
         if (buffer.length() > 5)        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
         else                            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
@@ -474,6 +478,9 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (FileExists(docroot + "/scripts/" + cmdString.toLower() + ".sh"))
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/" + cmdString.toLower() + ".sh", QStringList(dataString));
+        if (xmlEscape)
+            buffer = XMLEscape(buffer);
+
         if (buffer.length() > 5)        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data>" + buffer.trimmed() + "</data></xml>", true);
         else                            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data>" + buffer.trimmed() + "</data></xml>", true);
         buffer = QByteArray();
@@ -490,9 +497,17 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
 void BridgeController::service(SocketRequest& request, SocketResponse& response)
 {
+    //Extract the command name & most commonly used 'value' parameter (if any)
     QByteArray cmdString = request.getCommand().toUpper();
     QByteArray dataString = request.getParameter(STRING_VALUE).trimmed();
     QByteArray authorizedCaller = request.getParameter(STRING_AUTHORIZED_CALLER).toUpper();
+    request.removeParameter(STRING_VALUE);
+
+    //Some commands requires XML escape. This would be an option.
+    //QByteArray xmlEscapeString = request.getParameter(STRING_XML_ESCAPE).toUpper();
+    //bool xmlEscape = (xmlEscapeString == "1" || xmlEscapeString == "TRUE" || xmlEscapeString == "YES") ? true : false;
+
+    //-----------------------------------------------------------
 
     if (cmdString == "SETURL")
     {
@@ -515,10 +530,28 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     //-----------
     //Mostly from Android/iOS devices
 
-    else if (cmdString == "REMOTECONTROL" || cmdString == "REMOTE")
+    else if (cmdString == "REMOTECONTROL" || cmdString == "REMOTE" || cmdString == "KEY" || cmdString == "KEYBOARD")
     {
-        //Forward to all clients
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><value>" + dataString + "</value></xml>", "netvbrowser");
+        //Forward to all TCP clients
+        int numClient = Static::tcpSocketServer->broadcast(request.getRawData(), "all");
+
+        //Reply to socket client (Android/iOS)
+        if (numClient > 0) {
+            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+            response.setCommand(cmdString);
+            response.setParameter(STRING_VALUE, "Command forwarded to browser");
+        }else{
+            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+            response.setCommand(cmdString);
+            response.setParameter(STRING_VALUE, "No browser running");
+        }
+        response.write();
+    }
+
+    else if (cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS")
+    {
+        //Forward to NeTVBrowser
+        int numClient = Static::tcpSocketServer->broadcast(request.getRawData(), "netvbrowser");
 
         //Reply to socket client (Android/iOS)
         if (numClient > 0) {
@@ -539,26 +572,8 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         QByteArray eventData = request.getParameter("eventdata").trimmed();     //already URI encoded
         QByteArray javaScriptString = "fAndroidEvents(\"" + eventName + "\",\"" + eventData + "\");";
 
-        //forward to NeTVBrowser
+        //Convert to a JavaScript command & forward to NeTVBrowser
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>JavaScript</cmd><value>") + javaScriptString + "</value></xml>", "netvbrowser");
-
-        //Reply to socket client (Android/iOS)
-        if (numClient > 0) {
-            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
-            response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "Command forwarded to browser");
-        }else{
-            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
-            response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "No browser running");
-        }
-        response.write();
-    }
-
-    else if (cmdString == "SETIFRAME" || cmdString == "MULTITAB" || cmdString == "TAB")
-    {
-        //Forward to NeTVBrowser
-        int numClient = Static::tcpSocketServer->broadcast(request.getRawData(), "netvbrowser");
 
         //Reply to socket client (Android/iOS)
         if (numClient > 0) {
@@ -583,26 +598,8 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         QByteArray level = request.getParameter("level").trimmed().toPercentEncoding();
         QByteArray javaScriptString = "fTickerEvents(\"" + message + "\",\"" + title + "\",\"" + image + "\",\"" + type + "\",\"" + level + "\");";
 
-        //forward to NeTVBrowser
+        //Convert to a JavaScript command & forward to NeTVBrowser
         int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>JavaScript</cmd><value>") + javaScriptString + "</value></xml>", "netvbrowser");
-
-        //Reply to socket client (Android/iOS)
-        if (numClient > 0) {
-            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
-            response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "Command forwarded to browser");
-        }else{
-            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
-            response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "No browser running");
-        }
-        response.write();
-    }
-
-    else if (cmdString == "KEY" || cmdString == "KEYBOARD")
-    {
-        //forward to NeTVBrowser
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><value>" + dataString + "</value></xml>", "netvbrowser");
 
         //Reply to socket client (Android/iOS)
         if (numClient > 0) {
@@ -638,15 +635,6 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
     else if (cmdString == "SETNETWORK")
     {
-        /*
-        qDebug() << "    wifi_password = " << request.getParameter("wifi_password");
-        qDebug() << "    wifi_authentication = " << request.getParameter("wifi_authentication");
-        qDebug() << "    wifi_encryption = " << request.getParameter("wifi_encryption");
-        qDebug() << "    wifi_allocation = " << request.getParameter("wifi_allocation");
-        qDebug() << "    wifi_encoding = " << request.getParameter("wifi_encoding");
-        qDebug() << "    type = " << request.getParameter("type");
-        */
-
         QHash<QString,QString> params;
         params.insert("allocation", request.getParameter("wifi_allocation"));
         params.insert("ssid", request.getParameter("wifi_ssid"));
@@ -892,27 +880,6 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         //No response
     }
 #endif
-
-    //-----------
-    //Mostly from Flash widget_engine.swf
-
-    else if (cmdString == "JAVASCRIPT" || cmdString == "JS")
-    {
-        //Forward to NeTVBrowser
-        int numClient = Static::tcpSocketServer->broadcast(request.getRawData(), "netvbrowser");
-
-        //Reply to socket client (Android/iOS)
-        if (numClient > 0) {
-            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
-            response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "Command forwarded to browser");
-        }else{
-            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
-            response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "No browser running");
-        }
-        response.write();
-    }
 
     //-----------
 

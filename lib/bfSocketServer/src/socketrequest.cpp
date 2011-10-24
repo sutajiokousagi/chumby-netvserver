@@ -80,6 +80,11 @@ int SocketRequest::getParametersCount()
     return parameters.count();
 }
 
+void SocketRequest::removeParameter(QByteArray paramName)
+{
+    parameters.remove(paramName);
+}
+
 void SocketRequest::ParseMessageXML(const char* data)
 {
     QXmlStreamReader* xml = new QXmlStreamReader();

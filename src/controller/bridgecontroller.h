@@ -16,7 +16,7 @@
 #define STRING_COMMAND                      "cmd"
 #define STRING_DATA                         "data"
 #define STRING_VALUE                        "value"
-
+#define STRING_XML_ESCAPE                   "xmlescape"
 
 
 class BridgeController : public QObject, public HttpRequestHandler, public SocketRequestHandler

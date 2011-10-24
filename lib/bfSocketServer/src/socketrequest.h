@@ -32,6 +32,7 @@ public:
     QMap<QByteArray,QByteArray>& getParameters();
     QByteArray getParameter(QByteArray paramName);
     int getParametersCount();
+    void removeParameter(QByteArray paramName);
 
 private:
 

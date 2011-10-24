@@ -17,29 +17,29 @@
 // From dbusmonitor.h
 void BridgeController::slot_StateChanged(uint state)
 {
-    //Forward it to browser
+    //Forward it to NeTVBrowser
     qDebug() << "BridgeController: [NMStateChanged] " << state;
-    Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMStateChanged</cmd><data><value>") + QString().number(state).toLatin1() + "</value></data></xml>", "netvbrowser");
+    Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMStateChanged</cmd><value>") + QString().number(state).toLatin1() + "</value></xml>", "netvbrowser");
 }
 
 void BridgeController::slot_PropertiesChanged(QByteArray /* prop_name */, QByteArray /* prop_value */)
 {
-    //Forward it to browser
+    //Forward it to NeTVBrowser
     //qDebug() << "BridgeController: [NMPropertiesChanged] " << state;
-    //Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMPropertiesChanged</cmd><data><value>" + objPath + "</value></data></xml>", "netvbrowser");
+    //Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMPropertiesChanged</cmd><value>" + objPath + "</value></xml>", "netvbrowser");
 }
 void BridgeController::slot_DeviceAdded(QByteArray objPath)
 {
-    //Forward it to browser
+    //Forward it to NeTVBrowser
     qDebug() << "BridgeController: [NMDeviceAdded] " << objPath;
-    Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMDeviceAdded</cmd><data><value>") + objPath + "</value></data></xml>", "netvbrowser");
+    Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMDeviceAdded</cmd><value>") + objPath + "</value></xml>", "netvbrowser");
 }
 
 void BridgeController::slot_DeviceRemoved(QByteArray objPath)
 {
-    //Forward it to browser
+    //Forward it to NeTVBrowser
     qDebug() << "BridgeController: [NMDeviceRemoved] " << objPath;
-    Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMDeviceRemoved</cmd><data><value>") + objPath + "</value></data></xml>", "netvbrowser");
+    Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>NMDeviceRemoved</cmd><value>") + objPath + "</value></xml>", "netvbrowser");
 }
 
 void BridgeController::slot_StopAP()
