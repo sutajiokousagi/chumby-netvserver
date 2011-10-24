@@ -100,6 +100,12 @@ public:
     QByteArray getParameter(const QByteArray& name) const;
 
     /**
+      Remove a HTTP request parameter off the parameters map.
+      @param name Name of the parameter
+    */
+    void removeParameter(const QByteArray& name);
+
+    /**
       Get the values of a HTTP request parameter.
       @param name Name of the parameter
     */

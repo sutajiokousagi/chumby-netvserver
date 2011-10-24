@@ -216,11 +216,15 @@ void HttpRequest::decodeRequestParams()
         {
             QByteArray name=part.left(equalsChar).trimmed();
             QByteArray value=part.mid(equalsChar+1).trimmed();
+            if (name.startsWith("dataxml_"))
+                name = name.right(name.length()-8);
             parameters.insert(urlDecode(name),urlDecode(value));
         }
         else if (!part.isEmpty())
         {
             // Name without value
+            if (part.startsWith("dataxml_"))
+                part = part.right(part.length()-8);
             parameters.insert(urlDecode(part),"");
         }
     }
@@ -238,7 +242,7 @@ void HttpRequest::decodeXMLParams()
     if (singleValueArg)
     {
         QByteArray dataString = dataXmlString.mid(7, dataXmlString.length() - 15).trimmed();
-        parameters.insert(urlDecode("value"),urlDecode(dataString));
+        parameters.insert("value", urlDecode(dataString));
         return;
     }
 
@@ -266,9 +270,8 @@ void HttpRequest::decodeXMLParams()
 
             if (currentTag == "cmd")
                 parameters.insert(QByteArray("cmd"), urlDecode(xml->readElementText().toLatin1()));
-
             else if (currentTag != "data")
-                parameters.insert(QByteArray("dataxml_")+urlDecode(currentTag.toLatin1()), urlDecode(xml->readElementText().toLatin1()));
+                parameters.insert(urlDecode(currentTag.toLatin1()), urlDecode(xml->readElementText().toLatin1()));
         }
     }
     currentTag = "";
@@ -362,6 +365,10 @@ QMultiMap<QByteArray,QByteArray> HttpRequest::getHeaderMap() const {
 
 QByteArray HttpRequest::getParameter(const QByteArray& name) const {
     return parameters.value(name);
+}
+
+void HttpRequest::removeParameter(const QByteArray& name) {
+    parameters.remove(name);
 }
 
 QList<QByteArray> HttpRequest::getParameters(const QByteArray& name) const {
