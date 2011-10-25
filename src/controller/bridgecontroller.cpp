@@ -130,8 +130,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         int numClient = Static::tcpSocketServer->broadcast(rawXmlString, "all");
 
         //Reply to HTTP client
-        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>Command forwarded to browser</value></data></xml>", true);
-        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
+        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + STRING_COMMAND_FORWARDED_CLIENT + "</value></data></xml>", true);
+        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + STRING_NO_CLIENT_RUNNING + "</value></data></xml>", true);
     }
 
     else if (cmdString == "SETURL" || cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS")
@@ -140,8 +140,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         int numClient = Static::tcpSocketServer->broadcast(rawXmlString, "netvbrowser");
 
         //Reply to HTTP client
-        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>Command forwarded to browser</value></data></xml>", true);
-        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
+        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + STRING_COMMAND_FORWARDED_BROWSER + "</value></data></xml>", true);
+        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + STRING_NO_BROWSER_RUNNING + "</value></data></xml>", true);
     }
 
     //-----------
@@ -480,29 +480,9 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     request.removeParameter(STRING_XML_ESCAPE);
 
     //-----------------------------------------------------------
-
-    if (cmdString == "SETURL")
-    {
-        //Send it straight to browser
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "netvbrowser");
-
-        //Reply to socket client (Android/iOS)
-        if (numClient > 0) {
-            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
-            response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "Command forwarded to browser");
-        }else{
-            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
-            response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "No browser running");
-        }
-        response.write();
-    }
-
-    //-----------
     //Mostly from Android/iOS devices
 
-    else if (cmdString == "REMOTECONTROL" || cmdString == "REMOTE" || cmdString == "KEY" || cmdString == "KEYBOARD")
+    if (cmdString == "REMOTECONTROL" || cmdString == "REMOTE" || cmdString == "KEY" || cmdString == "KEYBOARD")
     {
         //Forward to all TCP clients
         int numClient = Static::tcpSocketServer->broadcast(request.getRawData(), "all");
@@ -511,16 +491,16 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         if (numClient > 0) {
             response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
             response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "Command forwarded to browser");
+            response.setParameter(STRING_VALUE, STRING_COMMAND_FORWARDED_CLIENT);
         }else{
             response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
             response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "No browser running");
+            response.setParameter(STRING_VALUE, STRING_NO_CLIENT_RUNNING);
         }
         response.write();
     }
 
-    else if (cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS")
+    else if (cmdString == "SETURL" || cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS")
     {
         //Forward to NeTVBrowser
         int numClient = Static::tcpSocketServer->broadcast(request.getRawData(), "netvbrowser");
@@ -529,11 +509,11 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         if (numClient > 0) {
             response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
             response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "Command forwarded to browser");
+            response.setParameter(STRING_VALUE, STRING_COMMAND_FORWARDED_BROWSER);
         }else{
             response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
             response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "No browser running");
+            response.setParameter(STRING_VALUE, STRING_NO_BROWSER_RUNNING);
         }
         response.write();
     }
@@ -551,11 +531,11 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         if (numClient > 0) {
             response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
             response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "Command forwarded to browser");
+            response.setParameter(STRING_VALUE, STRING_COMMAND_FORWARDED_BROWSER);
         }else{
             response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
             response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "No browser running");
+            response.setParameter(STRING_VALUE, STRING_NO_BROWSER_RUNNING);
         }
         response.write();
     }
@@ -577,11 +557,11 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         if (numClient > 0) {
             response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
             response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "Command forwarded to browser");
+            response.setParameter(STRING_VALUE, STRING_COMMAND_FORWARDED_BROWSER);
         }else{
             response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
             response.setCommand(cmdString);
-            response.setParameter(STRING_VALUE, "No browser running");
+            response.setParameter(STRING_VALUE, STRING_NO_BROWSER_RUNNING);
         }
         response.write();
     }

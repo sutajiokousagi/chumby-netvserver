@@ -17,6 +17,10 @@
 #define STRING_DATA                         "data"
 #define STRING_VALUE                        "value"
 #define STRING_XML_ESCAPE                   "xmlescape"
+#define STRING_COMMAND_FORWARDED_BROWSER    "Command forwarded to NeTVBrowser"
+#define STRING_NO_BROWSER_RUNNING           "No browser is running"
+#define STRING_COMMAND_FORWARDED_CLIENT     "Command forwarded to TCP clients"
+#define STRING_NO_CLIENT_RUNNING            "No client is running"
 
 
 class BridgeController : public QObject, public HttpRequestHandler, public SocketRequestHandler
