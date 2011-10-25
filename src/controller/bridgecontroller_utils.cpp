@@ -56,12 +56,12 @@ void BridgeController::SaveParameters(QString * filename /* = NULL */)
 // Process Utilities
 //-----------------------------------------------------------------------------------------------------------
 
-QByteArray BridgeController::Execute(const QString &fullPath)
+QByteArray BridgeController::Execute(const QString &fullPath, bool xmlEscape /* = false */)
 {
-    return this->Execute(fullPath, QStringList());
+    return this->Execute(fullPath, QStringList(), xmlEscape);
 }
 
-QByteArray BridgeController::Execute(const QString &fullPath, QStringList args)
+QByteArray BridgeController::Execute(const QString &fullPath, QStringList args, bool xmlEscape /* = false */)
 {
     if (!SetFileExecutable(fullPath))
         return QByteArray("no permission to execute");
@@ -76,6 +76,8 @@ QByteArray BridgeController::Execute(const QString &fullPath, QStringList args)
     delete newProc;
     newProc = NULL;
 
+    if (xmlEscape)
+        return XMLEscape(buffer);
     return buffer;
 }
 

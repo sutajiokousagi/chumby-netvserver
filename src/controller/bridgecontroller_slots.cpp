@@ -56,3 +56,8 @@ void BridgeController::slot_StartAP_Factory()
 {
     this->Execute(docroot + "/scripts/start_ap_factory.sh");
 }
+
+void BridgeController::slot_Reboot()
+{
+    this->Execute("/sbin/reboot");
+}

@@ -48,6 +48,7 @@ public slots:
     void slot_StopAP();
     void slot_StartAP();
     void slot_StartAP_Factory();
+    void slot_Reboot();
 
 signals:
 
@@ -67,6 +68,7 @@ private:
     void StartAPwithDelay(int msec = 500);
     void StartAPFactorywithDelay(int msec = 500);
     void StopAPwithDelay(int msec = 500);
+    void RebootwithDelay(int msec = 500);
 
     /** Parameters */
     QSettings * parameters;
@@ -77,8 +79,8 @@ private:
     void SaveParameters(QString * filename = NULL);
 
     /** Process Utilities */
-    QByteArray Execute(const QString &fullPath);
-    QByteArray Execute(const QString &fullPath, QStringList args);
+    QByteArray Execute(const QString &fullPath, bool xmlEscape = false);
+    QByteArray Execute(const QString &fullPath, QStringList args, bool xmlEscape = false);
 
     /** File Utilities */
     void Sync(void);

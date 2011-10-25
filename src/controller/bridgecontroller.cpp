@@ -58,26 +58,12 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     //Some commands requires XML escape. This would be an option.
     QByteArray xmlEscapeString = request.getParameter(STRING_XML_ESCAPE).toUpper();
-    bool xmlEscape = (xmlEscapeString == "1" || xmlEscapeString == "TRUE" || xmlEscapeString == "YES") ? true : false;
+    bool xmlEscape = (xmlEscapeString == "1" || xmlEscapeString == "TRUE" || xmlEscapeString == "YES" || xmlEscapeString == "ON") ? true : false;
+    request.removeParameter(STRING_XML_ESCAPE);
 
     //-----------------------------------------------------------
 
-    if (cmdString == "SETURL")
-    {
-        if (!IsAuthorizedCaller(authorizedCaller)) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
-            return;
-        }
-
-        //Send it straight to browser
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>") + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", "netvbrowser");
-
-        //Reply to HTTP client
-        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>Command forwarded to browser</value></data></xml>", true);
-        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser found</value></data></xml>", true);
-    }
-
-    else if (cmdString == "GETURL")
+    if (cmdString == "GETURL")
     {
         QByteArray urlString = request.getParameter("url");
         QByteArray postString = request.getParameter("post");
@@ -90,7 +76,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         }
         else
         {
-            QByteArray buffer = this->Execute(docroot + "/scripts/geturl.sh", argsList);
+            QByteArray buffer = this->Execute(docroot + "/scripts/geturl.sh", argsList, xmlEscape);
             response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
             buffer = QByteArray();
         }
@@ -98,7 +84,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "GETJPG" || cmdString == "GETJPEG")
     {
-        QByteArray buffer = this->Execute(docroot + "/scripts/tmp_download.sh", QStringList(dataString));
+        QByteArray buffer = this->Execute(docroot + "/scripts/tmp_download.sh", QStringList(dataString), xmlEscape);
         response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
     }
 
@@ -120,7 +106,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         }
         else
         {
-            QByteArray buffer = this->Execute(docroot + "/scripts/chromakey.sh", argList);
+            QByteArray buffer = this->Execute(docroot + "/scripts/chromakey.sh", argList, xmlEscape);
             response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
             buffer = QByteArray();
         }
@@ -130,7 +116,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     {
         if (dataString.length() < 1)
             dataString = "start-chumby";
-        QByteArray buffer = this->Execute("/etc/init.d/sshd", QStringList(QString(dataString)));
+        QByteArray buffer = this->Execute("/etc/init.d/sshd", QStringList(QString(dataString)), xmlEscape);
 
         response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
         buffer = QByteArray();
@@ -148,7 +134,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
     }
 
-    else if (cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS")
+    else if (cmdString == "SETURL" || cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS")
     {
         //Forward to NeTVBrowser
         int numClient = Static::tcpSocketServer->broadcast(rawXmlString, "netvbrowser");
@@ -189,9 +175,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         }
 
         //This is simply passed directly to NeTVBrowser
-        QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString));
-        if (xmlEscape)
-            buffer = XMLEscape(buffer);
+        QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString), xmlEscape);
 
         response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
         buffer = QByteArray();
@@ -229,9 +213,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         QStringList argsList;
         argsList.append(time);
         argsList.append(timezone);
-        QByteArray buffer = this->Execute(docroot + "/scripts/set_time.sh", argsList);
-        if (xmlEscape)
-            buffer = XMLEscape(buffer);
+        QByteArray buffer = this->Execute(docroot + "/scripts/set_time.sh", argsList, xmlEscape);
 
         //Reply to HTTP client
         if (time == "")    response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>time parameter is required</value></data></xml>", true);
@@ -267,7 +249,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
         //Allow time for HTTP response to complete before we bring down the network
         if (!isTest)
-            StopAPwithDelay(500);
+            StopAPwithDelay();
     }
 
     //-----------
@@ -286,6 +268,11 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     {
         response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd></xml>", true);
         StartAPFactorywithDelay();
+    }
+    else if (cmdString == "RESTART" || cmdString == "REBOOT")
+    {
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+        RebootwithDelay();
     }
 
     //-----------
@@ -439,7 +426,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     //-----------
 
-    else if (cmdString == "NECOMMAND" || cmdString == "ANYCOMMAND" || cmdString == "SHELLCOMMAND" || cmdString == "SHELL")
+    else if (cmdString == "NECOMMAND")
     {
         if (!IsAuthorizedCaller(authorizedCaller)) {
             response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
@@ -453,33 +440,17 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         newArgsList.removeAt(0);
         for (int i=0; i<newArgsList.length(); i++)
             newArgs << newArgsList.at(i);
-        QByteArray buffer = this->Execute(command, newArgs);
-        if (xmlEscape)
-            buffer = XMLEscape(buffer);
+        QByteArray buffer = this->Execute(command, newArgs, xmlEscape);
 
         if (buffer.length() > 5)        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
         else                            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
         buffer = QByteArray();
     }
 
-    else if (cmdString == "REBOOT" || cmdString == "RESTART")
-    {
-        if (!IsAuthorizedCaller(authorizedCaller)) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
-            return;
-        }
-
-        QByteArray buffer = this->Execute("/sbin/reboot");
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
-        buffer = QByteArray();
-    }
-
     //A generic command to execute name-alike scripts
     else if (FileExists(docroot + "/scripts/" + cmdString.toLower() + ".sh"))
     {
-        QByteArray buffer = this->Execute(docroot + "/scripts/" + cmdString.toLower() + ".sh", QStringList(dataString));
-        if (xmlEscape)
-            buffer = XMLEscape(buffer);
+        QByteArray buffer = this->Execute(docroot + "/scripts/" + cmdString.toLower() + ".sh", QStringList(dataString), xmlEscape);
 
         if (buffer.length() > 5)        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data>" + buffer.trimmed() + "</data></xml>", true);
         else                            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data>" + buffer.trimmed() + "</data></xml>", true);
@@ -504,8 +475,9 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     request.removeParameter(STRING_VALUE);
 
     //Some commands requires XML escape. This would be an option.
-    //QByteArray xmlEscapeString = request.getParameter(STRING_XML_ESCAPE).toUpper();
-    //bool xmlEscape = (xmlEscapeString == "1" || xmlEscapeString == "TRUE" || xmlEscapeString == "YES") ? true : false;
+    QByteArray xmlEscapeString = request.getParameter(STRING_XML_ESCAPE).toUpper();
+    bool xmlEscape = (xmlEscapeString == "1" || xmlEscapeString == "TRUE" || xmlEscapeString == "YES" || xmlEscapeString == "ON") ? true : false;
+    request.removeParameter(STRING_XML_ESCAPE);
 
     //-----------------------------------------------------------
 
@@ -625,7 +597,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         QStringList argsList;
         argsList.append(time);
         argsList.append(timezone);
-        QByteArray buffer = this->Execute(docroot + "/scripts/set_time.sh", argsList);
+        QByteArray buffer = this->Execute(docroot + "/scripts/set_time.sh", argsList, xmlEscape);
 
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setCommand(cmdString);
@@ -665,7 +637,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
         //Allow time for socket response to complete before we bring down the network
         if (!isTest)
-            StopAPwithDelay(500);
+            StopAPwithDelay();
     }
 
     //-----------
@@ -796,6 +768,13 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
         StartAPFactorywithDelay();
     }
+    else if (cmdString == "REBOOT" || cmdString == "RESTART")
+    {
+        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        response.setCommand(cmdString);
+        response.write();
+        RebootwithDelay();
+    }
 
     //-----------
 
@@ -883,7 +862,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
     //-----------
 
-    else if (cmdString == "NECOMMAND" || cmdString == "ANYCOMMAND" || cmdString == "SHELLCOMMAND" || cmdString == "SHELL")
+    else if (cmdString == "NECOMMAND")
     {
         if (!IsAuthorizedCaller(authorizedCaller)) {
             response.setStatus(BRIDGE_RETURN_STATUS_UNAUTHORIZED);
@@ -900,7 +879,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         newArgsList.removeAt(0);
         for (int i=0; i<newArgsList.length(); i++)
             newArgs << newArgsList.at(i);
-        QByteArray buffer = this->Execute(command, newArgs);
+        QByteArray buffer = this->Execute(command, newArgs, xmlEscape);
 
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setCommand(cmdString);
@@ -912,17 +891,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     {
         if (dataString.length() < 1)
             dataString = "start-chumby";
-        QByteArray buffer = this->Execute("/etc/init.d/sshd", QStringList(QString(dataString)));
-
-        response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
-        response.setCommand(cmdString);
-        response.setParameter(STRING_VALUE, buffer.trimmed());
-        response.write();
-    }
-
-    else if (cmdString == "REBOOT" || cmdString == "RESTART")
-    {
-        QByteArray buffer = this->Execute("reboot");
+        QByteArray buffer = this->Execute("/etc/init.d/sshd", QStringList(QString(dataString)), xmlEscape);
 
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setCommand(cmdString);
@@ -933,7 +902,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
     //A generic command to execute name-alike scripts
     else if (FileExists(docroot + "/scripts/" + cmdString.toLower() + ".sh"))
     {
-        QByteArray buffer = this->Execute(docroot + "/scripts/" + cmdString.toLower() + ".sh", QStringList(dataString));
+        QByteArray buffer = this->Execute(docroot + "/scripts/" + cmdString.toLower() + ".sh", QStringList(dataString), xmlEscape);
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setCommand(cmdString);
         response.setParameter(STRING_DATA, buffer.trimmed());
@@ -1072,4 +1041,9 @@ void BridgeController::StartAPFactorywithDelay(int msec /* = 500 */)
 void BridgeController::StopAPwithDelay(int msec /* = 500 */)
 {
     QTimer::singleShot(msec, this, SLOT(slot_StopAP()));
+}
+
+void BridgeController::RebootwithDelay(int msec /* = 500 */)
+{
+    QTimer::singleShot(msec, this, SLOT(slot_Reboot()));
 }
