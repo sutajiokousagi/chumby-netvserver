@@ -134,7 +134,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + STRING_NO_CLIENT_RUNNING + "</value></data></xml>", true);
     }
 
-    else if (cmdString == "SETURL" || cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS")
+    else if (cmdString == "SETURL" || cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS"
+             || cmdString == "UPDATEREADY" || cmdString == "UPDATEDONE" || cmdString == "UPGRADEDONE")
     {
         //Forward to NeTVBrowser
         int numClient = Static::tcpSocketServer->broadcast(rawXmlString, "netvbrowser");
@@ -500,7 +501,8 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
-    else if (cmdString == "SETURL" || cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS")
+    else if (cmdString == "SETURL" || cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS"
+             || cmdString == "UPDATEREADY" || cmdString == "UPDATEDONE" || cmdString == "UPGRADEDONE")
     {
         //Forward to NeTVBrowser
         int numClient = Static::tcpSocketServer->broadcast(request.getRawData(), "netvbrowser");
