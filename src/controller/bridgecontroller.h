@@ -62,9 +62,13 @@ signals:
 private:
 
     /** Variables from NeTVServer.ini */
-    QString docroot;
+    QString docroot;                //This docroot is for executing scripts, should not be changed
     QString paramsFile;
     QString networkConfigFile;
+
+    /** Interact with StaticFileController */
+    QString SetStaticDocroot(QString newPath);
+    QString GetStaticDocroot();
 
     /** High level helper functions */
     bool IsAuthorizedCaller(QByteArray headerValue);

@@ -20,6 +20,20 @@ StaticFileController::StaticFileController(QSettings* settings) : HttpRequestHan
     qDebug("StaticFileController: docroot=%s", qPrintable(docroot));
 }
 
+QString StaticFileController::setDocroot(QString newPath)
+{
+    if (newPath != NULL && newPath.length() > 2 && newPath.startsWith("/"))
+    {
+        if (newPath.endsWith("/"))      this->docroot = newPath.left(newPath.size()-1);
+        else                            this->docroot = newPath;
+    }
+    return getDocroot();
+}
+
+QString StaticFileController::getDocroot()
+{
+    return this->docroot;
+}
 
 void StaticFileController::service(HttpRequest& request, HttpResponse& response)
 {

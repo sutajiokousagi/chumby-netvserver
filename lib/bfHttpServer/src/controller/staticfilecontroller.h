@@ -28,6 +28,9 @@ public:
     /** Generates the response */
     void service(HttpRequest& request, HttpResponse& response);
 
+    QString setDocroot(QString newPath);
+    QString getDocroot();
+
     /** Set a content-type header in the response depending on the ending of the filename */
     static void SetContentType(QString file, HttpResponse& response);
 

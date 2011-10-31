@@ -122,6 +122,22 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         buffer = QByteArray();
     }
 
+    else if (cmdString == "SETDOCROOT")
+    {
+        QByteArray current_docroot = SetStaticDocroot(dataString).toLatin1();
+        if (xmlEscape)
+            current_docroot = XMLEscape(current_docroot);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + current_docroot.trimmed() + "</value></data></xml>", true);
+    }
+
+    else if (cmdString == "GETDOCROOT")
+    {
+        QByteArray current_docroot = GetStaticDocroot().toLatin1();
+        if (xmlEscape)
+            current_docroot = XMLEscape(current_docroot);
+        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + current_docroot.trimmed() + "</value></data></xml>", true);
+    }
+
     //-----------
 
     else if (cmdString == "REMOTECONTROL" || cmdString == "REMOTE" || cmdString == "KEY" || cmdString == "KEYBOARD")
@@ -902,6 +918,19 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 }
 
 
+//-----------------------------------------------------------------------------------------------------------
+// Interaction with StaticFileController
+//-----------------------------------------------------------------------------------------------------------
+
+QString BridgeController::SetStaticDocroot(QString newPath)
+{
+    return Static::staticFileController->setDocroot(newPath);
+}
+
+QString BridgeController::GetStaticDocroot()
+{
+    return Static::staticFileController->getDocroot();
+}
 
 
 //-----------------------------------------------------------------------------------------------------------
