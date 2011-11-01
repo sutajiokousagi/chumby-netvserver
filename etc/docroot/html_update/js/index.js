@@ -117,6 +117,7 @@ function fUPDATEEvents( vEventName, vEventData )
 		case "progress":	setUpgradeProgress(vEventData);		break;
 		case "done":		setUpgradeDone(vEventData);			break;
 	}
+	//return "ok";
 }
 
 function setUpgradeProgress(vData)
