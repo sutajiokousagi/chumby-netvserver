@@ -5,7 +5,8 @@
 DOCROOT=/media/storage/root
 GITPATH=http://git.chumby.com.sg/git/chumby-sg/netv-controlpanel.git
 
-echo "${DOCROOT}/docroot"
+echo "<docroot>${DOCROOT}/docroot</docroot>"
+echo "<gitoutput>"
 
 # Clone the repo if it doesn't exist
 if [ ! -e "${DOCROOT}/docroot" ];
@@ -14,8 +15,11 @@ then
 	if git clone ${GITPATH} docroot; then
 		exit 0;
 	fi
+	if [ ! -e "${DOCROOT}/docroot" ]; then
+		rm -rf "${DOCROOT}/docroot"
+	fi
 	echo "Error updating cpanel git repo"
-	rm -rf "${DOCROOT}/docroot"
+	echo "</gitoutput>"
 	exit 1;
 fi
 
@@ -23,10 +27,12 @@ fi
 cd "${DOCROOT}/docroot"
 git reset --hard HEAD
 if git pull; then
+	echo "</gitoutput>"
 	exit 0;
 fi
 
 # Failed halfway, rollback the changes
 git reset --hard HEAD
 echo "Error updating cpanel git repo"
+echo "</gitoutput>"
 exit 1;
