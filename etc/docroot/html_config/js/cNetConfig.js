@@ -12,7 +12,7 @@ function cNetConfig()
 {
 	this.wifiListArray = new Array();
 	this.wifiParamNamesArray = new Array('ssid', 'qty', 'lvl', 'ch', 'mode', 'encryption', 'auth');
-	this.helloParamNamesArray = new Array('guid', 'hwver', 'fwver', 'internet', 'mac', 'ip', 'flashplugin', 'flashver');
+	this.helloParamNamesArray = new Array('guid', 'hwver', 'fwver', 'internet', 'mac', 'minAndroid', 'minIOS', 'ip');
 }
 
 // -------------------------------------------------------------------------------------------------

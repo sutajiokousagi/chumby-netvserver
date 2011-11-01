@@ -1,44 +1,10 @@
 
 // -------------------------------------------------------------------------------------------------
-//	override fDbg() function
+//	Print out to console
 // -------------------------------------------------------------------------------------------------
-function fDbg(v)
+function fDebug(v)
 {
-	//$("#div_dbg").html($("#div_dbg").html() + "<br />" + v);
-	//document.getElementById("div_dbg").scrollTop = document.getElementById("div_dbg").scrollHeight;
-}
-function fDbg2(v)
-{
-	/*
-	if ($("#div_dbg").length > 0)
-	{
-		$("#div_dbg").html($("#div_dbg").html() + "<br />" + v);
-		document.getElementById("div_dbg").scrollTop = document.getElementById("div_dbg").scrollHeight;
-	}
-	*/
 	console.log("|~|" + v);
-}
-
-// -------------------------------------------------------------------------------------------------
-//	fLoadScript
-// -------------------------------------------------------------------------------------------------
-
-function fLoadExtJSScript( vFileList )
-{
-	var vUrl = vFileList.pop();
-	var script = document.createElement("script");
-	
-	script.type = "text/javascript";
-	script.src = vUrl;
-	
-	script.onload = function()
-	{
-		if (vFileList.length == 0)
-			return;
-		fLoadExtJSScript(vFileList);
-	};
-	
-	document.getElementsByTagName("head")[0].appendChild(script);
 }
 
 

@@ -4,6 +4,9 @@ var updateCount;
 var needReboot;
 var startConfiguring;
 var completedTextString = "Update Completed!";
+var fwverTextString = "Firmware Version: ";
+var minAndroidTextString = "Minimum Android app version: ";
+var minIOSTextString = "Minimum iOS app version: ";
 var upgradedPackageColor = "6598EB";
 var needRebootTextString = "System will reboot after upgrading";
 var rebootingTextString = "System is rebooting...";
@@ -18,6 +21,7 @@ function onLoad()
 	//Params passed thru GET
 	updateCount = GET('updateCount');
 	isContinue = GET('continue');
+	pkgList = GET('list');
 	needReboot = GET('reboot');
 	startConfiguring = false;
 	
@@ -29,7 +33,7 @@ function onLoad()
 	//Not continue from an upgrade process
 	if (isContinue == "" || isContinue == 0)
 	{
-		fDbg2("Start upgrading UI");
+		fDebug("Start upgrading UI");
 		
 		setUpgradePercentage(0, false);
 		
@@ -48,11 +52,11 @@ function onLoad()
 	//Using opkg-chumby-upgrade, the Browser only get killed at the end, so we consider it as done
 	else
 	{
-		fDbg2("Continue upgrading UI: " + isContinue + "%");
+		fDebug("Continue upgrading UI: " + isContinue + "%");
 				
 		main_showMainPanel();
 		setUpgradePercentage(201, false);
-		setUpgradeDone();
+		setUpgradeDone(pkgList);
 	}
 }
 
@@ -111,7 +115,7 @@ function fUPDATEEvents( vEventName, vEventData )
 	{
 		case "configuring":	setUpgradeConfiguring(vEventData);	break;
 		case "progress":	setUpgradeProgress(vEventData);		break;
-		case "done":		setUpgradeDone();					break;
+		case "done":		setUpgradeDone(vEventData);			break;
 	}
 }
 
@@ -180,8 +184,23 @@ function setUpgradePercentage(percentage, animated)
 	}
 }
 
-function setUpgradeDone()
+function setUpgradeDone(xmlList)
 {
+	//Format: <list>Collon separated list of packages names</list> or without the xml syntax
+	if (xmlList)
+	{
+		xmlList = xmlList.replace("<list>", "").replace("</list>", "");
+		var pkgList = xmlList.split(";");
+		
+		if (pkgList.length > 0)
+		{
+			clearConsoleLog();
+			for (var idx in pkgList)
+				addConsoleLog("<font color='#" + upgradedPackageColor +"'>Upgraded " + pkgList[idx] + "</font>");
+			addConsoleLog('----');
+		}
+	}
+	
 	//Hehe
 	setUpgradePercentage(201, true);
 	
@@ -190,6 +209,9 @@ function setUpgradeDone()
 		addConsoleLog("<font color='#" + upgradedPackageColor + "'>" + completedTextString + "</font>");
 	if (needReboot == "true" || needReboot == true)
 		addConsoleLog("<font color='#" + rebootTextColor + "'>" + rebootingTextString + "</font>");
+		
+	//Show firmware version
+	Hello();
 			
 	//Wait for 2.5 seconds then continue
 	
@@ -296,6 +318,31 @@ function fCheckAlive()
 }
 
 
+// -------------------------------------------------------------------------------------------------
+//	Probe system for device info
+// -------------------------------------------------------------------------------------------------
+function Hello()
+{
+	xmlhttpPost("", "post", { 'cmd' : 'Hello' }, rawHelloCallback );
+}
+function rawHelloCallback(vData)
+{
+	if (!vData || vData.split("</status>")[0].split("<status>")[1] != "1")
+		return;
+	
+	var helloData = new Array();
+	var helloParamNamesArray = new Array('guid', 'hwver', 'fwver', 'internet', 'mac', 'minAndroid', 'minIOS', 'ip');
+	for (var idx in helloParamNamesArray)
+	{
+		var paramName = helloParamNamesArray[idx];
+		helloData[paramName] = vData.split("</"+paramName+">")[0].split("<"+paramName+">")[1];
+	}
+
+	addConsoleLog('----');
+	addConsoleLog(fwverTextString + helloData['fwver']);
+	addConsoleLog(minAndroidTextString + helloData['minAndroid']);
+	addConsoleLog(minIOSTextString + helloData['minIOS']);	
+}
 
 // Other system events are totally ignored
 
