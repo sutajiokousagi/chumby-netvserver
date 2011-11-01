@@ -19,11 +19,14 @@ then
 	exit 1;
 fi
 
-# Pull latest changes
+# Pull latest changes, discard any local changes made
 cd "${DOCROOT}/docroot"
-if ! git pull;
-then
-	echo "Error updating cpanel git repo"
-	exit 1;
+git reset --hard HEAD
+if git pull; then
+	exit 0;
 fi
 
+# Failed halfway, rollback the changes
+git reset --hard HEAD
+echo "Error updating cpanel git repo"
+exit 1;
