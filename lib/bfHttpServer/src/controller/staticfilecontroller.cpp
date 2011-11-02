@@ -71,6 +71,7 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
     QFile file(docrootDynamic+path);
     if (!file.exists())
     {
+        file.close();
         file.setFileName(docroot+path);
         if (!file.exists())
         {
@@ -81,7 +82,7 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
             response.write("301 moved permanently",true);
             */
             response.setStatus(404,"file not found");
-            response.write("Oops! 404 file not found",true);
+            response.write(QString("Oops! 404 file not found (%1)").arg(file.fileName()).toLatin1(), true);
             return;
         }
     }
