@@ -18,6 +18,7 @@ StaticFileController::StaticFileController(QSettings* settings) : HttpRequestHan
         docroot = QFileInfo(configFile.absolutePath(),docroot).absoluteFilePath();
     }
     qDebug("StaticFileController: docroot=%s", qPrintable(docroot));
+    docrootDynamic = docroot;
 }
 
 QString StaticFileController::setDocroot(QString newPath)
@@ -27,22 +28,21 @@ QString StaticFileController::setDocroot(QString newPath)
         return "";
     if (newPath != NULL && newPath.length() > 2 && newPath.startsWith("/"))
     {
-        if (newPath.endsWith("/"))      this->docroot = newPath.left(newPath.size()-1);
-        else                            this->docroot = newPath;
+        if (newPath.endsWith("/"))      this->docrootDynamic = newPath.left(newPath.size()-1);
+        else                            this->docrootDynamic = newPath;
     }
     return getDocroot();
 }
 
 QString StaticFileController::getDocroot()
 {
-    return this->docroot;
+    return this->docrootDynamic;
 }
 
 void StaticFileController::service(HttpRequest& request, HttpResponse& response)
 {
-    QByteArray path = request.getPath();
-
     // Path will always start with "/" character
+    QByteArray path = request.getPath();
 
     // Forbid access to files outside the docroot directory
     if (path.startsWith("/.."))
@@ -53,7 +53,7 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
     }
 
     // If the filename is a directory, append index.html
-    if (QFileInfo(docroot+path).isDir())
+    if ( QFileInfo(docrootDynamic+path).isDir() || QFileInfo(docroot+path).isDir() )
     {
         //Redirect to home page
         if (!path.endsWith('/'))
@@ -67,15 +67,23 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
         path += "index.html";
     }
 
-    // Try opening the file
-    QFile file(docroot+path);
+    // Try opening the file in dynamic docroot
+    QFile file(docrootDynamic+path);
     if (!file.exists())
-    {       
-        //Redirect to home page
-        response.setStatus(301,"moved permanently");
-        response.setHeader("Location", "http://" + request.getHeader("Host"));
-        response.write("301 moved permanently",true);
-        return;
+    {
+        file.setFileName(docroot+path);
+        if (!file.exists())
+        {
+            /*
+            //Redirect to home page
+            response.setStatus(301,"moved permanently");
+            response.setHeader("Location", "http://" + request.getHeader("Host"));
+            response.write("301 moved permanently",true);
+            */
+            response.setStatus(404,"file not found");
+            response.write("Oops! 404 file not found",true);
+            return;
+        }
     }
 
     // Error opening the file

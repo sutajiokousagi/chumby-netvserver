@@ -38,6 +38,8 @@ private:
 
     /** Root directory of documents */
     QString docroot;
+
+    QString docrootDynamic;
 };
 
 #endif // STATICFILECONTROLLER_H
