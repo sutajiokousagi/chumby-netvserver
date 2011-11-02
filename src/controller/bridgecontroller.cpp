@@ -323,7 +323,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         if (params.size() < 1)
             response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>no parameters received</value></data></xml>", true);
         else
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer + "</value></data></xml>", true);
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data>" + buffer + "</data></xml>", true);
     }
 
     else if (cmdString == "SETPARAM")
@@ -334,7 +334,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             while (i.hasNext())
             {
                 i.next();
-                SetParameter( i.key(), i.value() );
+                if (i.key() != "data")
+                    SetParameter( i.key(), i.value() );
             }
             response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + QByteArray().setNum(request.getParameterMap().count()) + "</value></data></xml>", true);
         }
