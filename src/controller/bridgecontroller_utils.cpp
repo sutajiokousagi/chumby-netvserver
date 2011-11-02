@@ -15,11 +15,17 @@
 
 QByteArray BridgeController::GetParameter(QString name)
 {
+    //Refresh param
+    LoadParameters();
+
     return parameters->value(name, "").toByteArray();
 }
 
 QByteArray BridgeController::GetAllParameters()
 {
+    //Refresh param
+    LoadParameters();
+
     QByteArray paramsString = "";
     QStringList allkeys = parameters->allKeys();
     for (int i = 0; i < allkeys.size(); ++i)
@@ -35,6 +41,7 @@ void BridgeController::SetParameter(QString name, QString value)
 {
     parameters->setValue(name, value);
     SaveParameters();
+    LoadParameters();
 }
 
 void BridgeController::LoadParameters(QString * filename /* = NULL */)
