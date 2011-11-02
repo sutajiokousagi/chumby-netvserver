@@ -127,7 +127,8 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         QByteArray current_docroot = SetStaticDocroot(dataString).toLatin1();
         if (xmlEscape)
             current_docroot = XMLEscape(current_docroot);
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + current_docroot.trimmed() + "</value></data></xml>", true);
+        if (current_docroot.length() < 1)       response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>path not found</value></data></xml>", true);
+        else                                    response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + current_docroot.trimmed() + "</value></data></xml>", true);
     }
 
     else if (cmdString == "GETDOCROOT")
@@ -885,6 +886,8 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
+    //-----------
+
     else if (cmdString == "ENABLESSH" || cmdString == "SSH")
     {
         if (dataString.length() < 1)
@@ -897,6 +900,58 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
+    else if (cmdString == "SETCHROMAKEY" || cmdString == "CHROMAKEY")
+    {
+        //Contruct arguments
+        dataString = dataString.toLower();
+        QStringList argList;
+
+        if (dataString == "on" || dataString == "true" || dataString == "yes")                argList.append(QString("on"));
+        else if (dataString == "off" || dataString == "false" || dataString == "no")          argList.append(QString("off"));
+
+        //Execute the script
+        if (argList.size() <= 0)
+        {
+            response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+            response.setParameter(STRING_VALUE, "Invalid arguments");
+        }
+        else
+        {
+            QByteArray buffer = this->Execute(docroot + "/scripts/chromakey.sh", argList, xmlEscape);
+            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+            response.setParameter(STRING_VALUE, buffer.trimmed());
+            buffer = QByteArray();
+        }
+        response.write();
+    }
+
+    else if (cmdString == "SETDOCROOT")
+    {
+        QByteArray current_docroot = SetStaticDocroot(dataString).toLatin1();
+        if (xmlEscape)
+            current_docroot = XMLEscape(current_docroot);
+
+        if (current_docroot.length() < 1)       response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+        else                                    response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        if (current_docroot.length() < 1)       response.setParameter(STRING_VALUE, "path not found");
+        else                                    response.setParameter(STRING_VALUE, current_docroot.trimmed());
+        response.write();
+    }
+
+    else if (cmdString == "GETDOCROOT")
+    {
+        QByteArray current_docroot = GetStaticDocroot().toLatin1();
+        if (xmlEscape)
+            current_docroot = XMLEscape(current_docroot);
+        if (current_docroot.length() < 1)       response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+        else                                    response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        if (current_docroot.length() < 1)       response.setParameter(STRING_VALUE, "path not found");
+        else                                    response.setParameter(STRING_VALUE, current_docroot.trimmed());
+        response.write();
+    }
+
+    //-----------
+
     //A generic command to execute name-alike scripts
     else if (FileExists(docroot + "/scripts/" + cmdString.toLower() + ".sh"))
     {
@@ -906,8 +961,6 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.setParameter(STRING_DATA, buffer.trimmed());
         response.write();
     }
-
-    //-----------
 
     else
     {
