@@ -2,7 +2,7 @@
 
 # This is in home folder of root account in NeTV, always writable
 # Returns (echo) the path to caller so that we can change the path just by changing this script
-DOCROOT=/media/storage/root
+DOCROOT=/media/storage
 GITPATH=http://git.chumby.com.sg/git/chumby-sg/netv-controlpanel.git
 
 echo "<docroot>${DOCROOT}/docroot</docroot>"
