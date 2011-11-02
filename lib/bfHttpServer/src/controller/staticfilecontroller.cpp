@@ -22,6 +22,9 @@ StaticFileController::StaticFileController(QSettings* settings) : HttpRequestHan
 
 QString StaticFileController::setDocroot(QString newPath)
 {
+    QDir dir(newPath);
+    if (!dir.exists(newPath))
+        return "";
     if (newPath != NULL && newPath.length() > 2 && newPath.startsWith("/"))
     {
         if (newPath.endsWith("/"))      this->docroot = newPath.left(newPath.size()-1);
