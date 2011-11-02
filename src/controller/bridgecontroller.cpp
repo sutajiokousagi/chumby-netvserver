@@ -922,6 +922,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
             response.setParameter(STRING_VALUE, buffer.trimmed());
             buffer = QByteArray();
         }
+        response.setCommand(cmdString);
         response.write();
     }
 
@@ -935,6 +936,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         else                                    response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         if (current_docroot.length() < 1)       response.setParameter(STRING_VALUE, "path not found");
         else                                    response.setParameter(STRING_VALUE, current_docroot.trimmed());
+        response.setCommand(cmdString);
         response.write();
     }
 
@@ -947,6 +949,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         else                                    response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         if (current_docroot.length() < 1)       response.setParameter(STRING_VALUE, "path not found");
         else                                    response.setParameter(STRING_VALUE, current_docroot.trimmed());
+        response.setCommand(cmdString);
         response.write();
     }
 
