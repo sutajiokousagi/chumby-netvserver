@@ -92,6 +92,7 @@ private:
 
     /** File Utilities */
     void Sync(void);
+    bool DirExists(const QString &fullPath);
     bool FileExists(const QString &fullPath);
     bool FileExecutable(const QString &fullPath);
     qint64  GetFileSize(const QString &fullPath);

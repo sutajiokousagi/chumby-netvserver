@@ -91,6 +91,12 @@ void BridgeController::Sync(void)
     this->Execute("/bin/sync");
 }
 
+bool BridgeController::DirExists(const QString &fullPath)
+{
+    QDir dir(fullPath);
+    return dir.exists(fullPath);
+}
+
 bool BridgeController::FileExists(const QString &fullPath)
 {
     QFile file(fullPath);
