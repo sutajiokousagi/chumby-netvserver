@@ -308,6 +308,24 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + value + "</value></data></xml>", true);
     }
 
+    else if (cmdString == "GETPARAMS")
+    {
+        QList<QByteArray> params = dataString.split(';');
+        QByteArray buffer;
+        for (int i = 0; i < params.size(); ++i)
+        {
+            QByteArray key = params.at(i);
+            QByteArray value = GetParameter(key);
+            if (xmlEscape)
+                value = XMLEscape(value);
+            buffer += "<" + key + ">" + value + "</" + key + ">";
+        }
+        if (params.size() < 1)
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>no parameters received</value></data></xml>", true);
+        else
+            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer + "</value></data></xml>", true);
+    }
+
     else if (cmdString == "SETPARAM")
     {
         if (request.getParameterMap().count() > 0)
@@ -653,6 +671,22 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
         response.setCommand(cmdString);
         response.setParameter(STRING_VALUE, GetParameter(dataString));
+        response.write();
+    }
+
+    else if (cmdString == "GETPARAMS")
+    {
+        QList<QByteArray> params = dataString.split(';');
+        for (int i = 0; i < params.size(); ++i)
+        {
+            QByteArray key = params.at(i);
+            response.setParameter(key, GetParameter(key));
+        }
+        if (params.size() < 1)          response.setStatus(BRIDGE_RETURN_STATUS_ERROR);
+        else                            response.setStatus(BRIDGE_RETURN_STATUS_SUCCESS);
+        if (params.size() < 1)
+            response.setParameter(STRING_VALUE, "no parameters received");
+        response.setCommand(cmdString);
         response.write();
     }
 
