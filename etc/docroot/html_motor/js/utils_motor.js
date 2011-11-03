@@ -1,0 +1,146 @@
+var motor_firmware_enabled = false;
+var motor_firmware_version = 0;
+var motor_states = new Array();
+
+function check_motor_firmware()
+{
+	xmlhttpPost(serverUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl V"}, on_motor_firmware_version );
+}
+
+function enable_motor_board()
+{
+	xmlhttpPost(serverUrl, "post", { cmd : 'NECommand', value : "/etc/init.d/netv_service motor"}, on_motor_firmware );
+}
+
+function on_motor_firmware_version(vData)
+{
+	vData = clean_vData(vData);
+	if (vData == "")
+		return;
+	/* Expecting a single number, or this
+	FPGA is not configured to drive a motor board, please follow this procedure:
+	1. Make sure the HDMI input is connected to the motor board. Do not connect an HDMI device to the port! We are not liable for damages if you wire this up wrong.
+	2. Issue the command 'netv_service motor'; this will switch the NeTV into motor driver mode.
+	*/
+	if (vData.length < 5)
+	{
+		motor_firmware_enabled = true;
+		motor_firmware_version = vData;
+		console.log("Motor firmware version: " + vData);
+		motor_stop_all();
+	}
+	else
+	{
+		motor_firmware_enabled = false;
+		motor_firmware_version = 0;
+		console.log("FPGA is not using motor firmware.");
+	}
+	on_firmware_version_changed(motor_firmware_version);
+}
+
+function on_motor_firmware(vData)
+{
+	vData = clean_vData(vData);
+	if (vData == "")
+		return;	
+	/*
+	Expecting this:
+		Setting 0xd420b1a8: 0x90000001 -> 0x90000001 ok
+		installing chumby xilinx driver
+		configuring FPGA
+		Note configuration: motor driver on input side, 720p video on output side
+		Setting 0xd420b1c8: 0x00000000 -> 0x00000000 ok
+		Setting 0xd420b1b8: 0x210ff003 -> 0x210ff003 ok
+	But 2nd time execution, it gives this:
+		Setting 0xd420b1a8: 0x90000001 -> 0x90000001 ok
+		installing chumby xilinx driver
+		configuring FPGA
+		FPGA is configured to drive a motor board on the HDMI input, you can't use this utility for the current configuration.
+		If you have no idea what this message is about, disconnect the device from the HDMI input NOW or else you may permanantly damage it, and reboot the board to get back to a typical consumer-use application configuration.
+		Note configuration: motor driver on input side, 720p video on output side
+		Setting 0xd420b1c8: 0x00000000 -> 0x00000000 ok
+		Setting 0xd420b1b8: 0x210ff003 -> 0x210ff003 ok
+	*/
+	//Getting firmware version
+	xmlhttpPost(serverUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl V"}, on_motor_firmware_version );
+}
+
+function clean_vData(vData)
+{
+	if (!vData)
+		return "";
+	if (!stringContains(vData, "<status>") || !stringContains(vData, "</status>"))
+		return "";
+	var status = vData.split("<status>")[1].split("</status>")[0];
+	//if (status != "1")
+	//	return "";
+	if (!stringContains(vData, "<value>") || !stringContains(vData, "</value>"))
+		return "";
+	var value = vData.split("<value>")[1].split("</value>")[0];
+	return value;
+}
+
+//--------------------------------------------------
+
+function motor_stop_all()
+{
+	motor_stop("1");
+	motor_stop("2");
+	motor_stop("3");
+	motor_stop("4");
+}
+
+function motor_stop(index)
+{
+	motor_states[index] = 's';
+	if (index == "1") 		send_motor_noreply("M sxxx");
+	else if (index == "2")  send_motor_noreply("M xsxx");
+	else if (index == "3")  send_motor_noreply("M xxsx");
+	else if (index == "4")  send_motor_noreply("M xxxs");
+	if (global_parameters['log_motor'])
+		console.log("Stopping motor " + index);
+}
+
+function motor_forward(index)
+{
+	motor_states[index] = 'f';
+	if (index == "1") 		send_motor_noreply("M fxxx");
+	else if (index == "2")  send_motor_noreply("M xfxx");
+	else if (index == "3")  send_motor_noreply("M xxfx");
+	else if (index == "4")  send_motor_noreply("M xxxf");
+	if (global_parameters['log_motor'])
+		console.log("Forward motor " + index);
+}
+
+function motor_reverse(index)
+{
+	motor_states[index] = 'r';
+	if (index == "1") 		send_motor_noreply("M rxxx");
+	else if (index == "2")  send_motor_noreply("M xrxx");
+	else if (index == "3")  send_motor_noreply("M xxrx");
+	else if (index == "4")  send_motor_noreply("M xxxr");
+	if (global_parameters['log_motor'])
+		console.log("Reverse motor " + index);
+}
+
+function motor_speed(index, value)
+{
+	if (value == 0) {
+		motor_stop(index);
+	}
+	var prev_state = motor_states[index];
+	if (value > 0 && prev_state != "f")			motor_forward(index);
+	else if (value < 0 && prev_state != "r")	motor_reverse(index);
+	send_motor_noreply("p " + index + " " + Math.abs(value));
+}
+
+function send_motor_noreply(command_string)
+{
+	if (command_string == "")
+		return;
+	if (motor_firmware_enabled == false)
+		return;
+	//console.log(command_string);
+	xmlhttpPost(serverUrl, "post", { cmd : 'Motor', value : command_string }, null );
+}
+
