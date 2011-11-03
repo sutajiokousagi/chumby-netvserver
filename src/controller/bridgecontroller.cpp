@@ -1,5 +1,6 @@
 #include "bridgecontroller.h"
 #include "../static.h"
+#include "../mot_ctl.h"
 #include <QFileInfo>
 #include <QDir>
 #include <QDebug>
@@ -9,7 +10,6 @@
 #include <QUrl>
 #include <QXmlStreamWriter>
 #include <QTimer>
-
 
 BridgeController::BridgeController(QSettings* settings, QObject* parent) : QObject(parent), HttpRequestHandler(), SocketRequestHandler()
 {
@@ -63,7 +63,41 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     //-----------------------------------------------------------
 
-    if (cmdString == "GETURL")
+    if (cmdString == "MOTOR")
+    {
+        QList<QByteArray> newArgsList = dataString.split(' ');
+        QStringList newArgs;
+        newArgs.append("mot_ctl");
+        for (int i=0; i<newArgsList.length(); i++)
+            newArgs << newArgsList.at(i);
+
+        //Convert QStringList to char** array
+        char **output = new char*[newArgs.size() + 1];
+        for (int i = 0; i < newArgs.size(); i++)
+        {
+            output[i] = new char[strlen(newArgs.at(i).toStdString().c_str())+1];
+            memcpy(output[i], newArgs.at(i).toStdString().c_str(), strlen(newArgs.at(i).toStdString().c_str())+1);
+        }
+        output[newArgs.size()] = ((char)NULL);
+
+        //Execute C motor command
+        int result = main_motor(newArgs.size(), output);
+
+        //Delete char** array
+        int i = 0;
+        while (output[i]) {
+            delete output[i];
+            i++;
+        }
+        delete output;
+
+        if (result == 0)        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>OK</value></data></xml>", true);
+        else                    response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>invalid arguements</value></data></xml>", true);
+    }
+
+    //-----------------------------------------------------------
+
+    else if (cmdString == "GETURL")
     {
         QByteArray urlString = request.getParameter("url");
         QByteArray postString = request.getParameter("post");

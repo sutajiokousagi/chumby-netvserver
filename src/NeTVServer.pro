@@ -18,15 +18,17 @@ HEADERS = \
     static.h \
     startup.h \
     requestmapper.h \
+    mot_ctl.h \
     controller/fileuploadcontroller.h \
     controller/sessioncontroller.h
 
 SOURCES = main.cpp \
-    static.cpp \
-    startup.cpp \
-    requestmapper.cpp \
-    controller/fileuploadcontroller.cpp \
-    controller/sessioncontroller.cpp
+        static.cpp \
+        startup.cpp \
+        requestmapper.cpp \
+        mot_ctl.cpp \
+        controller/fileuploadcontroller.cpp \
+        controller/sessioncontroller.cpp
 
 # DBus support
 message("DBus enabled")
@@ -38,7 +40,9 @@ SOURCES += $$PWD/controller/scriptcontroller.cpp
 
 # Hardware bridge
 HEADERS += $$PWD/controller/bridgecontroller.h
-SOURCES += $$PWD/controller/bridgecontroller.cpp controller/bridgecontroller_utils.cpp controller/bridgecontroller_slots.cpp
+SOURCES += $$PWD/controller/bridgecontroller.cpp \
+           $$PWD/controller/bridgecontroller_utils.cpp \
+           $$PWD/controller/bridgecontroller_slots.cpp
 
 
 OTHER_FILES += \
@@ -85,5 +89,3 @@ MOC_DIR = $$PWD/tmp/$$BUILD_NAME
 UI_DIR = $$PWD/tmp/$$BUILD_NAME
 RCC_DIR = $$PWD/tmp/$$BUILD_NAME
 DESTDIR = $$PWD/bin
-
-
