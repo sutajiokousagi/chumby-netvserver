@@ -2,20 +2,21 @@
 
 # Turn on
 if [ "$1" == "on" ]; then
-	fpga_ctl w 0xc 2
-	echo "on"
+	if fpga_ctl x i 2>&1; then
+		echo "on"
+	else
+		echo "error"
+	fi
 	exit 0
 fi
 
 # Turn off
 if [ "$1" == "off" ]; then
-	fpga_ctl w 0xc 0
-	echo "off"
+	if fpga_ctl x o 2>&1; then
+		echo "off"
+	else
+		echo "error"
+	fi
 	exit 0
 fi
 
-# Setting color $1 $2 $3
-fpga_ctl w 0xc 2
-fpga_ctl w 0xd $1
-fpga_ctl w 0xe $2
-fpga_ctl w 0xf $3
