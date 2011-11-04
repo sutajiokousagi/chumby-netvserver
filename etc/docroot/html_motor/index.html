@@ -7,9 +7,11 @@
 		<link type="text/css" href="css/index.css" rel="stylesheet" />	
 		<script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
 		<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+		<script type="text/javascript" src="js/raphael-min.js"></script>
 		<script type="text/javascript" src="js/utils_log.js"></script>
 		<script type="text/javascript" src="js/utils_string.js"></script>
 		<script type="text/javascript" src="js/utils_general.js"></script>
+		<script type="text/javascript" src="js/utils_graph.js"></script>
 		<script type="text/javascript" src="js/utils_motor.js"></script>
 		<script type="text/javascript" src="js/index.js"></script>
 	</head>
@@ -18,28 +20,47 @@
 	<div id="body_wrapper" width="100%">
 		<button name="btn_enable_motor" id="btn_enable_motor">Enable Motor board</button><br/>
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
+			Motor rate (PWM frequency)
+		</p>
+		<div id="pwm_frequencies">
+			<input type="radio" id="pwmfreq01" value="1"/><label for="pwmfreq01">1Hz</label>
+			<input type="radio" id="pwmfreq02" value="2"/><label for="pwmfreq02">2Hz</label>
+			<input type="radio" id="pwmfreq05" value="5"/><label for="pwmfreq05">5Hz</label>
+			<input type="radio" id="pwmfreq1" value="10"/><label for="pwmfreq1">10Hz</label>
+			<input type="radio" id="pwmfreq2" value="20"/><label for="pwmfreq2">20Hz</label>
+			<input type="radio" id="pwmfreq3" value="30"/><label for="pwmfreq3">30Hz</label>
+			<input type="radio" id="pwmfreq4" value="50"/><label for="pwmfreq4">50Hz</label>
+			<input type="radio" id="pwmfreq8" value="1000"/><label for="pwmfreq8">1kHz</label>
+			<input type="radio" id="pwmfreq10" value="5000"/><label for="pwmfreq10">5kHz</label>
+			<input type="radio" id="pwmfreq11" value="10000"/><label for="pwmfreq11">10kHz</label>
+			<input type="radio" id="pwmfreq13" value="50000"/><label for="pwmfreq13">50kHz</label>
+			<input type="radio" id="pwmfreq14" value="101500" checked="checked"/><label for="pwmfreq14">101.5kHz</label>
+		</div>
+		<div id="slider_pwm1"></div>
+		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
+			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
 			Motor 1
 		</p>
 		<div id="slider1"></div><button id="motor_stop1">Stop</button><button id="servo1" id="servo1">Servo mode</button><br/>
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
 			Motor 2
 		</p>
 		<div id="slider2"></div><button id="motor_stop2">Stop</button><button id="servo2" id="servo2">Servo mode</button><br/>
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
 			Motor 3
 		</p>
 		<div id="slider3"></div><button id="motor_stop3">Stop</button><br/>
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
 			Motor 4
 		</p>
 		<div id="slider4"></div><button id="motor_stop4">Stop</button><br/>
 		
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
 			Digital Outputs
 		</p>
 		<div id="digital_outputs">
@@ -54,7 +75,7 @@
 		</div>
 		
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
 			Digital Intputs
 		</p>
 		<div id="digital_inputs">
@@ -69,7 +90,7 @@
 		</div>
 		
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
 			Analog Intputs
 		</p>
 		<div id="analog_inputs">
@@ -81,6 +102,8 @@
 			<div class="adc" id="adc5"></div>
 			<div class="adc" id="adc6"></div>
 			<div class="adc" id="adc7"></div>
+		</div>
+		<div id="analog_input_graphs">
 		</div>
 	</div>
 	</body>

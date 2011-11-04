@@ -8,6 +8,7 @@ var dinput_timer_id = null;
 var ainput_states = new Array();
 var ainput_interval = 500;
 var ainput_timer_id = null;
+var ainput_data_history = new Array();
 
 function check_motor_firmware()
 {
@@ -95,7 +96,6 @@ function send_motor_noreply(command_string)
 		return;
 	if (motor_firmware_enabled == false)
 		return;
-	//console.log(command_string);
 	xmlhttpPost(serverUrl, "post", { cmd : 'Motor', value : command_string }, null );
 }
 
@@ -229,6 +229,25 @@ function on_analog_input_state(vData)
 	
 	//UI
 	set_analog_input_state(channel, value);
+	
+	//Push data to history array
+	if (!ainput_data_history[channel]) {
+		ainput_data_history[channel] = [];
+		for (i=0;i < 32; i++)
+			ainput_data_history[channel].push(0);
+	}
+	ainput_data_history[channel].unshift(value);
+	
+	//Limit at 40 values
+	if (ainput_data_history[channel].length > 40)
+		ainput_data_history[channel].pop();
+		
+	//Update graph data
+	if (channel < 7 || ainput_data_history[channel].length < 30)
+		return;
+		
+	graph_update_data(ainput_data_history);
+	graph_update_drawing();
 }
 
 function start_ainput_update(interval)
@@ -244,4 +263,20 @@ function stop_ainput_update()
 		return;
 	clearInterval( ainput_timer_id );
 	ainput_timer_id = null;
+}
+
+//--------------------------------------------------
+
+function set_motor_freqency(freq)
+{
+	//See mot_ctl command for formula
+	var div = Math.round( (101498.0 / freq) - 2.0 );
+	set_pwm_divider(div)
+}
+
+function set_pwm_divider(div)
+{
+	if (div < 0) 		div = 0;
+	if (div > 65535)	div = 65535;
+	send_motor_noreply("P " + div);
 }
