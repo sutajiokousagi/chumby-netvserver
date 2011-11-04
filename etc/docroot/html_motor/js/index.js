@@ -21,6 +21,8 @@ function onLoad()
 	$("#slider4").slider({ min:-255, max:255, value:0, slide:on_motor_slider_slide });
 	
 	$( "#pwm_frequencies" ).buttonset();
+	$( "#motor_channel_mode1" ).buttonset();
+	$( "#motor_channel_mode2" ).buttonset();
 	$( "#digital_outputs" ).buttonset();
 	$( "#digital_inputs" ).buttonset({ disabled: true });
 	
@@ -45,6 +47,8 @@ function on_firmware_version_changed(fwver)
 	commit_digital_output_state();
 	start_dinput_update(1000);
 	start_ainput_update(500);
+	set_motor_mode(1, true);		//motor mode
+	set_motor_mode(2, true);		//motor mode
 }
 
 //-------------------------------------------------------
@@ -72,6 +76,16 @@ function on_button_click(btnName)
 		set_motor_freqency(desired_freq);
 		$("#slider_pwm1").slider( "option", "value", desired_freq );
 		$("input", "#pwm_frequencies").button("refresh");
+	}
+	else if (btnName == "servo_mode1" || btnName == "servo_mode2")
+	{
+		var index = btnName.replace("servo_mode");
+		set_motor_mode(index,false);
+	}
+	else if (btnName == "motor_mode1" || btnName == "motor_mode2")
+	{
+		var index = btnName.replace("motor_mode");
+		set_motor_mode(index,true);
 	}
 	else
 	{

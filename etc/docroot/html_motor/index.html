@@ -36,28 +36,48 @@
 			<input type="radio" id="pwmfreq11" value="10000"/><label for="pwmfreq11">10kHz</label>
 			<input type="radio" id="pwmfreq13" value="50000"/><label for="pwmfreq13">50kHz</label>
 			<input type="radio" id="pwmfreq14" value="101500" checked="checked"/><label for="pwmfreq14">101.5kHz</label>
+			<input type="radio" id="pwmfreq15" value="-1" /><label for="pwmfreq15">Slider</label>
 		</div>
 		<div id="slider_pwm1"></div>
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
 			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
 			Motor 1
 		</p>
-		<div id="slider1"></div><button id="motor_stop1">Stop</button><button id="servo1" id="servo1">Servo mode</button><br/>
+		<div id="slider1"></div>
+		<button id="motor_stop1">Stop</button>
+		<div id="motor_channel_mode1">
+			<input type="radio" id="motor_mode1" checked="checked" /><label for="motor_mode1">Motor</label>
+			<input type="radio" id="servo_mode1" /><label for="servo_mode1">Servo</label>
+		</div>
+		
+		<!-------------------------------------->
+		
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
 			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
 			Motor 2
 		</p>
-		<div id="slider2"></div><button id="motor_stop2">Stop</button><button id="servo2" id="servo2">Servo mode</button><br/>
+		<div id="slider2"></div>
+		<button id="motor_stop2">Stop</button>
+		<div id="motor_channel_mode2">
+			<input type="radio" id="motor_mode2" checked="checked" /><label for="motor_mode2">Motor</label>
+			<input type="radio" id="servo_mode2" /><label for="servo_mode2">Servo</label>
+		</div>
+		
+		<!-------------------------------------->
+		
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
 			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
 			Motor 3
 		</p>
+		
 		<div id="slider3"></div><button id="motor_stop3">Stop</button><br/>
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
 			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
 			Motor 4
 		</p>
 		<div id="slider4"></div><button id="motor_stop4">Stop</button><br/>
+		
+		<!-------------------------------------->
 		
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
 			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
@@ -74,6 +94,8 @@
 			<input type="checkbox" id="doutput7" /><label for="doutput7">7</label>
 		</div>
 		
+		<!-------------------------------------->
+		
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
 			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
 			Digital Intputs
@@ -89,6 +111,8 @@
 			<input type="checkbox" id="dinput7" /><label for="dinput7">7</label>
 		</div>
 		
+		<!-------------------------------------->
+		
 		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
 			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
 			Analog Intputs
@@ -103,8 +127,10 @@
 			<div class="adc" id="adc6"></div>
 			<div class="adc" id="adc7"></div>
 		</div>
-		<div id="analog_input_graphs">
-		</div>
+		<div id="analog_input_graphs"></div>
+		
+		<!-------------------------------------->
+		
 	</div>
 	</body>
 </html>

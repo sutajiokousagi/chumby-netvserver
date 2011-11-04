@@ -280,3 +280,13 @@ function set_pwm_divider(div)
 	if (div > 65535)	div = 65535;
 	send_motor_noreply("P " + div);
 }
+
+//--------------------------------------------------
+
+function set_motor_mode(index, isMotor)
+{
+	if (index < 1 || index > 2)
+		return;
+	if (isMotor)	send_motor_noreply("S " + index + " m");
+	else			send_motor_noreply("S " + index + " s");
+}
