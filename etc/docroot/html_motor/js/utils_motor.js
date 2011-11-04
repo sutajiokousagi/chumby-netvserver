@@ -1,6 +1,13 @@
 var motor_firmware_enabled = false;
 var motor_firmware_version = 0;
 var motor_states = new Array();
+var doutput_state = 0;
+var dinput_state = 0;
+var dinput_interval = 500;
+var dinput_timer_id = null;
+var ainput_states = new Array();
+var ainput_interval = 500;
+var ainput_timer_id = null;
 
 function check_motor_firmware()
 {
@@ -82,6 +89,18 @@ function clean_vData(vData)
 
 //--------------------------------------------------
 
+function send_motor_noreply(command_string)
+{
+	if (command_string == "")
+		return;
+	if (motor_firmware_enabled == false)
+		return;
+	//console.log(command_string);
+	xmlhttpPost(serverUrl, "post", { cmd : 'Motor', value : command_string }, null );
+}
+
+//--------------------------------------------------
+
 function motor_stop_all()
 {
 	motor_stop("1");
@@ -134,13 +153,95 @@ function motor_speed(index, value)
 	send_motor_noreply("p " + index + " " + Math.abs(value));
 }
 
-function send_motor_noreply(command_string)
+//--------------------------------------------------
+
+function set_digital_output_all(value)
 {
-	if (command_string == "")
-		return;
-	if (motor_firmware_enabled == false)
-		return;
-	//console.log(command_string);
-	xmlhttpPost(serverUrl, "post", { cmd : 'Motor', value : command_string }, null );
+	send_motor_noreply("u " + value);
 }
 
+function set_digital_output(index, isOn)
+{
+	var mask = 1 << index;
+	var new_state = doutput_state;
+	if (isOn)		new_state |= mask;
+	else			new_state &= ~mask;
+	
+	doutput_state = new_state;	
+	set_digital_output_all(doutput_state);
+}
+
+//--------------------------------------------------
+
+function update_digital_input()
+{
+	xmlhttpPost(serverUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl i"}, on_digital_input_state );
+}
+
+function on_digital_input_state(vData)
+{
+	vData = clean_vData(vData);
+	if (vData == "")
+		return;
+	//Expected: 0x20: xx
+	if (!stringContains(vData, ": "))
+		return;
+	dinput_state = trim( vData.split(": ")[1] );
+	
+	//UI
+	set_digital_input_state_all(dinput_state);
+}
+
+function start_dinput_update(interval)
+{
+	if (!interval)
+		dinput_interval = interval;
+	dinput_timer_id = setInterval ( "update_digital_input()", dinput_interval );
+}
+
+function stop_dinput_update()
+{
+	if (dinput_timer_id == null)
+		return;
+	clearInterval( dinput_timer_id );
+	dinput_timer_id = null;
+}
+
+//--------------------------------------------------
+
+function update_analog_inputs()
+{
+	for (i=0; i<8; i++)
+		xmlhttpPost(serverUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl a " + i}, on_analog_input_state );
+}
+
+function on_analog_input_state(vData)
+{
+	vData = clean_vData(vData);
+	if (vData == "")
+		return;
+	//Expected: 2: 0x2a
+	if (!stringContains(vData, ": "))
+		return;
+	var channel = parseInt( vData.split(": ")[0] );
+	var value = parseInt( vData.split(": ")[1] );
+	ainput_states[channel] = value;
+	
+	//UI
+	set_analog_input_state(channel, value);
+}
+
+function start_ainput_update(interval)
+{
+	if (!interval)
+		ainput_interval = interval;
+	ainput_timer_id = setInterval ( "update_analog_inputs()", ainput_interval );
+}
+
+function stop_ainput_update()
+{
+	if (ainput_timer_id == null)
+		return;
+	clearInterval( ainput_timer_id );
+	ainput_timer_id = null;
+}

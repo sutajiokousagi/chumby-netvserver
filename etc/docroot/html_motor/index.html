@@ -3,7 +3,7 @@
 	<head>
 		<title>NeTV Motor</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<link type="text/css" href="css/dark-hive/jquery-ui-1.8.16.custom.css" rel="stylesheet" />	
+		<link type="text/css" href="css/vader/jquery-ui-1.8.16.custom.css" rel="stylesheet" />	
 		<link type="text/css" href="css/index.css" rel="stylesheet" />	
 		<script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
 		<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
@@ -16,11 +16,72 @@
 	
 	<body onload="onLoad();">
 	<div id="body_wrapper" width="100%">
-		<button name="btn_enable_motor" id="btn_enable_motor" style="float:left;">Enable Motor board</button><br/>
-		Motor 1<div id="slider1"></div><button name="motor_stop1">Stop</button><button name="servo1" id="servo1">Servo mode</button><br/>
-		Motor 2<div id="slider2"></div><button name="motor_stop2">Stop</button><button name="servo2" id="servo2">Servo mode</button><br/>
-		Motor 3<div id="slider3"></div><button name="motor_stop3">Stop</button><br/>
-		Motor 4<div id="slider4"></div><button name="motor_stop4">Stop</button><br/>
+		<button name="btn_enable_motor" id="btn_enable_motor">Enable Motor board</button><br/>
+		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
+			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			Motor 1
+		</p>
+		<div id="slider1"></div><button id="motor_stop1">Stop</button><button id="servo1" id="servo1">Servo mode</button><br/>
+		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
+			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			Motor 2
+		</p>
+		<div id="slider2"></div><button id="motor_stop2">Stop</button><button id="servo2" id="servo2">Servo mode</button><br/>
+		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
+			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			Motor 3
+		</p>
+		<div id="slider3"></div><button id="motor_stop3">Stop</button><br/>
+		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
+			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			Motor 4
+		</p>
+		<div id="slider4"></div><button id="motor_stop4">Stop</button><br/>
+		
+		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
+			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			Digital Outputs
+		</p>
+		<div id="digital_outputs">
+			<input type="checkbox" id="doutput0" /><label for="doutput0">0</label>
+			<input type="checkbox" id="doutput1" /><label for="doutput1">1</label>
+			<input type="checkbox" id="doutput2" /><label for="doutput2">2</label>
+			<input type="checkbox" id="doutput3" /><label for="doutput3">3</label>
+			<input type="checkbox" id="doutput4" /><label for="doutput4">4</label>
+			<input type="checkbox" id="doutput5" /><label for="doutput5">5</label>
+			<input type="checkbox" id="doutput6" /><label for="doutput6">6</label>
+			<input type="checkbox" id="doutput7" /><label for="doutput7">7</label>
+		</div>
+		
+		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
+			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			Digital Intputs
+		</p>
+		<div id="digital_inputs">
+			<input type="checkbox" id="dinput0" /><label for="dinput0">0</label>
+			<input type="checkbox" id="dinput1" /><label for="dinput1">1</label>
+			<input type="checkbox" id="dinput2" /><label for="dinput2">2</label>
+			<input type="checkbox" id="dinput3" /><label for="dinput3">3</label>
+			<input type="checkbox" id="dinput4" /><label for="dinput4">4</label>
+			<input type="checkbox" id="dinput5" /><label for="dinput5">5</label>
+			<input type="checkbox" id="dinput6" /><label for="dinput6">6</label>
+			<input type="checkbox" id="dinput7" /><label for="dinput7">7</label>
+		</div>
+		
+		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
+			<span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+			Analog Intputs
+		</p>
+		<div id="analog_inputs">
+			<div class="adc" id="adc0"></div>
+			<div class="adc" id="adc1"></div>
+			<div class="adc" id="adc2"></div>
+			<div class="adc" id="adc3"></div>
+			<div class="adc" id="adc4"></div>
+			<div class="adc" id="adc5"></div>
+			<div class="adc" id="adc6"></div>
+			<div class="adc" id="adc7"></div>
+		</div>
 	</div>
 	</body>
 </html>

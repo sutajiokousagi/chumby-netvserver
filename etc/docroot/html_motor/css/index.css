@@ -12,7 +12,6 @@ body
 {
 	overflow: hidden;
 	font-size: 14px;
-	color: #FFFFFF;
 }
 a
 {
@@ -168,40 +167,8 @@ div.spacer
 	border-radius: 20px;
 }
 
-/*-----------------------------
-	Configuring
------------------------------*/
-
-#div_configuringMain {
-}
-
-#div_activationStatus {
-	float: top;
-	text-align: center;
-	margin-top: 15px;
-}
-
-.div_activationStatus_error {
-	color: #FF0000;
-	font-size: 18px;
-}
-
-.div_activationStatus_success {
-	color: #00FF00;
-	font-size: 18px;
-}
-
-/*-----------------------------
-	System update
------------------------------*/
-
-.console
- {
-	position: relative;
-	padding: 8px;
-	margin-left: 20px;
-	margin-right: 20px;
-	text-align: left;
-	color: #646464;
-	font-size: 12px;
+.adc
+{
+	height: 10px;
+	margin-top: 5px;
 }
