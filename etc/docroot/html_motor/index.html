@@ -18,118 +18,144 @@
 	
 	<body onload="onLoad();">
 	<div id="body_wrapper" width="100%">
-		<button name="btn_enable_motor" id="btn_enable_motor">Enable Motor board</button><br/>
-		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
-			Motor rate (PWM frequency)
-		</p>
-		<div id="pwm_frequencies">
-			<input type="radio" id="pwmfreq01" value="1"/><label for="pwmfreq01">1Hz</label>
-			<input type="radio" id="pwmfreq02" value="2"/><label for="pwmfreq02">2Hz</label>
-			<input type="radio" id="pwmfreq05" value="5"/><label for="pwmfreq05">5Hz</label>
-			<input type="radio" id="pwmfreq1" value="10"/><label for="pwmfreq1">10Hz</label>
-			<input type="radio" id="pwmfreq2" value="20"/><label for="pwmfreq2">20Hz</label>
-			<input type="radio" id="pwmfreq3" value="30"/><label for="pwmfreq3">30Hz</label>
-			<input type="radio" id="pwmfreq4" value="50"/><label for="pwmfreq4">50Hz</label>
-			<input type="radio" id="pwmfreq8" value="1000"/><label for="pwmfreq8">1kHz</label>
-			<input type="radio" id="pwmfreq10" value="5000"/><label for="pwmfreq10">5kHz</label>
-			<input type="radio" id="pwmfreq11" value="10000"/><label for="pwmfreq11">10kHz</label>
-			<input type="radio" id="pwmfreq13" value="50000"/><label for="pwmfreq13">50kHz</label>
-			<input type="radio" id="pwmfreq14" value="101500" checked="checked"/><label for="pwmfreq14">101.5kHz</label>
-			<input type="radio" id="pwmfreq15" value="-1" /><label for="pwmfreq15">Slider</label>
-		</div>
-		<div id="slider_pwm1"></div>
-		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
-			Motor 1
-		</p>
-		<div id="slider1"></div>
-		<button id="motor_stop1">Stop</button>
-		<div id="motor_channel_mode1">
-			<input type="radio" id="motor_mode1" checked="checked" /><label for="motor_mode1">Motor</label>
-			<input type="radio" id="servo_mode1" /><label for="servo_mode1">Servo</label>
-		</div>
+		<ul id="sortable">
 		
-		<!-------------------------------------->
+			<div class="portlet">
+			<div class="portlet-header">Settings</div>
+				<div class="portlet-content">
+					<button name="btn_enable_motor" id="btn_enable_motor">Checking motor firmware</button><br/>
+				</div>
+			</div>
+			
+			<!-------------------------------------->
 		
-		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
-			Motor 2
-		</p>
-		<div id="slider2"></div>
-		<button id="motor_stop2">Stop</button>
-		<div id="motor_channel_mode2">
-			<input type="radio" id="motor_mode2" checked="checked" /><label for="motor_mode2">Motor</label>
-			<input type="radio" id="servo_mode2" /><label for="servo_mode2">Servo</label>
-		</div>
+			<div class="portlet">
+				<div class="portlet-header">Motor rate (PWM frequency)</div>
+				<div class="portlet-content">
+					<div id="pwm_frequencies">
+						<input type="radio" name="pwm_frequencies" id="pwmfreq01" value="1"/><label for="pwmfreq01">1Hz</label>
+						<input type="radio" name="pwm_frequencies" id="pwmfreq02" value="2"/><label for="pwmfreq02">2Hz</label>
+						<input type="radio" name="pwm_frequencies" id="pwmfreq05" value="5"/><label for="pwmfreq05">5Hz</label>
+						<input type="radio" name="pwm_frequencies" id="pwmfreq1" value="10"/><label for="pwmfreq1">10Hz</label>
+						<input type="radio" name="pwm_frequencies" id="pwmfreq2" value="20"/><label for="pwmfreq2">20Hz</label>
+						<input type="radio" name="pwm_frequencies" id="pwmfreq3" value="30"/><label for="pwmfreq3">30Hz</label>
+						<input type="radio" name="pwm_frequencies" id="pwmfreq4" value="50"/><label for="pwmfreq4">50Hz</label>
+						<input type="radio" name="pwm_frequencies" id="pwmfreq8" value="1000"/><label for="pwmfreq8">1kHz</label>
+						<input type="radio" name="pwm_frequencies" id="pwmfreq10" value="5000"/><label for="pwmfreq10">5kHz</label>
+						<input type="radio" name="pwm_frequencies" id="pwmfreq11" value="10000"/><label for="pwmfreq11">10kHz</label>
+						<input type="radio" name="pwm_frequencies" id="pwmfreq13" value="50000"/><label for="pwmfreq13">50kHz</label>
+						<input type="radio" name="pwm_frequencies" id="pwmfreq14" value="101500" checked="checked"/><label for="pwmfreq14">101.5kHz</label>
+						<input type="radio" name="pwm_frequencies" id="pwmfreq15" value="-1" /><label for="pwmfreq15">Slider</label>
+					</div>
+					<div class="slider" id="slider_pwm1"></div>
+				</div>
+			</div>
+			
+			<!-------------------------------------->
+			
+			<div class="portlet">
+				<div class="portlet-header">Motor 1</div>
+				<div class="portlet-content">
+					<div class="slider" id="slider1"></div>
+					<button id="motor_stop1">Stop</button>
+					<div class="button_group" id="motor_channel_mode1">
+						<input type="radio" name="motor_channel_mode1" id="motor_mode1" checked="checked" /><label for="motor_mode1">Motor</label>
+						<input type="radio" name="motor_channel_mode1" id="servo_mode1" /><label for="servo_mode1">Servo</label>
+					</div>
+				</div>
+			</div>
 		
-		<!-------------------------------------->
+			<!-------------------------------------->
+			
+			<div class="portlet">
+				<div class="portlet-header">Motor 2</div>
+				<div class="portlet-content">
+					<div class="slider" id="slider2"></div>
+					<button id="motor_stop2">Stop</button>
+					<div class="button_group" id="motor_channel_mode2">
+						<input type="radio" name="motor_channel_mode2" id="motor_mode2" checked="checked" /><label for="motor_mode2">Motor</label>
+						<input type="radio" name="motor_channel_mode2" id="servo_mode2" /><label for="servo_mode2">Servo</label>
+					</div>
+				</div>
+			</div>
 		
-		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
-			Motor 3
-		</p>
-		
-		<div id="slider3"></div><button id="motor_stop3">Stop</button><br/>
-		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
-			Motor 4
-		</p>
-		<div id="slider4"></div><button id="motor_stop4">Stop</button><br/>
-		
-		<!-------------------------------------->
-		
-		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
-			Digital Outputs
-		</p>
-		<div id="digital_outputs">
-			<input type="checkbox" id="doutput0" /><label for="doutput0">0</label>
-			<input type="checkbox" id="doutput1" /><label for="doutput1">1</label>
-			<input type="checkbox" id="doutput2" /><label for="doutput2">2</label>
-			<input type="checkbox" id="doutput3" /><label for="doutput3">3</label>
-			<input type="checkbox" id="doutput4" /><label for="doutput4">4</label>
-			<input type="checkbox" id="doutput5" /><label for="doutput5">5</label>
-			<input type="checkbox" id="doutput6" /><label for="doutput6">6</label>
-			<input type="checkbox" id="doutput7" /><label for="doutput7">7</label>
-		</div>
-		
-		<!-------------------------------------->
-		
-		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
-			Digital Intputs
-		</p>
-		<div id="digital_inputs">
-			<input type="checkbox" id="dinput0" /><label for="dinput0">0</label>
-			<input type="checkbox" id="dinput1" /><label for="dinput1">1</label>
-			<input type="checkbox" id="dinput2" /><label for="dinput2">2</label>
-			<input type="checkbox" id="dinput3" /><label for="dinput3">3</label>
-			<input type="checkbox" id="dinput4" /><label for="dinput4">4</label>
-			<input type="checkbox" id="dinput5" /><label for="dinput5">5</label>
-			<input type="checkbox" id="dinput6" /><label for="dinput6">6</label>
-			<input type="checkbox" id="dinput7" /><label for="dinput7">7</label>
-		</div>
-		
-		<!-------------------------------------->
-		
-		<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
-			<span class="ui-icon ui-icon-gear" style="float:left;"></span>
-			Analog Intputs
-		</p>
-		<div id="analog_inputs">
-			<div class="adc" id="adc0"></div>
-			<div class="adc" id="adc1"></div>
-			<div class="adc" id="adc2"></div>
-			<div class="adc" id="adc3"></div>
-			<div class="adc" id="adc4"></div>
-			<div class="adc" id="adc5"></div>
-			<div class="adc" id="adc6"></div>
-			<div class="adc" id="adc7"></div>
-		</div>
-		<div id="analog_input_graphs"></div>
-		
-		<!-------------------------------------->
+			<!-------------------------------------->
+			
+			<div class="portlet">
+				<div class="portlet-header">Motor 3</div>
+				<div class="portlet-content">
+					<div class="slider" id="slider3"></div><button id="motor_stop3">Stop</button><br/>
+				</div>
+			</div>
+			<div class="portlet">
+				<div class="portlet-header">Motor 4</div>
+				<div class="portlet-content">
+					<div class="slider" id="slider4"></div><button id="motor_stop4">Stop</button><br/>
+				</div>
+			</div>
+			
+			<!-------------------------------------->
+			
+			<div class="portlet">
+				<div class="portlet-header">Digital Outputs</div>
+				<div class="portlet-content">
+					<div class="button_group" id="digital_outputs">
+						<input type="checkbox" id="doutput0" /><label for="doutput0">0</label>
+						<input type="checkbox" id="doutput1" /><label for="doutput1">1</label>
+						<input type="checkbox" id="doutput2" /><label for="doutput2">2</label>
+						<input type="checkbox" id="doutput3" /><label for="doutput3">3</label>
+						<input type="checkbox" id="doutput4" /><label for="doutput4">4</label>
+						<input type="checkbox" id="doutput5" /><label for="doutput5">5</label>
+						<input type="checkbox" id="doutput6" /><label for="doutput6">6</label>
+						<input type="checkbox" id="doutput7" /><label for="doutput7">7</label>
+					</div>
+					<div class="button_group" id="led_demo_mode">
+						<input type="radio" name="led_demo_mode" id="led_demo_mode0" checked="checked" /><label for="led_demo_mode0">None</label>
+						<input type="radio" name="led_demo_mode" id="led_demo_mode1" /><label for="led_demo_mode1">Demo 1</label>
+						<input type="radio" name="led_demo_mode" id="led_demo_mode2" /><label for="led_demo_mode2">Demo 2</label>
+					</div>
+				</div>
+			</div>
+			
+			<!-------------------------------------->
+			
+			<div class="portlet">
+				<div class="portlet-header">Digital Intputs</div>
+				<div class="portlet-content">
+					<div class="button_group" id="digital_inputs">
+						<input type="checkbox" id="dinput0" /><label for="dinput0">0</label>
+						<input type="checkbox" id="dinput1" /><label for="dinput1">1</label>
+						<input type="checkbox" id="dinput2" /><label for="dinput2">2</label>
+						<input type="checkbox" id="dinput3" /><label for="dinput3">3</label>
+						<input type="checkbox" id="dinput4" /><label for="dinput4">4</label>
+						<input type="checkbox" id="dinput5" /><label for="dinput5">5</label>
+						<input type="checkbox" id="dinput6" /><label for="dinput6">6</label>
+						<input type="checkbox" id="dinput7" /><label for="dinput7">7</label>
+					</div>
+				</div>
+			</div>
+			
+			<!-------------------------------------->
+			
+			<div class="portlet">
+				<div class="portlet-header">Analog Intputs</div>
+				<div class="portlet-content">
+					<div id="analog_inputs">
+						<div class="adc" id="adc0"></div>
+						<div class="adc" id="adc1"></div>
+						<div class="adc" id="adc2"></div>
+						<div class="adc" id="adc3"></div>
+						<div class="adc" id="adc4"></div>
+						<div class="adc" id="adc5"></div>
+						<div class="adc" id="adc6"></div>
+						<div class="adc" id="adc7"></div>
+					</div>
+					<div id="analog_input_graphs"></div>
+				</div>
+			</div>
+			
+			<!-------------------------------------->
+		</ul>
 		
 	</div>
 	</body>

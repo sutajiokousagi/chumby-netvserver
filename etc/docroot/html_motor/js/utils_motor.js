@@ -1,6 +1,7 @@
 var motor_firmware_enabled = false;
 var motor_firmware_version = 0;
 var motor_states = new Array();
+var servo_states = new Array();
 var doutput_state = 0;
 var dinput_state = 0;
 var dinput_interval = 500;
@@ -112,10 +113,7 @@ function motor_stop_all()
 function motor_stop(index)
 {
 	motor_states[index] = 's';
-	if (index == "1") 		send_motor_noreply("M sxxx");
-	else if (index == "2")  send_motor_noreply("M xsxx");
-	else if (index == "3")  send_motor_noreply("M xxsx");
-	else if (index == "4")  send_motor_noreply("M xxxs");
+	send_motor_noreply("m " + index + " s");
 	if (global_parameters['log_motor'])
 		console.log("Stopping motor " + index);
 }
@@ -123,10 +121,7 @@ function motor_stop(index)
 function motor_forward(index)
 {
 	motor_states[index] = 'f';
-	if (index == "1") 		send_motor_noreply("M fxxx");
-	else if (index == "2")  send_motor_noreply("M xfxx");
-	else if (index == "3")  send_motor_noreply("M xxfx");
-	else if (index == "4")  send_motor_noreply("M xxxf");
+	send_motor_noreply("m " + index + " f");
 	if (global_parameters['log_motor'])
 		console.log("Forward motor " + index);
 }
@@ -134,15 +129,12 @@ function motor_forward(index)
 function motor_reverse(index)
 {
 	motor_states[index] = 'r';
-	if (index == "1") 		send_motor_noreply("M rxxx");
-	else if (index == "2")  send_motor_noreply("M xrxx");
-	else if (index == "3")  send_motor_noreply("M xxrx");
-	else if (index == "4")  send_motor_noreply("M xxxr");
+	send_motor_noreply("m " + index + " r");
 	if (global_parameters['log_motor'])
 		console.log("Reverse motor " + index);
 }
 
-function motor_speed(index, value)
+function set_motor_speed(index, value)
 {
 	if (value == 0) {
 		motor_stop(index);
@@ -287,6 +279,22 @@ function set_motor_mode(index, isMotor)
 {
 	if (index < 1 || index > 2)
 		return;
+	servo_states[index] = isMotor;
 	if (isMotor)	send_motor_noreply("S " + index + " m");
 	else			send_motor_noreply("S " + index + " s");
+	motor_stop(index);
+}
+
+function is_motor_mode(index)
+{
+	return servo_states[index];
+}
+
+function set_servo_angle(index, value)
+{
+	if (is_motor_mode(index))
+		return;
+	if (motor_states[index] != 'f')
+		motor_forward(index);
+	send_motor_noreply("s " + index + " " + value);
 }
