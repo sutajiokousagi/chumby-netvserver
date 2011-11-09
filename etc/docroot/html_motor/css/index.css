@@ -29,7 +29,7 @@ body
 .portlet-header .ui-icon { float: right; }
 .portlet-content { padding: 0.4em; }
 .ui-sortable-placeholder { border: 1px dotted black; visibility: visible !important; height: 50px !important; }
-.slider { margin: 12px 10px 10px 8px; }
+.slider { clear:none; margin: 12px 10px 10px 8px; }
 .ui-progressbar-value { background-color: #f0f0f0; background-image: url(''); }
 .ui-slider-handle { background-color: #f0f0f0; background-image: url(''); border-color: #4977FF; }
 .button_group, button { float:left; clear:none; margin:3px 0px 10px 6px; padding:0; }

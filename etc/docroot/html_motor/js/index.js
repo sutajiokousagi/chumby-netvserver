@@ -97,14 +97,6 @@ function on_button_click(btnName)
 	{
 		return;
 	}
-	else if (stringStartsWith(btnName, "motor_stop"))
-	{
-		var index = btnName.replace("motor_stop", "");
-		motor_stop(index);
-		servo_reset(index);
-		if (is_motor_mode(index))		$("#slider"+index).slider( "option", "value", 0 );
-		else							$("#slider"+index).slider( "option", "value", 900 );
-	}
 	else if (stringStartsWith(btnName, "doutput"))
 	{
 		set_digital_output_all( get_digital_output_ui_state_all() );
@@ -127,20 +119,45 @@ function on_button_click(btnName)
 		set_motor_freqency(desired_freq);
 		$("#slider_pwm1").slider( "option", "value", desired_freq );
 		$("input", "#pwm_frequencies").button("refresh");
+		if (desired_freq < 1000)	$("#pwm_title").html("Motor rate (PWM frequency) - " + desired_freq + "Hz");
+		else						$("#pwm_title").html("Motor rate (PWM frequency) - " + (desired_freq/1000.0) + "kHz");
+	}
+	else if (stringStartsWith(btnName, "motor_stop"))
+	{
+		var index = btnName.replace("motor_stop", "");
+		var isMotor = is_motor_mode(index);
+		motor_stop(index);
+		servo_reset(index);
+		if (isMotor)
+		{
+			$("#slider"+index).slider( "option", "value", 0 );
+			$("#motor_title"+index).html("Motor "+index+ " - stopped");
+		}
+		else
+		{
+			$("#slider"+index).slider( "option", "value", 900 );
+			$("#motor_title"+index).html("Servo "+index+ " - centered");
+		}
 	}
 	else if (stringStartsWith(btnName, "servo_mode"))
 	{
 		var index = btnName.replace("servo_mode", "");
+		if (index < 1 || index > 2)
+			return;
 		set_motor_mode(index,false);
 		$("#slider"+index).slider({ min:0, max:1800, value:900, slide:on_motor_slider_slide });
 		$("#motor_stop"+index).button('option', 'label', 'Center');
+		$("#motor_title"+index).html("Servo "+index+ " - centered");
 	}
 	else if (stringStartsWith(btnName, "motor_mode"))
 	{
 		var index = btnName.replace("motor_mode", "");
+		if (index < 1 || index > 2)
+			return;
 		set_motor_mode(index,true);
 		$("#slider"+index).slider({ min:-255, max:255, value:0, slide:on_motor_slider_slide });
 		$("#motor_stop"+index).button('option', 'label', 'Stop');
+		$("#motor_title"+index).html("Motor "+index+ " - stopped");
 	}
 	else
 	{
@@ -154,8 +171,20 @@ function on_motor_slider_slide(event, ui)
 	var index = id.replace("slider", "");
 	var value = ui.value;
 	var isMotor = is_motor_mode(index);
-	if (isMotor)	set_motor_speed(index, value);
-	else			set_servo_angle(index, value/10.0);
+
+	if (isMotor)
+	{
+		set_motor_speed(index, value);
+		if (value == 0)		$("#motor_title"+index).html("Motor "+index+ " - stopped");
+		else if (value > 0)	$("#motor_title"+index).html("Motor "+index+ " - forward " + Math.abs(value));
+		else				$("#motor_title"+index).html("Motor "+index+ " - reverse " + Math.abs(value));
+	}
+	else
+	{
+		value = value / 10.0;
+		set_servo_angle(index, value);
+		if (value > 0)	$("#motor_title"+index).html("Servo "+index+ " - " + value + " degree");
+	}
 }
 
 function on_pwm_slider_slide(event, ui)
@@ -164,6 +193,8 @@ function on_pwm_slider_slide(event, ui)
 	var desired_freq = ui.value;
 	set_motor_freqency(desired_freq);
 	$("#pwmfreq15").click();
+	if (desired_freq < 1000)	$("#pwm_title").html("Motor rate (PWM frequency) - " + desired_freq + "Hz");
+	else						$("#pwm_title").html("Motor rate (PWM frequency) - " + (desired_freq/1000.0) + "kHz");
 }
 
 //-------------------------------------------------------

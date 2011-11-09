@@ -288,6 +288,8 @@ function set_motor_mode(index, isMotor)
 
 function is_motor_mode(index)
 {
+	if (index < 1 || index > 2)
+		return true;
 	return servo_states[index];
 }
 
