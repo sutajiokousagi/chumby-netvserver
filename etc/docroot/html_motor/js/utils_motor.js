@@ -283,6 +283,7 @@ function set_motor_mode(index, isMotor)
 	if (isMotor)	send_motor_noreply("S " + index + " m");
 	else			send_motor_noreply("S " + index + " s");
 	motor_stop(index);
+	servo_reset(index);
 }
 
 function is_motor_mode(index)
@@ -297,4 +298,9 @@ function set_servo_angle(index, value)
 	if (motor_states[index] != 'f')
 		motor_forward(index);
 	send_motor_noreply("s " + index + " " + value);
+}
+
+function servo_reset(index)
+{
+	set_servo_angle(index, 90);
 }

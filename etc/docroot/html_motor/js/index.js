@@ -101,6 +101,7 @@ function on_button_click(btnName)
 	{
 		var index = btnName.replace("motor_stop", "");
 		motor_stop(index);
+		servo_reset(index);
 		if (is_motor_mode(index))		$("#slider"+index).slider( "option", "value", 0 );
 		else							$("#slider"+index).slider( "option", "value", 900 );
 	}
@@ -132,12 +133,14 @@ function on_button_click(btnName)
 		var index = btnName.replace("servo_mode", "");
 		set_motor_mode(index,false);
 		$("#slider"+index).slider({ min:0, max:1800, value:900, slide:on_motor_slider_slide });
+		$("#motor_stop"+index).button('option', 'label', 'Center');
 	}
 	else if (stringStartsWith(btnName, "motor_mode"))
 	{
 		var index = btnName.replace("motor_mode", "");
 		set_motor_mode(index,true);
 		$("#slider"+index).slider({ min:-255, max:255, value:0, slide:on_motor_slider_slide });
+		$("#motor_stop"+index).button('option', 'label', 'Stop');
 	}
 	else
 	{
