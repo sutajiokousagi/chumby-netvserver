@@ -577,10 +577,19 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         if (id == "")       qDebug("%s: TextInput event from NeTVBrowser (de-focus)",  TAG);
         else                qDebug("%s: TextInput event from NeTVBrowser (id: %s, value: %s)",  TAG, id.constData(), dataString.constData());
 
-        //Forward to all Android clients
+        //TCP won't work because all requests get disconnected as soon as they finish
+        /*
         int numClient = Static::tcpSocketServer->broadcast(request.getRawData(), "android");
         if (numClient > 0)  qDebug("%s: forwarded to Android",  TAG);
         else                qDebug("%s: no Android connected",  TAG);
+        */
+
+        //Send multicast to whoever subscribe
+        QMap<QByteArray, QByteArray> parameters;
+        parameters.insert("cmd", "TextInput");
+        parameters.insert("id", id);
+        parameters.insert("value", dataString);
+        Static::udpSocketServer->sendMessage(parameters, "multicast");
     }
 
     else if (cmdString == "SETURL" || cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS"
