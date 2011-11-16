@@ -8,15 +8,11 @@
 #include <QMutex>
 #include <QThread>
 #include <QHostAddress>
+#include <QUdpSocket>
 #include "socketrequesthandler.h"
 
-#define SERVICE_INTERVAL    25                  //milliseconds
+#define SERVICE_INTERVAL    20                  //milliseconds
 #define MULTICAST_GROUP     "225.0.0.37"
-#define USE_MULTICAST       false
-#define DATA_MESSAGE        "da"
-#define COMMAND_MESSAGE     "cm"
-#define MESSAGE_KEY_TYPE    "tp"
-#define MESSAGE_KEY_ADDRESS "address"
 
 /**
   Listens for incoming UDP data from mobile devices and communicate in XML format
@@ -41,11 +37,9 @@ private:
 
     //Flags
     QMutex      mutex;
+    int         mPort;
     bool        bStop;
     bool        bRunning;
-
-    //Data storage
-    QList< QMap<QString, QString> > messageQueue;
 
 public:
 
@@ -55,8 +49,7 @@ public:
     bool isRunning();
     bool isStopping();
 
-    void queueMessage( QMap<QString, QString> params );
-    QByteArray getSerializedInfoXML( const QMap<QString, QString> params );
+    void sendMessage( QMap<QByteArray, QByteArray> params, QByteArray peerAddress );
 
 private:
 
@@ -65,6 +58,10 @@ private:
 
     /** Request handler for the server */
     SocketRequestHandler* requestHandler;
+
+    /** The socket object **/
+    QUdpSocket* pSocket;
+
 };
 
 #endif // UDPSOCKETSERVER_H

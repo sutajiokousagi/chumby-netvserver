@@ -18,9 +18,24 @@ UdpSocketServer::UdpSocketServer(QSettings* settings, SocketRequestHandler* requ
 
     bStop = false;
     bRunning = false;
+    mPort = settings->value("port").toInt();
 
-    // Start listening
-    start();
+    //Create the socket
+    pSocket = new QUdpSocket(this);
+    bool isBound = pSocket->bind(mPort);
+
+    //Start listening if everything is ok
+    if (isBound)
+    {
+        qDebug("UdpSocketServer: Listening on port %i", mPort);
+        start();
+        return;
+    }
+
+    //Clean up when it failed
+    qDebug("UdpSocketServer: failed to bind to port %i", mPort);
+    delete pSocket;
+    pSocket = NULL;
 }
 
 UdpSocketServer::~UdpSocketServer()
@@ -40,7 +55,8 @@ UdpSocketServer::~UdpSocketServer()
 
 void UdpSocketServer::start()
 {
-    QThread::start(QThread::LowestPriority);
+    if (pSocket != NULL)
+        QThread::start(QThread::LowestPriority);
 }
 
 void UdpSocketServer::terminate()
@@ -94,20 +110,13 @@ void UdpSocketServer::run()
         return;
     }
 
+    //No socket to run on
+    if (pSocket == NULL)
+        return;
+
     bStop = false;
     bRunning = true;
     mutex.unlock();
-
-    //Create the socket
-    int port = settings->value("port").toInt();
-
-    QUdpSocket sock;
-    bool isBound = sock.bind(port);
-    if (!isBound) {
-        qDebug() << "UdpSocketServer failed to bind to port " << port;
-        return;
-    }
-    qDebug("UdpSocketServer: Listening on port %i", port);
 
     //Get own IP addresses
     QList <QHostAddress> list = QHostInfo::fromName(QHostInfo::localHostName()).addresses();
@@ -116,14 +125,14 @@ void UdpSocketServer::run()
     {
         msleep(SERVICE_INTERVAL);
 
-        while(sock.hasPendingDatagrams())
+        while(pSocket->hasPendingDatagrams())
         {
-            int bytesAvail = sock.pendingDatagramSize();
+            int bytesAvail = pSocket->pendingDatagramSize();
             char *buf = (char*) malloc(bytesAvail);
             memset(buf, 0, sizeof(bytesAvail));
 
             QHostAddress peerAddress;
-            int byteRead = sock.readDatagram(buf, bytesAvail, &peerAddress);
+            int byteRead = pSocket->readDatagram(buf, bytesAvail, &peerAddress);
             if (byteRead <= 0) {
                 free(buf);
                 continue;
@@ -138,10 +147,10 @@ void UdpSocketServer::run()
 
             if (!isLoopback)
             {
-                SocketRequest *request = new SocketRequest(QByteArray(buf, byteRead), peerAddress.toString().toLatin1(), port);
+                SocketRequest *request = new SocketRequest(QByteArray(buf, byteRead), peerAddress.toString().toLatin1(), this->mPort);
                 if (!request->hasError() && this->requestHandler != NULL)
                 {
-                    SocketResponse response(&sock, peerAddress.toString().toLatin1() , port);
+                    SocketResponse response(this->pSocket, peerAddress.toString().toLatin1() , this->mPort);
                     this->requestHandler->service(*request, response);
                 }
                 delete request;
@@ -160,32 +169,12 @@ void UdpSocketServer::run()
 // Sending
 //----------------------------------------------------------------------------------
 
-void UdpSocketServer::queueMessage( QMap<QString, QString> params )
+void UdpSocketServer::sendMessage( QMap<QByteArray, QByteArray> params, QByteArray peerAddress )
 {
-    messageQueue.push_back(params);
-}
+    if (peerAddress.length() < 7 || peerAddress.toUpper() == "MULTICAST")
+        peerAddress = MULTICAST_GROUP;
 
-QByteArray UdpSocketServer::getSerializedInfoXML( const QMap<QString, QString> params )
-{
-    QByteArray byteArray;
-    QBuffer buffer(&byteArray);
-    buffer.open(QIODevice::WriteOnly);
-
-    QXmlStreamWriter *xmlfile = new QXmlStreamWriter();
-    xmlfile->setDevice(&buffer);
-
-    xmlfile->writeStartElement( "xml" );
-
-    QMapIterator<QString, QString> i(params);
-    while (i.hasNext())
-    {
-         i.next();
-         xmlfile->writeTextElement(i.key(), i.value());
-    }
-
-    xmlfile->writeEndElement();
-    delete xmlfile;
-
-    buffer.close();
-    return byteArray;
+    SocketResponse response(pSocket, peerAddress, this->mPort);
+    response.setQMap(params);
+    response.write();
 }

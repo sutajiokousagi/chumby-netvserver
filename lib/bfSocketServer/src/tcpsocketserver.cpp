@@ -67,10 +67,6 @@ int TcpSocketServer::broadcast(QByteArray messageText, QByteArray type /* = "" *
 
 void TcpSocketServer::read()
 {
-#ifdef SUPERVERBOSE
-    qDebug("TcpSocketServer (%x): read input",(unsigned int) this);
-#endif
-
     QTcpSocket *socket = (QTcpSocket *)QObject::sender();
 
     QByteArray buffer;

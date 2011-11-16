@@ -23,6 +23,7 @@ public:
     void setStatus(QByteArray statusName);
     void setStatus(int statusCode);
     void setCommand(QByteArray commandName);
+    void setQMap(QMap<QByteArray,QByteArray> parameters);
 
     void setParameter(QByteArray paramName, int paramValue);
     void setParameter(QByteArray paramName, float paramValue);

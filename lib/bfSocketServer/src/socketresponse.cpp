@@ -40,6 +40,26 @@ void SocketResponse::setCommand(QByteArray commandName)
     this->commandText = commandName;
 }
 
+void SocketResponse::setQMap(QMap<QByteArray,QByteArray> parameters)
+{
+    QByteArray tempValue = parameters.value("cmd");
+    if (tempValue.length() > 0)
+        this->commandText = tempValue;
+
+    tempValue = parameters.value("status");
+    if (tempValue.length() > 0)
+        this->statusText = tempValue;
+
+    parameters.remove("status");
+    parameters.remove("cmd");
+
+    QMapIterator<QByteArray, QByteArray> i(parameters);
+    while (i.hasNext()) {
+        i.next();
+        setParameter(i.key(), i.value());
+    }
+}
+
 void SocketResponse::setParameter(QByteArray paramName, int paramValue)
 {
     setParameter(paramName, QByteArray::number(paramValue));
