@@ -570,6 +570,19 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 
+    //from NeTVServer mostly
+    if (cmdString == "TEXTINPUT")
+    {
+        QByteArray id = request.getParameter("id");
+        if (id == "")       qDebug("%s: TextInput event from NeTVBrowser (de-focus)",  TAG);
+        else                qDebug("%s: TextInput event from NeTVBrowser (id: %s, value: %s)",  TAG, id.constData(), dataString.constData());
+
+        //Forward to all Android clients
+        int numClient = Static::tcpSocketServer->broadcast(request.getRawData(), "android");
+        if (numClient > 0)  qDebug("%s: forwarded to Android",  TAG);
+        else                qDebug("%s: no Android connected",  TAG);
+    }
+
     else if (cmdString == "SETURL" || cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS"
              || cmdString == "UPDATEREADY" || cmdString == "UPDATEDONE" || cmdString == "UPGRADEDONE")
     {
