@@ -57,10 +57,10 @@ function onLoad()
 		console.log("Server URL: " + serverUrl);
 	}
 		
-	//Start by checking motor firmware presence
+	//Start by checking motor firmware presence after all other stuffs has been fully loaded
 	$("#btn_enable_motor").button( "option", "disabled", true );
 	$("#btn_enable_motor").button('option', 'icons', {primary:'ui-icon-transferthick-e-w'} );
-	setTimeout("check_motor_firmware()", 500);
+	setTimeout("check_motor_firmware(on_firmware_version_changed)", 500);
 }
 
 function on_firmware_version_changed(fwver)
@@ -77,8 +77,8 @@ function on_firmware_version_changed(fwver)
 	$("#btn_enable_motor").button( "option", "disabled", true );
 	$("#btn_enable_motor").button('option', 'icons', {primary:'ui-icon-circle-check'} );
 	commit_digital_output_ui_state();
-	start_dinput_update(1000);
-	start_ainput_update(500);
+	start_digital_input_update(1000, set_digital_input_state_all);
+	start_analog_input_update(500, set_analog_input_ui_state, graph_update_data);
 	set_motor_mode(1, true);		//motor mode
 	set_motor_mode(2, true);		//motor mode
 }
@@ -90,7 +90,7 @@ function on_button_click(btnName)
 	if (global_parameters['log_btn'])
 		log( btnName );
 	if (btnName == "btn_enable_motor") {
-		enable_motor_board();
+		enable_motor_board(on_firmware_version_changed);
 		return;
 	}
 	else if (stringStartsWith(btnName, "dinput"))
@@ -122,12 +122,12 @@ function on_button_click(btnName)
 		if (desired_freq < 1000)	$("#pwm_title").html("Motor rate (PWM frequency) - " + desired_freq + "Hz");
 		else						$("#pwm_title").html("Motor rate (PWM frequency) - " + (desired_freq/1000.0) + "kHz");
 	}
-	else if (stringStartsWith(btnName, "motor_stop"))
+	else if (stringStartsWith(btnName, "stop_motor"))
 	{
-		var index = btnName.replace("motor_stop", "");
+		var index = btnName.replace("stop_motor", "");
 		var isMotor = is_motor_mode(index);
-		motor_stop(index);
-		servo_reset(index);
+		stop_motor(index);
+		center_servo(index);
 		if (isMotor)
 		{
 			$("#slider"+index).slider( "option", "value", 0 );
@@ -146,7 +146,7 @@ function on_button_click(btnName)
 			return;
 		set_motor_mode(index,false);
 		$("#slider"+index).slider({ min:0, max:1800, value:900, slide:on_motor_slider_slide });
-		$("#motor_stop"+index).button('option', 'label', 'Center');
+		$("#stop_motor"+index).button('option', 'label', 'Center');
 		$("#motor_title"+index).html("Servo "+index+ " - centered");
 	}
 	else if (stringStartsWith(btnName, "motor_mode"))
@@ -156,7 +156,7 @@ function on_button_click(btnName)
 			return;
 		set_motor_mode(index,true);
 		$("#slider"+index).slider({ min:-255, max:255, value:0, slide:on_motor_slider_slide });
-		$("#motor_stop"+index).button('option', 'label', 'Stop');
+		$("#stop_motor"+index).button('option', 'label', 'Stop');
 		$("#motor_title"+index).html("Motor "+index+ " - stopped");
 	}
 	else
@@ -244,7 +244,7 @@ function set_digital_input_state(index, isOn)
 	$("#dinput" + index).button('refresh');
 }
 
-function set_analog_input_state(index, value)
+function set_analog_input_ui_state(index, value)
 {
 	var percentage = 100.0 * value / 255.0;
 	$("#adc" + index).progressbar( "option", "value", percentage );

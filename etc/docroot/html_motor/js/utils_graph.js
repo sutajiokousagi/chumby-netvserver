@@ -37,7 +37,7 @@ function graph_update_data(array)
 {
 	if (array == null)
 	{
-		//Generate random data
+		//Zero all data
 		for (var i = 0; i < 8; i++)
 			values[i] = randomPath(30, i);
 		return;
@@ -63,6 +63,8 @@ function graph_update_data(array)
 		}
 		values[m] = path;
 	}
+	
+	graph_update_drawing();
 }
 
 //Helper function to generate random data on-demand

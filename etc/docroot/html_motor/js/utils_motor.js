@@ -10,15 +10,26 @@ var ainput_states = new Array();
 var ainput_interval = 500;
 var ainput_timer_id = null;
 var ainput_data_history = new Array();
+var bridgeUrl = getBridgeUrl();
+var motor_firmware_callback = null;
+var digital_input_ui_callback = null;
+var analog_input_ui_callback = null;
+var analog_input_graph_callback = null;
 
-function check_motor_firmware()
+//--------------------------------------------------
+// Initialization
+//--------------------------------------------------
+
+function check_motor_firmware(vCompleteFunc)
 {
-	xmlhttpPost(serverUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl V"}, on_motor_firmware_version );
+	motor_firmware_callback = vCompleteFunc;
+	xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl V"}, on_motor_firmware_version );
 }
 
-function enable_motor_board()
+function enable_motor_board(vCompleteFunc)
 {
-	xmlhttpPost(serverUrl, "post", { cmd : 'NECommand', value : "/etc/init.d/netv_service motor"}, on_motor_firmware );
+	motor_firmware_callback = vCompleteFunc;
+	xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'NECommand', value : "/etc/init.d/netv_service motor"}, on_motor_firmware );
 }
 
 function on_motor_firmware_version(vData)
@@ -26,7 +37,7 @@ function on_motor_firmware_version(vData)
 	vData = clean_vData(vData);
 	if (vData == "")
 		return;
-	/* Expecting a single number, or this
+	/* Expecting a single number, or this long string
 	FPGA is not configured to drive a motor board, please follow this procedure:
 	1. Make sure the HDMI input is connected to the motor board. Do not connect an HDMI device to the port! We are not liable for damages if you wire this up wrong.
 	2. Issue the command 'netv_service motor'; this will switch the NeTV into motor driver mode.
@@ -36,7 +47,7 @@ function on_motor_firmware_version(vData)
 		motor_firmware_enabled = true;
 		motor_firmware_version = vData;
 		console.log("Motor firmware version: " + vData);
-		motor_stop_all();
+		stop_motor_all();
 	}
 	else
 	{
@@ -44,7 +55,10 @@ function on_motor_firmware_version(vData)
 		motor_firmware_version = 0;
 		console.log("FPGA is not using motor firmware.");
 	}
-	on_firmware_version_changed(motor_firmware_version);
+	
+	//Returns 0 if failed to enable motor firmware
+	if (motor_firmware_callback)
+		motor_firmware_callback(motor_firmware_version);
 }
 
 function on_motor_firmware(vData)
@@ -71,46 +85,22 @@ function on_motor_firmware(vData)
 		Setting 0xd420b1b8: 0x210ff003 -> 0x210ff003 ok
 	*/
 	//Getting firmware version
-	xmlhttpPost(serverUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl V"}, on_motor_firmware_version );
-}
-
-function clean_vData(vData)
-{
-	if (!vData)
-		return "";
-	if (!stringContains(vData, "<status>") || !stringContains(vData, "</status>"))
-		return "";
-	var status = vData.split("<status>")[1].split("</status>")[0];
-	//if (status != "1")
-	//	return "";
-	if (!stringContains(vData, "<value>") || !stringContains(vData, "</value>"))
-		return "";
-	var value = vData.split("<value>")[1].split("</value>")[0];
-	return value;
+	xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl V"}, on_motor_firmware_version );
 }
 
 //--------------------------------------------------
-
-function send_motor_noreply(command_string)
-{
-	if (command_string == "")
-		return;
-	if (motor_firmware_enabled == false)
-		return;
-	xmlhttpPost(serverUrl, "post", { cmd : 'Motor', value : command_string }, null );
-}
-
+// Motors mode
 //--------------------------------------------------
 
-function motor_stop_all()
+function stop_motor_all()
 {
-	motor_stop("1");
-	motor_stop("2");
-	motor_stop("3");
-	motor_stop("4");
+	stop_motor("1");
+	stop_motor("2");
+	stop_motor("3");
+	stop_motor("4");
 }
 
-function motor_stop(index)
+function stop_motor(index)
 {
 	motor_states[index] = 's';
 	send_motor_noreply("m " + index + " s");
@@ -118,7 +108,7 @@ function motor_stop(index)
 		console.log("Stopping motor " + index);
 }
 
-function motor_forward(index)
+function set_motor_forward(index)
 {
 	motor_states[index] = 'f';
 	send_motor_noreply("m " + index + " f");
@@ -126,7 +116,7 @@ function motor_forward(index)
 		console.log("Forward motor " + index);
 }
 
-function motor_reverse(index)
+function set_motor_reverse(index)
 {
 	motor_states[index] = 'r';
 	send_motor_noreply("m " + index + " r");
@@ -137,14 +127,70 @@ function motor_reverse(index)
 function set_motor_speed(index, value)
 {
 	if (value == 0) {
-		motor_stop(index);
+		stop_motor(index);
 	}
 	var prev_state = motor_states[index];
-	if (value > 0 && prev_state != "f")			motor_forward(index);
-	else if (value < 0 && prev_state != "r")	motor_reverse(index);
+	if (value > 0 && prev_state != "f")			set_motor_forward(index);
+	else if (value < 0 && prev_state != "r")	set_motor_reverse(index);
 	send_motor_noreply("p " + index + " " + Math.abs(value));
 }
 
+//--------------------------------------------------
+// Motor settings
+//--------------------------------------------------
+
+function set_motor_freqency(freq)
+{
+	//See mot_ctl command for formula
+	var div = Math.round( (101498.0 / freq) - 2.0 );
+	set_pwm_divider(div)
+}
+
+function set_pwm_divider(div)
+{
+	if (div < 0) 		div = 0;
+	if (div > 65535)	div = 65535;
+	send_motor_noreply("P " + div);
+}
+
+function is_motor_mode(index)
+{
+	if (index < 1 || index > 2)
+		return true;
+	return servo_states[index];
+}
+
+function set_motor_mode(index, isMotor)
+{
+	if (index < 1 || index > 2)
+		return;
+	servo_states[index] = isMotor;
+	if (isMotor)	send_motor_noreply("S " + index + " m");
+	else			send_motor_noreply("S " + index + " s");
+	stop_motor(index);
+	center_servo(index);
+}
+
+//--------------------------------------------------
+// Servo mode
+//--------------------------------------------------
+
+function set_servo_angle(index, value)
+{
+	if (is_motor_mode(index))
+		return;
+	if (motor_states[index] != 'f')
+		set_motor_forward(index);
+	send_motor_noreply("s " + index + " " + value);
+}
+
+function center_servo(index)
+{
+	set_servo_angle(index, 90);
+}
+
+//--------------------------------------------------
+// Digital outputs
 //--------------------------------------------------
 
 function set_digital_output_all(value)
@@ -164,10 +210,28 @@ function set_digital_output(index, isOn)
 }
 
 //--------------------------------------------------
+// Digital inputs
+//--------------------------------------------------
 
-function update_digital_input()
+function start_digital_input_update(interval, vCompleteFunc)
 {
-	xmlhttpPost(serverUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl i"}, on_digital_input_state );
+	if (!interval)
+		dinput_interval = interval;
+	digital_input_ui_callback = vCompleteFunc;
+	dinput_timer_id = setInterval ( "request_digital_input_state()", dinput_interval );
+}
+
+function stop_digital_input_update()
+{
+	if (dinput_timer_id == null)
+		return;
+	clearInterval( dinput_timer_id );
+	dinput_timer_id = null;
+}
+
+function request_digital_input_state()
+{
+	xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl i"}, on_digital_input_state );
 }
 
 function on_digital_input_state(vData)
@@ -180,31 +244,36 @@ function on_digital_input_state(vData)
 		return;
 	dinput_state = trim( vData.split(": ")[1] );
 	
-	//UI
-	set_digital_input_state_all(dinput_state);
-}
-
-function start_dinput_update(interval)
-{
-	if (!interval)
-		dinput_interval = interval;
-	dinput_timer_id = setInterval ( "update_digital_input()", dinput_interval );
-}
-
-function stop_dinput_update()
-{
-	if (dinput_timer_id == null)
-		return;
-	clearInterval( dinput_timer_id );
-	dinput_timer_id = null;
+	//UI callback
+	if (digital_input_ui_callback)
+		digital_input_ui_callback(dinput_state);
 }
 
 //--------------------------------------------------
+// Analog inputs
+//--------------------------------------------------
 
-function update_analog_inputs()
+function start_analog_input_update(interval, vCompleteFunc, vGraphFunc)
+{
+	if (!interval)
+		ainput_interval = interval;
+	analog_input_ui_callback = vCompleteFunc;
+	analog_input_graph_callback = vGraphFunc;
+	ainput_timer_id = setInterval ( "request_analog_input_state()", ainput_interval );
+}
+
+function stop_analog_input_update()
+{
+	if (ainput_timer_id == null)
+		return;
+	clearInterval( ainput_timer_id );
+	ainput_timer_id = null;
+}
+
+function request_analog_input_state()
 {
 	for (i=0; i<8; i++)
-		xmlhttpPost(serverUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl a " + i}, on_analog_input_state );
+		xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl a " + i}, on_analog_input_state );
 }
 
 function on_analog_input_state(vData)
@@ -220,7 +289,8 @@ function on_analog_input_state(vData)
 	ainput_states[channel] = value;
 	
 	//UI
-	set_analog_input_state(channel, value);
+	if (analog_input_ui_callback)
+		analog_input_ui_callback(channel, value);
 	
 	//Push data to history array
 	if (!ainput_data_history[channel]) {
@@ -234,75 +304,128 @@ function on_analog_input_state(vData)
 	if (ainput_data_history[channel].length > 40)
 		ainput_data_history[channel].pop();
 		
-	//Update graph data
+	//Update history data
 	if (channel < 7 || ainput_data_history[channel].length < 30)
 		return;
-		
-	graph_update_data(ainput_data_history);
-	graph_update_drawing();
+	
+	if (analog_input_graph_callback)
+		analog_input_graph_callback(ainput_data_history);
 }
 
-function start_ainput_update(interval)
-{
-	if (!interval)
-		ainput_interval = interval;
-	ainput_timer_id = setInterval ( "update_analog_inputs()", ainput_interval );
-}
+//----------------------------------------------------------------
+// XMLHttpRequest helpers
+//----------------------------------------------------------------
 
-function stop_ainput_update()
+function send_motor_noreply(command_string)
 {
-	if (ainput_timer_id == null)
+	if (command_string == "")
 		return;
-	clearInterval( ainput_timer_id );
-	ainput_timer_id = null;
-}
-
-//--------------------------------------------------
-
-function set_motor_freqency(freq)
-{
-	//See mot_ctl command for formula
-	var div = Math.round( (101498.0 / freq) - 2.0 );
-	set_pwm_divider(div)
-}
-
-function set_pwm_divider(div)
-{
-	if (div < 0) 		div = 0;
-	if (div > 65535)	div = 65535;
-	send_motor_noreply("P " + div);
-}
-
-//--------------------------------------------------
-
-function set_motor_mode(index, isMotor)
-{
-	if (index < 1 || index > 2)
+	if (motor_firmware_enabled == false)
 		return;
-	servo_states[index] = isMotor;
-	if (isMotor)	send_motor_noreply("S " + index + " m");
-	else			send_motor_noreply("S " + index + " s");
-	motor_stop(index);
-	servo_reset(index);
+	xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'Motor', value : command_string }, null );
 }
 
-function is_motor_mode(index)
+function getBridgeUrl()
 {
-	if (index < 1 || index > 2)
-		return true;
-	return servo_states[index];
+	var tempLocaltion = "" + document.location;
+	if (tempLocaltion.indexOf("localhost") != -1)
+		return "localhost";
+	if (tempLocaltion.indexOf("file://") != -1)
+		return "";
+	return "http://" + document.location.host + "/bridge";
 }
 
-function set_servo_angle(index, value)
+//Get an XMLHttpRequest, object
+function getXHR()
 {
-	if (is_motor_mode(index))
+	var req = null;
+	if(window.XMLHttpRequest)
+	{
+		req = new XMLHttpRequest();
+		return req;
+	}
+	else
+	{
+		try {
+			req = new ActiveXObject('Msxml2.XMLHTTP');				//IE
+			return req;
+		}
+		catch(e)
+		{
+			try {
+				req = new ActiveXObject("Microsoft.XMLHTTP");		//IE
+				return req;
+			}
+			catch(e)
+			{
+				return null;
+			}
+		}
+	}
+	return req;
+}
+
+function xmlHttpPostMotor(
+	vUrl,
+	vType,			// "post" | "get"
+	vData,
+	vCompleteFunc
+)
+{		
+	var xmlHttpReq = getXHR();
+	if (xmlHttpReq == null) {
+		alert("Failed to get XMLHttpRequest");
 		return;
-	if (motor_states[index] != 'f')
-		motor_forward(index);
-	send_motor_noreply("s " + index + " " + value);
+	}
+	
+	if (vUrl == "")
+		vUrl = getBridgeUrl();
+	xmlHttpReq.open(vType, vUrl, true);
+	xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xmlHttpReq.onreadystatechange = function()
+	{
+		if (xmlHttpReq.readyState == 4)
+		{
+			switch (xmlHttpReq.status)
+			{
+				case 200:
+					if (vCompleteFunc)
+						vCompleteFunc(xmlHttpReq.responseText);
+					break;
+				case 0:
+					if (vCompleteFunc)
+						vCompleteFunc(0);
+					break;
+			}
+		}
+	}
+	
+	if (vType.toLowerCase() == "post")
+	{
+		var parameters = "";
+		for (var o in vData)
+			parameters += o + "=" + encodeURIComponent(vData[o]) + "&";
+		parameters = parameters.substring(0, parameters.length-1);
+			
+		xmlHttpReq.send(parameters);
+	}
+	else
+	{
+		xmlHttpReq.send();
+	}
 }
 
-function servo_reset(index)
+function clean_vData(vData)
 {
-	set_servo_angle(index, 90);
+	if (!vData)
+		return "";
+	if (!stringContains(vData, "<status>") || !stringContains(vData, "</status>"))
+		return "";
+	var status = vData.split("<status>")[1].split("</status>")[0];
+	//if (status != "1")
+	//	return "";
+	if (!stringContains(vData, "<value>") || !stringContains(vData, "</value>"))
+		return "";
+	var value = vData.split("<value>")[1].split("</value>")[0];
+	return value;
 }
