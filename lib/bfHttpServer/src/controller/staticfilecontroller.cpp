@@ -162,18 +162,18 @@ void StaticFileController::SetContentType(QString fileName, HttpResponse& respon
 QString StaticFileController::readPspHomepage()
 {
     if (!FileExists(HOMEPAGE_PAGE_FILE))
-        return "1";
+        return "";
     QByteArray fileContent = GetFileContents(HOMEPAGE_PAGE_FILE).trimmed();
     if (fileContent.length() < 1)
-        return "2";
+        return "";
     if (fileContent.startsWith("http"))
-        return "3";
+        return "";
     if (!fileContent.startsWith("/"))
-        return "4";
+        return "";
     QString fileContentString = fileContent;
     QDir dir(fileContentString);
     if (!dir.exists(fileContentString))
-        return "5";
+        return "";
 
     if (fileContent.endsWith("/"))
         fileContent = fileContent.left(fileContent.size()-1);
@@ -182,7 +182,7 @@ QString StaticFileController::readPspHomepage()
 
 QString StaticFileController::setDocroot(QString newPath)
 {
-    if (newPath == NULL || newPath.length() >= 2)
+    if (newPath == NULL || newPath.length() < 2)
         return "";
     if (!newPath.startsWith("/"))
         return "";
@@ -190,8 +190,9 @@ QString StaticFileController::setDocroot(QString newPath)
     if (!dir.exists(newPath))
         return "";
     if (newPath.endsWith("/"))
-        newPath = newPath.left(newPath.size()-1);
+        newPath = newPath.left(newPath.length()-1);
 
+    qDebug("NeTVServer: setDocroot %s", qPrintable(newPath));
     this->docrootDynamic = newPath;
     return getDocroot();
 }
