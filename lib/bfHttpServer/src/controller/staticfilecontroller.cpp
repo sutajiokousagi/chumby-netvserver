@@ -6,37 +6,16 @@
 StaticFileController::StaticFileController(QSettings* settings) : HttpRequestHandler()
 {
     docroot = settings->value("path",".").toString();
-
-    // Convert relative path to absolute, based on the directory of the config file.
-#ifdef Q_OS_WIN32
-    if (QDir::isRelativePath(docroot) && settings->format()!=QSettings::NativeFormat)
-#else
-    if (QDir::isRelativePath(docroot))
-#endif
-    {
-        QFileInfo configFile(settings->fileName());
-        docroot = QFileInfo(configFile.absolutePath(),docroot).absoluteFilePath();
-    }
-    qDebug("StaticFileController: docroot=%s", qPrintable(docroot));
     docrootDynamic = docroot;
-}
 
-QString StaticFileController::setDocroot(QString newPath)
-{
-    QDir dir(newPath);
-    if (!dir.exists(newPath))
-        return "";
-    if (newPath != NULL && newPath.length() > 2 && newPath.startsWith("/"))
-    {
-        if (newPath.endsWith("/"))      this->docrootDynamic = newPath.left(newPath.size()-1);
-        else                            this->docrootDynamic = newPath;
-    }
-    return getDocroot();
-}
+    // Get dynamic docroot from /psp/homepage (if any)
+    QString customDocroot = readPspHomepage();
+    if (customDocroot.length() > 1)
+        docrootDynamic = customDocroot;
 
-QString StaticFileController::getDocroot()
-{
-    return this->docrootDynamic;
+    // Print out the docroots
+    qDebug("StaticFileController: life support=%s", qPrintable(docroot));
+    qDebug("StaticFileController: dynamic docroot=%s", qPrintable(docrootDynamic));
 }
 
 void StaticFileController::service(HttpRequest& request, HttpResponse& response)
@@ -172,4 +151,97 @@ void StaticFileController::SetContentType(QString fileName, HttpResponse& respon
     {
         response.setHeader("Content-Type", "text/plain; charset=UTF-8");
     }
+}
+
+
+//-----------------------------------------------------------------------------------------------------------
+// Dynamic docroot
+//-----------------------------------------------------------------------------------------------------------
+
+
+QString StaticFileController::readPspHomepage()
+{
+    if (!FileExists(HOMEPAGE_PAGE_FILE))
+        return "1";
+    QByteArray fileContent = GetFileContents(HOMEPAGE_PAGE_FILE).trimmed();
+    if (fileContent.length() < 1)
+        return "2";
+    if (fileContent.startsWith("http"))
+        return "3";
+    if (!fileContent.startsWith("/"))
+        return "4";
+    QString fileContentString = fileContent;
+    QDir dir(fileContentString);
+    if (!dir.exists(fileContentString))
+        return "5";
+
+    if (fileContent.endsWith("/"))
+        fileContent = fileContent.left(fileContent.size()-1);
+    return QString(fileContent);
+}
+
+QString StaticFileController::setDocroot(QString newPath)
+{
+    if (newPath == NULL || newPath.length() >= 2)
+        return "";
+    if (!newPath.startsWith("/"))
+        return "";
+    QDir dir(newPath);
+    if (!dir.exists(newPath))
+        return "";
+    if (newPath.endsWith("/"))
+        newPath = newPath.left(newPath.size()-1);
+
+    this->docrootDynamic = newPath;
+    return getDocroot();
+}
+
+QString StaticFileController::getDocroot()
+{
+    return this->docrootDynamic;
+}
+
+
+//-----------------------------------------------------------------------------------------------------------
+// File Utilities
+//-----------------------------------------------------------------------------------------------------------
+
+bool StaticFileController::DirExists(const QString &fullPath)
+{
+    QDir dir(fullPath);
+    return dir.exists(fullPath);
+}
+
+bool StaticFileController::FileExists(const QString &fullPath)
+{
+    QFile file(fullPath);
+    return file.exists();
+}
+
+bool StaticFileController::FileExecutable(const QString &fullPath)
+{
+    QFile file(fullPath);
+    if (!file.exists())
+        return false;
+    return ((file.permissions() & QFile::ExeOwner) || (file.permissions() & QFile::ExeOther) || (file.permissions() & QFile::ExeUser));
+}
+
+qint64 StaticFileController::GetFileSize(const QString &fullPath)
+{
+    QFile file(fullPath);
+    if (!file.exists())
+        return -1;
+    return file.size();
+}
+
+QByteArray StaticFileController::GetFileContents(const QString &fullPath)
+{
+    QFile file(fullPath);
+    if (!file.exists())                         //doesn't exist
+        return "file not found";
+    if (!file.open(QIODevice::ReadOnly))        //permission error?
+        return "no permission";
+    QByteArray buffer = file.readAll();
+    file.close();
+    return buffer;
 }
