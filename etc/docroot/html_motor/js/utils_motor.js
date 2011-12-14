@@ -1,3 +1,8 @@
+
+//--------------------------------------------------
+// Variables for internal implementation
+//--------------------------------------------------
+
 var motor_firmware_enabled = false;
 var motor_firmware_version = 0;
 var motor_states = new Array();
@@ -21,18 +26,24 @@ var analog_input_graph_callback = null;
 // Initialization
 //--------------------------------------------------
 
-function check_motor_firmware(vCompleteFunc)
-{
-	motor_firmware_callback = vCompleteFunc;
-	xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl V"}, on_motor_firmware_version );
-}
-
+//Enable motor board by loading motor board's firmware on to FPGA
+//Calling this while firmware is already loaded will reset all current settings & cause a flick on the screen
 function enable_motor_board(vCompleteFunc)
 {
 	motor_firmware_callback = vCompleteFunc;
 	xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'NECommand', value : "/etc/init.d/netv_service motor"}, on_motor_firmware );
 }
 
+//Internal implementation, requesting for motor board's firmware version
+function check_motor_firmware(vCompleteFunc)
+{
+	motor_firmware_callback = vCompleteFunc;
+	xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl V"}, on_motor_firmware_version );
+}
+
+//Internal implementation, receiving motor board's firmware version
+//If a long string is received, it means motor board firmware is not loaded
+//Otherwise expecting a simple version number (length < 6)
 function on_motor_firmware_version(vData)
 {
 	vData = clean_vData(vData);
@@ -43,7 +54,7 @@ function on_motor_firmware_version(vData)
 	1. Make sure the HDMI input is connected to the motor board. Do not connect an HDMI device to the port! We are not liable for damages if you wire this up wrong.
 	2. Issue the command 'netv_service motor'; this will switch the NeTV into motor driver mode.
 	*/
-	if (vData.length < 5)
+	if (vData.length < 6)
 	{
 		motor_firmware_enabled = true;
 		motor_firmware_version = vData;
@@ -62,25 +73,17 @@ function on_motor_firmware_version(vData)
 		motor_firmware_callback(motor_firmware_version);
 }
 
+//Internal implementation, receiving output of enabling motor firmward
 function on_motor_firmware(vData)
 {
 	vData = clean_vData(vData);
 	if (vData == "")
 		return;	
 	/*
-	Expecting this:
+	Expecting a long output string:
 		Setting 0xd420b1a8: 0x90000001 -> 0x90000001 ok
 		installing chumby xilinx driver
 		configuring FPGA
-		Note configuration: motor driver on input side, 720p video on output side
-		Setting 0xd420b1c8: 0x00000000 -> 0x00000000 ok
-		Setting 0xd420b1b8: 0x210ff003 -> 0x210ff003 ok
-	But 2nd time execution, it gives this:
-		Setting 0xd420b1a8: 0x90000001 -> 0x90000001 ok
-		installing chumby xilinx driver
-		configuring FPGA
-		FPGA is configured to drive a motor board on the HDMI input, you can't use this utility for the current configuration.
-		If you have no idea what this message is about, disconnect the device from the HDMI input NOW or else you may permanantly damage it, and reboot the board to get back to a typical consumer-use application configuration.
 		Note configuration: motor driver on input side, 720p video on output side
 		Setting 0xd420b1c8: 0x00000000 -> 0x00000000 ok
 		Setting 0xd420b1b8: 0x210ff003 -> 0x210ff003 ok
@@ -93,6 +96,7 @@ function on_motor_firmware(vData)
 // Motors mode
 //--------------------------------------------------
 
+//Stop all motor channels
 function stop_motor_all()
 {
 	stop_motor("1");
@@ -101,6 +105,7 @@ function stop_motor_all()
 	stop_motor("4");
 }
 
+//Stop a single motor channel
 function stop_motor(index)
 {
 	motor_states[index] = 's';
@@ -109,6 +114,8 @@ function stop_motor(index)
 		console.log("Stopping motor " + index);
 }
 
+//Set direction of motor channel to 'forward'
+//This depends on how the 2 motor cable is connected
 function set_motor_forward(index)
 {
 	motor_states[index] = 'f';
@@ -117,6 +124,8 @@ function set_motor_forward(index)
 		console.log("Forward motor " + index);
 }
 
+//Set direction of motor channel to 'reverse'
+//This depends on how the 2 motor cable is connected
 function set_motor_reverse(index)
 {
 	motor_states[index] = 'r';
@@ -125,6 +134,11 @@ function set_motor_reverse(index)
 		console.log("Reverse motor " + index);
 }
 
+//Change motor channel's speed (duty cycle) with 'value' (0-255)
+//0 for 0%, motor will be stopped
+//255 for 100%, motor will be turn on with full speed
+//127 for 50%, motor will be on half of the time, and off half of the time, hence 50% speed
+//See 'set_motor_freqency' for setting on/off frequency
 function set_motor_speed(index, value)
 {
 	if (value == 0) {
@@ -140,6 +154,9 @@ function set_motor_speed(index, value)
 // Motor settings
 //--------------------------------------------------
 
+//Setting PWM to a desired frequency (in Hz)
+//This changes how smoothly the motor is controlled
+//If set to 1 Hz, and speed to 50% (127) motor will be on for 0.5s and off for 0.5s
 function set_motor_freqency(freq)
 {
 	//See mot_ctl command for formula
@@ -147,6 +164,7 @@ function set_motor_freqency(freq)
 	set_pwm_divider(div)
 }
 
+//Internal implementation, setting PWM divider value
 function set_pwm_divider(div)
 {
 	if (div < 0) 		div = 0;
@@ -154,6 +172,7 @@ function set_pwm_divider(div)
 	send_motor_noreply("P " + div);
 }
 
+//Internal implementation, returns true if a motor channel is in motor mode
 function is_motor_mode(index)
 {
 	if (index < 1 || index > 2)
@@ -161,6 +180,7 @@ function is_motor_mode(index)
 	return servo_states[index];
 }
 
+//Internal implementation, switch a motor channel to motor or servo mode
 function set_motor_mode(index, isMotor)
 {
 	if (index < 1 || index > 2)
@@ -176,6 +196,8 @@ function set_motor_mode(index, isMotor)
 // Servo mode
 //--------------------------------------------------
 
+//Set a servo channel's angle (0.0 - 180.0)
+//This is servo-dependent, some servos have smaller operating range
 function set_servo_angle(index, value)
 {
 	if (is_motor_mode(index))
@@ -185,6 +207,7 @@ function set_servo_angle(index, value)
 	send_motor_noreply("s " + index + " " + value);
 }
 
+//Set a servo channel to center (90 degree)
 function center_servo(index)
 {
 	set_servo_angle(index, 90);
@@ -207,7 +230,7 @@ function set_digital_output_single(index, isOn)
 	else		send_motor_noreply("u " + index + " 0");
 }
 
-//Update internal digital output flags & send them to motor board
+//Update internal JavaScript digital output flags & send them to motor board
 function set_digital_output_flag(index, isOn)
 {
 	var mask = 1 << index;
@@ -223,6 +246,7 @@ function set_digital_output_flag(index, isOn)
 // Digital inputs
 //--------------------------------------------------
 
+//Start updating digital input values with 'interval' in milliseconds and data callback function 'vCompleteFunc'
 function start_digital_input_update(interval, vCompleteFunc)
 {
 	if (!interval)
@@ -231,6 +255,7 @@ function start_digital_input_update(interval, vCompleteFunc)
 	dinput_timer_id = setInterval ( "request_digital_input_state()", dinput_interval );
 }
 
+//Stop updating digital input values
 function stop_digital_input_update()
 {
 	if (dinput_timer_id == null)
@@ -239,11 +264,13 @@ function stop_digital_input_update()
 	dinput_timer_id = null;
 }
 
+//Internal implemenation, requesting all 8 digital input values at once
 function request_digital_input_state()
 {
 	xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl i"}, on_digital_input_state );
 }
 
+//Internal implemenation, receiving all 8 digital input values at once
 function on_digital_input_state(vData)
 {
 	vData = clean_vData(vData);
@@ -263,6 +290,8 @@ function on_digital_input_state(vData)
 // Analog inputs
 //--------------------------------------------------
 
+//Start updating analog input values with 'interval' in milliseconds and data callback function 'vCompleteFunc'
+//and optional callback function 'vGraphFunc' for graph/historical data
 function start_analog_input_update(interval, vCompleteFunc, vGraphFunc)
 {
 	if (!interval)
@@ -272,6 +301,7 @@ function start_analog_input_update(interval, vCompleteFunc, vGraphFunc)
 	ainput_timer_id = setInterval ( "request_analog_input_state()", ainput_interval );
 }
 
+//Stop updating analog input values
 function stop_analog_input_update()
 {
 	if (ainput_timer_id == null)
@@ -280,11 +310,13 @@ function stop_analog_input_update()
 	ainput_timer_id = null;
 }
 
+//Internal implemenation, requesting all 8 analog input values at once
 function request_analog_input_state()
 {
 	xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl a" }, on_analog_input_state );
 }
 
+//Internal implemenation, receiving all 8 analog input values at once
 function on_analog_input_state(vData)
 {
 	vData = clean_vData(vData);
@@ -329,6 +361,9 @@ function on_analog_input_state(vData)
 // XMLHttpRequest helpers
 //----------------------------------------------------------------
 
+//Send a motor command to bridge and expect no reply
+//This will be handled by NeTVServer's built-in mot_ctl code (might be obsolete)
+//This is much faster than going through HTTP API, suitable for slider UI
 function send_motor_noreply(command_string)
 {
 	if (command_string == "")
@@ -338,6 +373,7 @@ function send_motor_noreply(command_string)
 	xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'Motor', value : command_string }, null );
 }
 
+//Return the bridge URL derived from the current path
 function getBridgeUrl()
 {
 	var tempLocaltion = "" + document.location;
@@ -348,7 +384,7 @@ function getBridgeUrl()
 	return "http://" + document.location.host + "/bridge";
 }
 
-//Get an XMLHttpRequest, object
+//Get a cross-browser XMLHttpRequest object
 function getXHR()
 {
 	var req = null;
@@ -378,6 +414,8 @@ function getXHR()
 	return req;
 }
 
+//Submit a generic HTTP API command to the bridge
+//This function is usually available else where, but merged here for stand-alone purpose
 function xmlHttpPostMotor(
 	vUrl,
 	vType,			// "post" | "get"
@@ -428,6 +466,7 @@ function xmlHttpPostMotor(
 	}
 }
 
+//Basic sanity check & cleaning of returned data from the bridge (HTTP API)
 function clean_vData(vData)
 {
 	if (!vData)
