@@ -7,7 +7,8 @@ var dinput_state = 0;
 var dinput_interval = 500;
 var dinput_timer_id = null;
 var ainput_states = new Array();
-var ainput_interval = 500;
+var ainput_interval = 100;
+var ainput_num_history = 100;
 var ainput_timer_id = null;
 var ainput_data_history = new Array();
 var bridgeUrl = getBridgeUrl();
@@ -272,8 +273,7 @@ function stop_analog_input_update()
 
 function request_analog_input_state()
 {
-	for (i=0; i<8; i++)
-		xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl a " + i}, on_analog_input_state );
+	xmlHttpPostMotor(bridgeUrl, "post", { cmd : 'NECommand', value : "/usr/bin/mot_ctl a" }, on_analog_input_state );
 }
 
 function on_analog_input_state(vData)
@@ -281,33 +281,37 @@ function on_analog_input_state(vData)
 	vData = clean_vData(vData);
 	if (vData == "")
 		return;
-	//Expected: 2: 0x2a
-	if (!stringContains(vData, ": "))
+	//Expected: 0xe0 0xa0 0x60 0x20 0xc1 0x00 0xa0 0xe0
+	if (!stringContains(vData, " ") || !stringContains(vData, "0x"))
 		return;
-	var channel = parseInt( vData.split(": ")[0] );
-	var value = parseInt( vData.split(": ")[1] );
-	ainput_states[channel] = value;
+	var valuesArray = vData.split(" ");
+	if (!valuesArray)
+		return;
+
+	for (channel=0;channel < valuesArray.length; channel++)
+	{
+		ainput_states[channel] = parseInt( valuesArray[channel] );
+
+		//If not created history array
+		if (!ainput_data_history[channel]) {
+			ainput_data_history[channel] = [];
+			for (i=0;i < ainput_num_history; i++)
+				ainput_data_history[channel].push(0);
+		}
+		
+		//Push data to history array
+		ainput_data_history[channel].unshift( ainput_states[channel] );
+		
+		//Limit at 70 values
+		if (ainput_data_history[channel].length > ainput_num_history)
+			ainput_data_history[channel].pop();
+	}
+			
+	//Update history data
+	if (!ainput_data_history[0] || ainput_data_history[0].length < ainput_num_history)
+		return;
 	
 	//UI
-	if (analog_input_ui_callback)
-		analog_input_ui_callback(channel, value);
-	
-	//Push data to history array
-	if (!ainput_data_history[channel]) {
-		ainput_data_history[channel] = [];
-		for (i=0;i < 32; i++)
-			ainput_data_history[channel].push(0);
-	}
-	ainput_data_history[channel].unshift(value);
-	
-	//Limit at 40 values
-	if (ainput_data_history[channel].length > 40)
-		ainput_data_history[channel].pop();
-		
-	//Update history data
-	if (channel < 7 || ainput_data_history[channel].length < 30)
-		return;
-	
 	if (analog_input_graph_callback)
 		analog_input_graph_callback(ainput_data_history);
 }
