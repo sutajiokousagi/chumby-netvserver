@@ -195,6 +195,10 @@ struct timinginfo {
 #define FPGA_ADC_LSB_ADR   0x21
 #define FPGA_ADC_MSB_ADR   0x22
 #define FPGA_MOT_STAT_ADR  0x23
+#define FPGA_SCAN_TST0_ADR 0x24
+#define FPGA_SCAN_TST1_ADR 0x25
+#define FPGA_SCAN_TST2_ADR 0x26
+#define FPGA_SCAN_TST3_ADR 0x27
 
 #define FPGA_DNA_ADR       0x38
 //#define FPGA_MINOR_ADR     0x3e // defunct
@@ -274,6 +278,20 @@ int dump_registers(int stats) {
     return 0;
 }
 
+void microsleep(unsigned int us) {
+  struct timespec waittime;
+  struct timespec remtime;
+
+  waittime.tv_sec = us / 1000000;
+  waittime.tv_nsec = (us % 1000000) * 1000;
+
+  while(nanosleep(&waittime, &remtime) == -1) {
+    // this makes us sleep even if we get a signal for the specified time
+    waittime.tv_sec = remtime.tv_sec;
+    waittime.tv_nsec = remtime.tv_nsec;
+  }
+}
+
 int dump_register(unsigned char address) {
   unsigned char buffer;
 
@@ -284,44 +302,52 @@ int dump_register(unsigned char address) {
 }
 
 void print_help(char code) {
-    printf( "FPGA control routine." );
-    printf( "Command character %c not recognized.", code );
-    printf( "r       hardware reset of the FPGA to clean state for reconfiguration");
-    printf( "o       return the state of the FPGA programming done pin" );
-    printf( "V       print the version number of the FPGA" );
+    printf( "FPGA control routine.\n" );
+    printf( "Command character %c not recognized.\n", code );
+    printf( "r       hardware reset of the FPGA to clean state for reconfiguration\n");
+    printf( "o       return the state of the FPGA programming done pin\n" );
+    printf( "V       print the version number of the FPGA\n" );
 
-    printf( "a [ch]  read ADC vaule from channel ch0-7" );
-    printf( "S [ch] [s,m] set channel ch[1,2] to mode [s,m] (servo or motor mode)" );
-    printf( "s [ch] [val] set servo channel ch [1,2] to angle val [0.0-180.0, floating point]" );
-    printf( "e [val] set servo pulse period to [val] microseconds (integer only)" );
-    printf( "m [ch] [cmd] motor command for channel ch1-4. cmd = [f,r,s] -> forward, reverse, stop" );
-    printf( "M [xxxx] set motor channel [1234] to respective states [f,r,s,x] (x means don't change)" );
-    printf( "p [ch] [dc] PWM duty cycle for channel ch1-4 and duty cycle dc0-255" );
-    printf( "P [div] set PWM divider (div = 0-65535, rate = 101.5kHz / (div + 2))" );
-    printf( "u [val] set digital output to value val" );
-    printf( "i       print the value of the digital inputs" );
+    printf( "a [ch]  read ADC value from channel ch0-7\n" );
+    printf( "a       dump all ADC  channel values\n" );
+    printf( "S [ch] [s,m] set channel ch[1,2] to mode [s,m] (servo or motor mode)\n" );
+    printf( "S [ch] returns the servo mode status of channel [ch]\n" );
+    printf( "s [ch] [val] set servo channel ch [1,2] to angle val [0.0-180.0, floating point]\n" );
+    printf( "e [val] set servo pulse period to [val] microseconds (integer only)\n" );
+    printf( "e      get servo pulse period\n" );
+    printf( "m [ch] [cmd] motor command for channel ch1-4. cmd = [f,r,s] -> forward, reverse, stop\n" );
+    printf( "M [xxxx] set motor channel [1234] to respective states [f,r,s,x] (x means don't change)\n" );
+    printf( "p [ch] [dc] PWM duty cycle for channel ch1-4 and duty cycle dc0-255\n" );
+    printf( "P [div] set PWM divider (div = 0-65535, rate = 101.5kHz / (div + 2))\n" );
+    printf( "f [freq] set motor PWM to frequency [freq] Hz\n" );
+    printf( "u [val] set digital output to value val\n" );
+    printf( "u [ch] [val] set digital output bit [ch] to value [val]\n" );
+    printf( "i       print the value of the digital inputs\n" );
+    printf( "i [ch]  print the value of channel [ch]\n" );
 
-    printf( "d       dump the control set registers (raw values)" );
-    printf( "d [adr] dump the the raw value at [adr]" );
-    printf( "w [adr] [dat] write data [dat] to address [adr]" );
-    printf( "n       return device serial number" );
+    printf( "d       dump the control set registers (raw values)\n" );
+    printf( "d [adr] dump the the raw value at [adr]\n" );
+    printf( "w [adr] [dat] write data [dat] to address [adr]\n" );
+    printf( "D [tst] detect if the motor controller board is attached using test value [tst].\n" );
+    printf( "A       auto-detect if motor controller board is attached.\n" );
+    printf( "n       return device serial number\n" );
 }
 
 int main_motor(int argc, char **argv)
 {
   int file_desc, retval;
   char code;
-  unsigned char buffer, adr;
+  unsigned char buffer, adr, data;
   char supplement;
   unsigned int temp;
   unsigned long long device_id = 0LL;
   int i;
-  unsigned long a1, a2;
+  long a1, a2;
   double f1, f2;
   char *mcode;
 
   if(argc < 2) {
-    fprintf(stderr, "Usage: %s <op>", argv[0]);
+    fprintf(stderr, "Usage: %s <op>\n", argv[0]);
     print_help('_');
     return 1;
   }
@@ -329,15 +355,15 @@ int main_motor(int argc, char **argv)
 
   file_desc = open("/dev/fpga", 0);
   if (file_desc < 0) {
-    printf("Can't open device file: %s", "/dev/fpga");
+    printf("Can't open device file: %s\n", "/dev/fpga");
     exit(-1);
   }
 
   read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_MAJOR_ADR, &buffer, 1);
-  if( buffer < 192 ) {
-    printf( "FPGA is not configured to drive a motor board, please follow this procedure:" );
-    printf( "1. Make sure the HDMI input is connected to the motor board. Do not connect an HDMI device to the port! We are not liable for damages if you wire this up wrong." );
-    printf( "2. Issue the command 'netv_service motor'; this will switch the NeTV into motor driver mode." );
+  if( (buffer < 192) && (code != 'r') ) {
+    printf( "FPGA is not configured to drive a motor board, please follow this procedure:\n" );
+    printf( "1. Make sure the HDMI input is connected to the motor board. Do not connect an HDMI device to the port! We are not liable for damages if you wire this up wrong.\n" );
+    printf( "2. Issue the command 'netv_service motor'; this will switch the NeTV into motor driver mode.\n" );
     exit(0);
   }
 
@@ -359,11 +385,11 @@ int main_motor(int argc, char **argv)
     break;
   case 'o':
     ioctl_done(file_desc, &retval);
-    printf( "Done pin state: %d", retval );;
+    printf( "Done pin state: %d\n", retval );;
     break;
     //  case 'i':
     //    ioctl_init(file_desc, &retval);
-    //    printf( "Init pin state: %d", retval );;
+    //    printf( "Init pin state: %d\n", retval );;
     //    break;
   case 'V':
     print_fpga_version();
@@ -379,18 +405,18 @@ int main_motor(int argc, char **argv)
 
   case 'p':
     if( argc != 4 ) {
-      printf( "Insufficient arguments" );
+      printf( "Insufficient arguments\n" );
       print_help('p');
       break;
     } else {
       a1 = strtol(argv[2],NULL,0);
       a2 = strtol(argv[3],NULL,0);
       if( (a1 > 4) || (a1 < 1) ) {
-        printf( "Channel %ld is out of range (1-4)", a1 );
+        printf( "Channel %ld is out of range (1-4)\n", a1 );
         break;
       }
-      if( (a2 > 255) /*|| (a2 < 0) */ ) {
-        printf( "Duty cycle on percentage is out of range (0-255)" );
+      if( (a2 > 255) || (a2 < 0) ) {
+        printf( "Duty cycle on percentage is out of range (0-255)\n" );
         break;
       }
       buffer = a2;
@@ -400,13 +426,13 @@ int main_motor(int argc, char **argv)
 
   case 'P':
     if( argc != 3 ) {
-      printf( "Insufficient arguments" );
+      printf( "Insufficient arguments\n" );
       print_help('p');
       break;
     } else {
       a1 = strtol(argv[2],NULL,0);
-      if( (a1 > 65535) /* || (a1 < 0) */ ) {
-        printf( "Divider is out of range (0-65535)" );
+      if( (a1 > 65535) || (a1 < 0) ) {
+        printf( "Divider is out of range (0-65535)\n" );
         break;
       }
       buffer = a1 & 0xFF;
@@ -416,19 +442,57 @@ int main_motor(int argc, char **argv)
     }
     break;
 
-  case 'u':
+  case 'f':
     if( argc != 3 ) {
-      printf( "Insufficient arguments" );
+      printf( "Insufficient arguments\n" );
+      print_help('f');
+      break;
+    } else {
+      a2 = strtol(argv[2], NULL, 0);
+      if( (a2 > 50000) || (a2 < 1) ) {
+        printf( "Frequency %ldis out of range (1 - 50000)\n", a2 );
+      }
+      a1 = (101500 - (a2 * 2)) / a2;
+      printf( "Note: after rounding, frequency is %ldHz\n", (101500 / (a1 + 2)));
+
+      buffer = a1 & 0xFF;
+      write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_PWM_L_DIV_ADR, &buffer, sizeof(buffer));
+      buffer = (a1 & 0xFF00) >> 8;
+      write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_PWM_M_DIV_ADR, &buffer, sizeof(buffer));
+    }
+    break;
+
+  case 'u':
+    if( argc < 3 ) {
+      printf( "Insufficient arguments\n" );
       print_help('u');
       break;
     } else {
-      a1 = strtol(argv[2],NULL,0);
-      if( (a1 > 255) /* || (a1 < 0) */ ) {
-        printf( "Digital output is out of range (0-255)" );
-        break;
+      if( argc == 3 ) {
+        a1 = strtol(argv[2],NULL,0);
+        if( (a1 > 255) || (a1 < 0) ) {
+          printf( "Digital output is out of range (0-255)\n" );
+          break;
+        }
+        buffer = a1;
+        write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_DIG_OUT_ADR, &buffer, sizeof(buffer));
+      } else {  // argc is 4 or greater, but ignore extra arguments
+        a1 = strtol(argv[3],NULL,0);
+        a1 = a1 ? 1 : 0;
+
+        a2 = strtol(argv[2],NULL,0);
+        if( (a1 > 7) || (a1 < 0) ) {
+          printf( "Channel specifier %ldout of range (0-7)\n", a1);
+          break;
+        }
+
+        // read back the current output register setting
+        read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_DIG_OUT_ADR, &buffer, 1);
+        buffer &= ~(1 << a2);
+        buffer |= a1 << a2;
+        write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_DIG_OUT_ADR, &buffer, sizeof(buffer));
       }
-      buffer = a1;
-      write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_DIG_OUT_ADR, &buffer, sizeof(buffer));
+
 
       read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, 1);
       buffer &= 0xC7;
@@ -445,14 +509,70 @@ int main_motor(int argc, char **argv)
     break;
 
   case 'a':
-    if( argc != 3 ) {
-      printf( "Insufficient arguments" );
-      print_help('a');
-      break;
+    if( argc == 2 ) {
+      for( a1 = 0; a1 < 8; a1++ ) {
+        // first conversion sets address
+        read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, 1);
+        buffer &= 0xE0;
+        buffer |= (a1 & 0x7);
+        buffer |= 0x08;
+        // setup addres
+        write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+        buffer |= 0x10;
+        // initiate conversion
+        write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+        buffer &= 0xEF; // clear transfer
+        write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+
+        i = 0;
+        do {
+          read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_MOT_STAT_ADR, &buffer, 1);
+          i++;
+        } while ( ((buffer & 0x08) == 0) && (i < 1000) );
+        if( i >= 1000 ) {
+          printf( "Note: ADC timed out during readback\n" );
+        }
+
+        // second conversion reads out the data
+        read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, 1);
+        buffer &= 0xE0;
+        buffer |= (a1 & 0x7);
+        buffer |= 0x08;
+        // setup addres
+        write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+        buffer |= 0x10;
+        // initiate conversion
+        write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+        buffer &= 0xEF; // clear transfer
+        write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+
+        i = 0;
+        do {
+          read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_MOT_STAT_ADR, &buffer, 1);
+          i++;
+        } while ( ((buffer & 0x08) == 0) && (i < 1000) );
+        if( i >= 1000 ) {
+          printf( "Note: ADC timed out during readback\n" );
+        }
+
+        temp = 0;
+        read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_ADC_LSB_ADR, &buffer, 1);
+        temp = (buffer >> 4) & 0xF;
+        read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_ADC_MSB_ADR, &buffer, 1);
+        temp |= ((buffer << 4) & 0xF0);
+        printf( "0x%02x ", temp & 0xFF );
+      }
+      printf( "\n" );
+
     } else {
+      if( argc != 3 ) {
+        printf( "Insufficient arguments\n" );
+        print_help('a');
+        break;
+      }
       a1 = strtol(argv[2],NULL,0);
-      if( (a1 > 7) /* || (a1 < 0) */ ) {
-        printf( "ADC channel is out of range (0-7)" );
+      if( (a1 > 7) || (a1 < 0) ) {
+        printf( "ADC channel is out of range (0-7)\n" );
         break;
       }
       // first conversion sets address
@@ -474,7 +594,7 @@ int main_motor(int argc, char **argv)
         i++;
       } while ( ((buffer & 0x08) == 0) && (i < 1000) );
       if( i >= 1000 ) {
-        printf( "Note: ADC timed out during readback" );
+        printf( "Note: ADC timed out during readback\n" );
       }
 
       // second conversion reads out the data
@@ -496,7 +616,7 @@ int main_motor(int argc, char **argv)
         i++;
       } while ( ((buffer & 0x08) == 0) && (i < 1000) );
       if( i >= 1000 ) {
-        printf( "Note: ADC timed out during readback" );
+        printf( "Note: ADC timed out during readback\n" );
       }
 
       temp = 0;
@@ -504,24 +624,24 @@ int main_motor(int argc, char **argv)
       temp = (buffer >> 4) & 0xF;
       read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_ADC_MSB_ADR, &buffer, 1);
       temp |= ((buffer << 4) & 0xF0);
-      printf( "%ld: 0x%02x", a1, temp & 0xFF );
+      printf( "%ld: 0x%02x\n", a1, temp & 0xFF );
     }
     break;
 
   case 'm':
     if( argc != 4) {
-      printf( "Insufficient arguments" );
+      printf( "Insufficient arguments\n" );
       print_help('m');
       break;
     } else {
       a1 = strtol(argv[2],NULL,0);
       if( (a1 > 4) || (a1 < 1) ) {
-        printf( "Motor channel is out of range (1-4)" );
+        printf( "Motor channel is out of range (1-4)\n" );
         break;
       }
       supplement = *(argv[3]);
       if( !(supplement == 'f' || supplement == 'r' || supplement == 's') ) {
-        printf( "Motor command %c not recognized.", supplement );
+        printf( "Motor command %c not recognized.\n", supplement );
         break;
       }
 
@@ -537,7 +657,7 @@ int main_motor(int argc, char **argv)
       } else {
         buffer &= ~(0x3 << ((a1 - 1) * 2));
       }
-      //      printf( "dir %c, buffer %02x", supplement, buffer );
+      //      printf( "dir %c, buffer %02x\n", supplement, buffer );
       write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_MOTEN_ADR, &buffer, sizeof(buffer));
 
       read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, 1);
@@ -550,17 +670,38 @@ int main_motor(int argc, char **argv)
     break;
 
   case 'S':
-    if( argc != 4 ) {
-      printf( "Servo channel set requires [ch] and [mode] arguments." );
-      break;
-    } else {
+    if( argc == 3 ) {
       a1 = strtol(argv[2],NULL,0);
       if( !((a1 == 1) || (a1 ==2)) ) {
-        printf( "Only channels 1 and 2 can be toggled to servo or motor control" );
+        printf( "Only channels 1 and 2 can be toggled to servo or motor control\n" );
+      }
+      read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, 1);
+
+      if( a1 == 1 ) {
+        if( buffer & 0x40 ) {
+          printf( "Channel 1 is in servo mode.\n" );
+        } else {
+          printf( "Channel 1 is in motor mode.\n" );
+        }
+      } else {
+        if( buffer & 0x80 ) {
+          printf( "Channel 2 is in servo mode.\n" );
+        } else {
+          printf( "Channel 2 is in motor mode.\n" );
+        }
+      }
+    } else {
+      if( argc != 4 ) {
+        printf( "Servo channel set requires [ch] and [mode] arguments.\n" );
+        break;
+      }
+      a1 = strtol(argv[2],NULL,0);
+      if( !((a1 == 1) || (a1 ==2)) ) {
+        printf( "Only channels 1 and 2 can be toggled to servo or motor control\n" );
       }
       supplement = *(argv[3]);
       if( !(supplement == 's' || supplement == 'm') ) {
-        printf( "Only valid modes are s (servo mode) and m (motor mode)" );
+        printf( "Only valid modes are s (servo mode) and m (motor mode)\n" );
       }
 
       // now set a default pulse length equal to 20 ms
@@ -585,11 +726,23 @@ int main_motor(int argc, char **argv)
     break;
 
   case 'e':
-    if( argc != 3 ) {
-      printf( "Servo period set requires an argument in microseconds (math is accurate to < 0.5%%)" );
-      printf( "Accuracy is limited by cheesball integer rounding in driver, not hardware limits" );
-      break;
+    if( argc == 2 ) {
+      buffer = 0;
+      a2 = 0;
+      read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_SERV_PER1_ADR, &buffer, sizeof(buffer));
+      a2 = buffer & 0xFF;
+      read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_SERV_PER2_ADR, &buffer, sizeof(buffer));
+      a2 |= (buffer << 8) & 0xFF00;
+      read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_SERV_PER3_ADR, &buffer, sizeof(buffer));
+      a2 |= (buffer << 16) & 0xFF0000;
+
+      printf( "Servo period is approximately %ld microseconds\n", (a2 * 385) / 10000 );
     } else {
+      if( argc != 3 ) {
+        printf( "Servo period set requires an argument in microseconds (math is accurate to <0.5%%)\n" );
+        printf( "Accuracy is limited by cheesball integer rounding in driver, not hardware limits\n" );
+        break;
+      }
       a1 = strtol(argv[2],NULL,0);
       a2 = (a1 * 10000) / 385; // gets you to about 0.5% accuracy
       // if you want more accuracy, rewrite the routine to use floating point or long longs
@@ -605,19 +758,19 @@ int main_motor(int argc, char **argv)
 
   case 's':
     if( argc != 4 ) {
-      printf( "Servo angle set requires channel [1,2] argument and angle [0-180, fp], argument" );
-      printf( "Note: this function assumes a 'typical' analog servo with 1ms-2ms pulse width, and a total range of 180 degrees." );
+      printf( "Servo angle set requires channel [1,2] argument and angle [0-180, fp], argument\n" );
+      printf( "Note: this function assumes a 'typical' analog servo with 1ms-2ms pulse width, and a total range of 180 degrees.\n" );
       break;
     } else {
       a1 = strtol(argv[2],NULL,0);
       if( !(a1 == 1 || a1 == 2) ) {
-        printf( "Only channels 1 and 2 are supported for servo mode" );
+        printf( "Only channels 1 and 2 are supported for servo mode\n" );
       }
       f1 = strtod(argv[3],NULL);
       if( (f1 <= 0.0) || (f1 >= 180.0) ) {
-        printf( "Only angles from 0 to 180 degrees is allowed, got %.2lf.", f1 );
+        printf( "Only angles from 0 to 180 degrees is allowed, got %.2lf.\n", f1 );
       }
-      printf( "Setting servo %ld angle to %0.2lf", a1, f1);
+      printf( "Setting servo %ld angle to %0.2lf\n", a1, f1);
       // 1ms min, 1.5ms mid, 2ms max
       f2 = (1000.0 * 1000.0) * (f1 / 180.0);  // convert to nanoseconds pulse length
       f2 += 1000000.0; // add 1 ms for the minimum time
@@ -649,20 +802,20 @@ int main_motor(int argc, char **argv)
 
   case 'M':
     if( argc != 3 ) {
-      printf( "Insufficient arguments" );
+      printf( "Insufficient arguments\n" );
       print_help('M');
       break;
     } else {
       mcode = argv[2];
       if( strlen(mcode) != 4 ) {
-        printf( "Motor argument must have format 'xxxx', where x is one of f,r,s,x" );
+        printf( "Motor argument must have format 'xxxx', where x is one of f,r,s,x\n" );
         break;
       }
 
       for( i = 0; i < 3; i++ ) {
         if( !(mcode[i] == 'f' || mcode[i] == 'r' || mcode[i] == 's' || mcode[i] == 'x') ) {
-          printf( "Motor argument must have format 'xxxx', where x is one of f,r,s,x" );
-          printf( "Position %d with value %c is not valid.", i, mcode[i] );
+          printf( "Motor argument must have format 'xxxx', where x is one of f,r,s,x\n" );
+          printf( "Position %d with value %c is not valid.\n", i, mcode[i] );
         }
       }
 
@@ -684,7 +837,7 @@ int main_motor(int argc, char **argv)
           // 'x' case is "leave as is"
         }
       }
-      //      printf( "dir %c, buffer %02x", supplement, buffer );
+      //      printf( "dir %c, buffer %02x\n", supplement, buffer );
       write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_MOTEN_ADR, &buffer, sizeof(buffer));
 
       read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, 1);
@@ -697,12 +850,39 @@ int main_motor(int argc, char **argv)
     break;
 
   case 'i':
-    dump_register((unsigned char) 0x20);
+    read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, 1);
+    buffer &= 0xC7;
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+    buffer |= 0x20; // trigger sample
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+    buffer &= 0xDF; // kill sample
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+    buffer |= 0x10; // initiate transfer
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+    buffer &= 0xEF; // clear transfer
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+
+    if( argc == 2 ) {
+      dump_register((unsigned char) FPGA_DIG_IN_ADR);
+    } else {
+      if( argc != 3 ) {
+        printf( "Insufficient arguments\n" );
+        print_help('i');
+        break;
+      }
+      a1 = strtol(argv[2],NULL,0);
+      if( (a1 > 7) || (a1 < 0) ) {
+        printf( "Channel value %ldout of range (0-7)\n", a1 );
+        break;
+      }
+      read_eeprom(DEV_I2C_0, DEVADDR>>1, (unsigned long) FPGA_DIG_IN_ADR, &buffer, 1);
+      printf( "%d\n", ((buffer >> a1) & 0x1) ? 1 : 0 );
+    }
     break;
 
   case 'w':
     if( argc != 4 ) {
-      printf( "Write requires [adr] and [dat] arguments." );
+      printf( "Write requires [adr] and [dat] arguments.\n" );
     } else {
       adr = (unsigned char) strtol(argv[2],NULL,0);
       read_eeprom(DEV_I2C_0, DEVADDR>>1, adr, &buffer, 1);
@@ -710,7 +890,7 @@ int main_motor(int argc, char **argv)
       buffer = (unsigned char) strtol(argv[3],NULL,0);
       write_eeprom(DEV_I2C_0, DEVADDR>>1, adr, &buffer, sizeof(buffer));
       read_eeprom(DEV_I2C_0, DEVADDR>>1, adr, &buffer, 1);
-      printf( "0x%02x", buffer );
+      printf( "0x%02x\n", buffer );
     }
     break;
 
@@ -720,8 +900,145 @@ int main_motor(int argc, char **argv)
       device_id <<= 8;
       device_id |= (buffer & 0xFF);
     }
-    printf( "Device ID: %014llx", device_id );
+    printf( "Device ID: %014llx\n", device_id );
     break;
+
+  case 'D':
+    if( argc != 3 ) {
+      printf( "Write requires [tst] argument.\n" );
+    } else {
+      a1 = (unsigned char) strtol(argv[2],NULL,0);
+
+      read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_DIG_OUT_ADR, &buffer, 1);
+      data = buffer; // stash the dig_out value to restore later
+
+      // set test values for the shift chain
+      buffer = a1 & 0xff;
+      write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_DIG_OUT_ADR, &buffer, sizeof(buffer));
+
+      // set the test mode bit
+      read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_EXT1_CTL_ADR, &buffer, 1);
+      buffer |= 0x80;
+      write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_EXT1_CTL_ADR, &buffer, sizeof(buffer));
+
+      // commit shift values
+      read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, 1);
+      buffer &= 0xC7;
+      buffer |= 0x10; // initiate transfer
+      write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+      buffer &= 0xEF; // clear transfer
+      write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+
+      microsleep(10000); // wait a millisecond
+
+      // clear the test mode bit
+      read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_EXT1_CTL_ADR, &buffer, 1);
+      buffer &= 0x7F;
+      write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_EXT1_CTL_ADR, &buffer, sizeof(buffer));
+
+      // restore dig_out value
+      write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_DIG_OUT_ADR, &data, sizeof(buffer));
+
+      // reveal the shift chain value
+      a2 = 0;
+      read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_SCAN_TST0_ADR, &buffer, 1);
+      a2 |= buffer & 0xFF;
+      read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_SCAN_TST1_ADR, &buffer, 1);
+      a2 |= (buffer & 0xFF) << 8;
+      read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_SCAN_TST2_ADR, &buffer, 1);
+      a2 |= (buffer & 0xFF) << 16;
+      read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_SCAN_TST3_ADR, &buffer, 1);
+      a2 |= (buffer & 0xFF) << 24;
+      printf( "shift chain result: 0x%08lx\n", a2 );
+    }
+    break;
+
+  case 'A':
+    read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_MAJOR_ADR, &buffer, 1);
+    if( buffer < 193 ) {
+      fprintf( stderr, "FPGA version %d is incompatible with motor card auto-detection.\n", buffer );
+      printf( "0\n" );
+      return -1;
+    }
+
+    a1 = 0x6A;
+
+    read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_DIG_OUT_ADR, &buffer, 1);
+    data = buffer; // stash the dig_out value to restore later
+
+    // set test values for the shift chain
+    buffer = a1 & 0xff;
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_DIG_OUT_ADR, &buffer, sizeof(buffer));
+
+    // set the test mode bit
+    read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_EXT1_CTL_ADR, &buffer, 1);
+    buffer |= 0x80;
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_EXT1_CTL_ADR, &buffer, sizeof(buffer));
+
+    // commit shift values
+    read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, 1);
+    buffer &= 0xC7;
+    buffer |= 0x10; // initiate transfer
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+    buffer &= 0xEF; // clear transfer
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+
+    microsleep(10000); // wait a millisecond
+
+    // reveal the shift chain value
+    a2 = 0;
+    read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_SCAN_TST0_ADR, &buffer, 1);
+    a2 |= buffer & 0xFF;
+
+    if( a2 != 0x6A ) {
+      // not attached
+      printf( "0\n" );
+      return -1;
+    }
+
+    a1 = 0x72;
+    // set test values for the shift chain
+    buffer = a1 & 0xff;
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_DIG_OUT_ADR, &buffer, sizeof(buffer));
+
+    // set the test mode bit
+    read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_EXT1_CTL_ADR, &buffer, 1);
+    buffer |= 0x80;
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_EXT1_CTL_ADR, &buffer, sizeof(buffer));
+
+    // commit shift values
+    read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, 1);
+    buffer &= 0xC7;
+    buffer |= 0x10; // initiate transfer
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+    buffer &= 0xEF; // clear transfer
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_BRD_CTL_ADR, &buffer, sizeof(buffer));
+
+    microsleep(10000); // wait a millisecond
+
+    // reveal the shift chain value
+    a2 = 0;
+    read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_SCAN_TST0_ADR, &buffer, 1);
+    a2 |= buffer & 0xFF;
+
+    if( a2 != 0x72 ) {
+      // not attached
+      printf( "0\n" );
+      return -1;
+    }
+
+    // clear the test mode bit
+    read_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_EXT1_CTL_ADR, &buffer, 1);
+    buffer &= 0x7F;
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_EXT1_CTL_ADR, &buffer, sizeof(buffer));
+
+    // restore dig_out value
+    write_eeprom(DEV_I2C_0, DEVADDR>>1, FPGA_DIG_OUT_ADR, &data, sizeof(buffer));
+
+    printf( "1\n" );
+    return 0;
+    break;
+
 
   default:
     print_help(code);

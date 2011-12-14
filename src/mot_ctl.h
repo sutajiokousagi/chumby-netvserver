@@ -4,6 +4,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <time.h>
+#include <sys/time.h>
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
 
