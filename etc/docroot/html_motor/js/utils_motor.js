@@ -194,12 +194,21 @@ function center_servo(index)
 // Digital outputs
 //--------------------------------------------------
 
+//Set all 8 bits of digital output port to 'value' in decimal (0-255)
 function set_digital_output_all(value)
 {
 	send_motor_noreply("u " + value);
 }
 
-function set_digital_output(index, isOn)
+//Set 1 single digital output bit to on/off
+function set_digital_output_single(index, isOn)
+{
+	if (isOn)	send_motor_noreply("u " + index + " 1");
+	else		send_motor_noreply("u " + index + " 0");
+}
+
+//Update internal digital output flags & send them to motor board
+function set_digital_output_flag(index, isOn)
 {
 	var mask = 1 << index;
 	var new_state = doutput_state;
@@ -247,7 +256,7 @@ function on_digital_input_state(vData)
 	
 	//UI callback
 	if (digital_input_ui_callback)
-		digital_input_ui_callback(dinput_state);
+		digital_input_ui_callback( parseInt("0x"+dinput_state) );
 }
 
 //--------------------------------------------------

@@ -4,7 +4,6 @@ var serverIP = getServerIPAddress();		//utils_general.js
 var global_parameters = new Array();
 global_parameters['log_hostinfo'] = true;
 global_parameters['log_btn'] = false;
-global_parameters['log_sharephoto_btn'] = true;
 global_parameters['log_motor'] = true;
 
 //LED demo
@@ -165,6 +164,10 @@ function on_button_click(btnName)
 	}
 }
 
+//-------------------------------------------------------
+// Sliders UI
+//-------------------------------------------------------
+
 function on_motor_slider_slide(event, ui)
 {
 	var id = $(this).attr("id");
@@ -198,6 +201,8 @@ function on_pwm_slider_slide(event, ui)
 }
 
 //-------------------------------------------------------
+// Digital output UI
+//-------------------------------------------------------
 
 function get_digital_output_ui_state_all()
 {
@@ -229,11 +234,15 @@ function commit_digital_output_ui_state()
 	set_digital_output_all( get_digital_output_ui_state_all() );
 }
 
+//-------------------------------------------------------
+// Digital input UI
+//-------------------------------------------------------
+
 function set_digital_input_state_all(value)
 {
 	for (i=0; i<8; i++)
 	{
-		var isOn = (value & (1 << i)) > 0 ? true : false;
+		var isOn =  (value & (1 << i)) > 0 ? true : false;
 		set_digital_input_state(i, isOn);
 	}
 }
@@ -244,12 +253,18 @@ function set_digital_input_state(index, isOn)
 	$("#dinput" + index).button('refresh');
 }
 
+//-------------------------------------------------------
+// Analog Input Progressbar UI
+//-------------------------------------------------------
+
 function set_analog_input_ui_state(index, value)
 {
 	var percentage = 100.0 * value / 255.0;
 	$("#adc" + index).progressbar( "option", "value", percentage );
 }
 
+//-------------------------------------------------------
+// Digital output demo
 //-------------------------------------------------------
 
 function stop_led_demo()
