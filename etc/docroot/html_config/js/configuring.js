@@ -124,5 +124,9 @@ function configuring_helloCallback(helloData)
 
 function doneConfiguring()
 {
-	location.href="http://localhost/";
+	var tempLocaltion = "" + document.location;
+	if (tempLocaltion.indexOf("localhost") != -1)
+		location.href = "http://localhost/";
+	else 
+		location.href = "http://" + document.location.host + "/";
 }
