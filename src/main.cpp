@@ -39,8 +39,9 @@ int main(int argc, char *argv[])
     QString argsString = argsList.join(ARGS_SPLIT_TOKEN);
 
     // If the args list contains "-d", then daemonize
+    int temp = 0;
     if (argsList.contains("-d"))
-        daemon(0, 0);
+        temp = daemon(0, 0);
 
     // Print out console arguments (if any)
     if (argsList.count() > 0) {

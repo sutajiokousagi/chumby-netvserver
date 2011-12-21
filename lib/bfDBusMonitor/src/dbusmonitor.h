@@ -1,7 +1,8 @@
 #ifndef DBUSMONITOR_H
 #define DBUSMONITOR_H
 
-#include <nm_interface.h>
+#include "nm_interface.h"
+#include "nm_ap_interface.h"
 
 class DBusMonitor : public QObject
 {
@@ -18,6 +19,7 @@ public:
 private:
 
     org::freedesktop::NetworkManagerInterface *nm_interface;
+    org::freedesktop::NetworkManagerAPInterface *nm_ap_interface;
 
 signals:
 
@@ -29,7 +31,7 @@ signals:
 private slots:
 
     void StateChanged(uint state);
-    //void PropertiesChanged();
+    void PropertiesChanged(QVariantMap changed);
     void DeviceAdded(QDBusObjectPath objPath);
     void DeviceRemoved(QDBusObjectPath objPath);
 };
