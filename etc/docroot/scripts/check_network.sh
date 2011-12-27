@@ -2,6 +2,11 @@
 #
 #
 
+# Run this script while redirecting everything to a logfile
+LOGFILE=/tmp/check_network_`date +%Y_%m_%d`.log
+exec >> /tmp/${LOGFILE}.log
+
+echo `date +%H:%M:%S`
 echo "Checking network condition..."
 
 # Check for real Internet access
