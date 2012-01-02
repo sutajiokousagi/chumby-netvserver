@@ -41,7 +41,7 @@ void HttpRequest::readRequest(QTcpSocket& socket)
     currentSize+=newData.size();
 
     //Do nothing. This allows whitespace characters before HTTP header.
-    if (!newData.isEmpty())
+    if (newData.isEmpty())
         return;
 
     //Should contains at least 2 elements
@@ -50,6 +50,7 @@ void HttpRequest::readRequest(QTcpSocket& socket)
         lastError = "Received broken HTTP request, invalid first line";
         qWarning("HttpRequest: received broken HTTP request, invalid first line");
         status=abort;
+        return;
     }
 
     //Invalid HTTP method
@@ -58,6 +59,7 @@ void HttpRequest::readRequest(QTcpSocket& socket)
         lastError = "Invalid method name " + method + ". Expecting GET,POST";
         qWarning("Invalid method name " + method + ". Expecting GET,POST");
         status=abort;
+        return;
     }
 
     //Path

@@ -127,7 +127,7 @@ void HttpConnectionHandler::read()
     {
         QByteArray lastError = currentRequest->getLastError();
         if (lastError.size() > 0)
-            socket.write("HTTP/1.1 400 bad request\r\nConnection: close\r\n\r\n" + lastError);
+            socket.write("HTTP/1.1 400 bad request\r\nConnection: close\r\n\r\n" + lastError + "\r\n");
         else
             socket.write("HTTP/1.1 413 entity too large\r\nConnection: close\r\n\r\n413 Entity too large\r\n");
         socket.disconnectFromHost();
