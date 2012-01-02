@@ -29,29 +29,53 @@ HttpRequest::HttpRequest(QSettings* settings) {
     }
 }
 
+/* Example:
+    GET /path/to/file/index.html HTTP/1.0
+    POST /path/to/file/index.html HTTP/1.1
+*/
+
 void HttpRequest::readRequest(QTcpSocket& socket)
 {
     int toRead=maxSize-currentSize+1; // allow one byte more to be able to detect overflow
     QByteArray newData=socket.readLine(toRead).trimmed();
     currentSize+=newData.size();
+
+    //Do nothing. This allows whitespace characters before HTTP header.
     if (!newData.isEmpty())
-    {
-        QList<QByteArray> list=newData.split(' ');
-        if (list.count()!=3 || !list.at(2).contains("HTTP")) {
-            qWarning("HttpRequest: received broken HTTP request, invalid first line");
-            status=abort;
-        }
-        else
-        {
-            method=list.at(0);
-            path=list.at(1);
-            version=list.at(2);
-            status=waitForHeader;
-        }
+        return;
+
+    //Should contains at least 2 elements
+    QList<QByteArray> list = newData.split(' ');
+    if (list.count() < 2) {
+        lastError = "Received broken HTTP request, invalid first line";
+        qWarning("HttpRequest: received broken HTTP request, invalid first line");
+        status=abort;
     }
+
+    //Invalid HTTP method
+    method = list.at(0).toUpper();
+    if (method != "GET" && method != "POST") {
+        lastError = "Invalid method name " + method + ". Expecting GET,POST";
+        qWarning("Invalid method name " + method + ". Expecting GET,POST");
+        status=abort;
+    }
+
+    //Path
+    path=list.at(1);
+
+    //HTTP 1.0 may ommit version number
+    version = "HTTP/1.0";
+    if (list.count() >= 3)
+    {
+        QByteArray versionField = list.at(2).toUpper();
+        if (versionField.contains("HTTP/1.") && versionField.size() == 8)
+            version = versionField;
+    }
+
+    status=waitForHeader;
 }
 
-/*
+/* Example:
     Host: 192.168.1.207
     Origin: http://192.168.1.207
     User-Agent: Mozilla/5.0 (iPad; U; CPU OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J3 Safari/6533.18.5
@@ -333,6 +357,11 @@ void HttpRequest::readFromSocket(QTcpSocket& socket) {
 
 HttpRequest::RequestStatus HttpRequest::getStatus() const {
     return status;
+}
+
+
+QByteArray HttpRequest::getLastError() const {
+    return lastError;
 }
 
 

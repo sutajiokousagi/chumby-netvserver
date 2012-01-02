@@ -125,7 +125,11 @@ void HttpConnectionHandler::read()
     // If the request is aborted, return error message and close the connection
     if (currentRequest->getStatus()==HttpRequest::abort)
     {
-        socket.write("HTTP/1.1 413 entity too large\r\nConnection: close\r\n\r\n413 Entity too large\r\n");
+        QByteArray lastError = currentRequest->getLastError();
+        if (lastError.size() > 0)
+            socket.write("HTTP/1.1 400 bad request\r\nConnection: close\r\n\r\n" + lastError);
+        else
+            socket.write("HTTP/1.1 413 entity too large\r\nConnection: close\r\n\r\n413 Entity too large\r\n");
         socket.disconnectFromHost();
         delete currentRequest;
         currentRequest = NULL;

@@ -59,6 +59,9 @@ public:
     */
     void readFromSocket(QTcpSocket& socket);
 
+    /** Get the last error message (e.g. "invalid header") */
+    QByteArray getLastError() const;
+
     /**
       Get the status of this reqeust.
       @see RequestStatus
@@ -147,6 +150,9 @@ public:
     QMap<QByteArray,QByteArray>& getCookieMap();
 
 private:
+
+    /** Last error message */
+    QByteArray lastError;
 
     /** Request headers */
     QMultiMap<QByteArray,QByteArray> headers;
