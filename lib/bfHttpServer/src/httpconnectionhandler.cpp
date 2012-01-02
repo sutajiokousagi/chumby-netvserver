@@ -108,9 +108,13 @@ void HttpConnectionHandler::read()
     }
 
     // Collect data for the request object
-    while (socket.bytesAvailable() && currentRequest->getStatus()!=HttpRequest::complete && currentRequest->getStatus()!=HttpRequest::abort) {
+    while (socket.bytesAvailable() > 0
+           && currentRequest->getStatus() != HttpRequest::complete
+           && currentRequest->getStatus() != HttpRequest::abort)
+    {
         currentRequest->readFromSocket(socket);
-        if (currentRequest->getStatus()==HttpRequest::waitForBody) {
+        if (currentRequest->getStatus()==HttpRequest::waitForBody)
+        {
             // Restart timer for read timeout, otherwise it would
             // expire during large file uploads.
             int readTimeout=settings->value("readTimeout",10000).toInt();
@@ -119,12 +123,17 @@ void HttpConnectionHandler::read()
     }
 
     // If the request is aborted, return error message and close the connection
-    if (currentRequest->getStatus()==HttpRequest::abort) {
+    if (currentRequest->getStatus()==HttpRequest::abort)
+    {
         socket.write("HTTP/1.1 413 entity too large\r\nConnection: close\r\n\r\n413 Entity too large\r\n");
         socket.disconnectFromHost();
         delete currentRequest;
         currentRequest = NULL;
+        return;
     }
+
+    //NeTVServer used to segfault right after this comment
+    //due to a null pointer 'currentRequest' and missing 'return' statement just above
 
     // If the request is complete, let the request mapper dispatch it
     if (currentRequest->getStatus()==HttpRequest::complete)
