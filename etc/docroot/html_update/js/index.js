@@ -14,6 +14,9 @@ var rebootTextColor = "FF0000";
 var maxConsoleLines = 60;
 var leftMargin = 20;
 
+var timeoutMinCounter = 0;
+var timeoutTimerID = setInterval(onTimeoutTimer, 60000);		//1 minute
+
 function onLoad()
 {
 	onResize();
@@ -296,6 +299,22 @@ function stringContains(text, searchText)
 {
     return (text.indexOf(searchText) != -1);
 }
+
+//-----------------------------------------------------------
+
+function onTimeoutTimer()
+{
+    timeoutMinCounter++;
+	if (timeoutMinCounter < 25)		//allow up to 25 minutes for firmware upgrade
+		return;
+		
+	clearInterval(timeoutTimerID);
+	timeoutTimerID = 0;
+	setUpgradeDone();
+}
+
+
+
 
 // -------------------------------------------------------------------------------------------------
 //	press button on D-pad / android
