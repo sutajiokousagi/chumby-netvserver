@@ -57,7 +57,7 @@ void HttpRequest::readRequest(QTcpSocket& socket)
     method = list.at(0).toUpper();
     if (method != "GET" && method != "POST") {
         lastError = "Invalid method name " + method + ". Expecting GET,POST";
-        qWarning("Invalid method name " + method + ". Expecting GET,POST");
+        qWarning("Invalid method name %s. Expecting GET,POST", method.constData());
         status=abort;
         return;
     }

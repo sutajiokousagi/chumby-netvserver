@@ -6,6 +6,74 @@
 #include <QProcess>
 #include <QStringList>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcgiapp.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <string.h>
+
+#define FCGI_SOCKET "/tmp/bridge.socket"
+#define THREAD_COUNT 20
+
+int handle_bridge_uri(FCGX_Request *request);
+
+
+/*
+ * Initial parsing of the request path & redirect to actual handler function
+ */
+static int
+handle_request(FCGX_Request *request)
+{
+    int ret = -1;
+    char *uri = FCGX_GetParam("REQUEST_URI", request->envp);
+
+    if (!strncmp(uri, "/bridge", strlen("/bridge"))) {
+        ret = handle_bridge_uri(request);
+    }
+
+    else {
+        fprintf(stderr, "Unrecognized URI: %s\n", uri);
+    }
+
+    return ret;
+}
+
+
+/*
+ * Threaded function to handle FastCGI request
+ */
+static void *
+request_thread(void *s_ptr)
+{
+    int rc;
+    FCGX_Request request;
+
+    if (FCGX_InitRequest(&request, *((int *)s_ptr), 0)) {
+        perror("Unable to init request");
+        return NULL;
+    }
+
+    while (1) {
+        static pthread_mutex_t accept_mutex = PTHREAD_MUTEX_INITIALIZER;
+        //static pthread_mutex_t counts_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+        pthread_mutex_lock(&accept_mutex);
+        rc = FCGX_Accept_r(&request);
+        pthread_mutex_unlock(&accept_mutex);
+
+        handle_request(&request);
+        FCGX_Finish_r(&request);
+    }
+
+
+    return NULL;
+}
+
+
+/*
+ * Return true if there is another instance of this program already running
+ */
 bool isRunning()
 {
     QProcess *newProc = new QProcess();
@@ -24,6 +92,10 @@ bool isRunning()
     return false;
 }
 
+
+/*
+ * This needs no comments :)
+ */
 int main(int argc, char *argv[])
 {
     QCoreApplication instance(argc, argv);
@@ -53,6 +125,29 @@ int main(int argc, char *argv[])
     bool toBeReturn = startup.receiveArgs(argsString);
     if (toBeReturn == true)
         return 0;
+
+    //-----------------------------------------------------------
+    // FastCGI
+
+    int listen_socket;
+    int i;
+    pthread_t threads[THREAD_COUNT];
+
+    FCGX_Init();
+    listen_socket = FCGX_OpenSocket(FCGI_SOCKET, 10);
+    if (listen_socket < 0) {
+        perror("Unable to open listen socket");
+        exit(1);
+    }
+
+    for (i=0; i<THREAD_COUNT; i++) {
+        pthread_create(&threads[i], NULL, request_thread, (void *)&listen_socket);
+        pthread_detach(threads[i]);
+    }
+
+    request_thread((void *)&listen_socket);
+
+    //-----------------------------------------------------------
 
     return instance.exec();
 }

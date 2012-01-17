@@ -82,6 +82,9 @@ CONFIG( release, debug|release ) {
 target.path = /usr/bin
 INSTALLS += target
 
+# FastCGI library
+LIBS += -lfcgi
+
 # Temporary folders for the auxiliar files
 INCLUDEPATH += $$PWD/tmp/$$BUILD_NAME $$PWD/tmp
 OBJECTS_DIR = $$PWD/tmp/$$BUILD_NAME
