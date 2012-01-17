@@ -19,6 +19,12 @@
 int handle_bridge_uri(FCGX_Request *request);
 
 
+int handle_bridge_uri(FCGX_Request *request)
+{
+    return 0;
+}
+
+
 /*
  * Initial parsing of the request path & redirect to actual handler function
  */
