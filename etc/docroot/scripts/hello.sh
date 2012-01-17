@@ -30,9 +30,6 @@ if [ -z "${fwver}" ]; then
 	fwver='1.0'
 fi
 
-# Flash version
-flashver=$(chumbyflashplayer.x -v | sed '5!d')
-
 # Network status
 network_status=$(network_status.sh)
 internet='connecting'
