@@ -21,6 +21,8 @@ int handle_bridge_uri(FCGX_Request *request);
 
 int handle_bridge_uri(FCGX_Request *request)
 {
+    QByteArray test = "<status>1</status><cmd>HELLOWORLD</cmd><data><value>123456</value></data>";
+    FCGX_PutStr(test.constData(), test.length(), request->out);
     return 0;
 }
 
