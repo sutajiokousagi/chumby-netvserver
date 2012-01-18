@@ -159,6 +159,7 @@ int main(int argc, char *argv[])
     //-----------------------------------------------------------
     // FastCGI
 
+    /*
     int listen_socket;
     int i;
     pthread_t threads[THREAD_COUNT];
@@ -177,6 +178,7 @@ int main(int argc, char *argv[])
 
     //This will not return
     request_thread((void *)&listen_socket);
+    */
 
     //-----------------------------------------------------------
 
