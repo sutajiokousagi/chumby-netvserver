@@ -23,6 +23,7 @@ DBusMonitor::DBusMonitor(QObject *parent) : QObject(parent)
 
     //-------------
 
+    /*
     nm_ap_interface = new org::freedesktop::NetworkManagerAPInterface(this);
 
     if (!nm_ap_interface->isValid())
@@ -34,6 +35,7 @@ DBusMonitor::DBusMonitor(QObject *parent) : QObject(parent)
     {
         nm_ap_interface->connection().connect(nm_ap_interface->service(), nm_ap_interface->path(), nm_ap_interface->interface(), "PropertiesChanged", this, SLOT(PropertiesChanged(QVariantMap)));
     }
+    */
 }
 
 DBusMonitor::~DBusMonitor()
