@@ -28,7 +28,7 @@ int handle_bridge_uri(FCGX_Request *request)
 
     //No parameters
     if (strlen(raw_uri) <= strlen("/bridge/")) {
-        FCGX_PutStr(NO_PARAM_STRING, strlen(NO_PARAM_STRING), request->out);
+        FCGX_FPrintF(request->out, NO_PARAM_STRING);
         return 0;
     }
 
