@@ -18,14 +18,18 @@
 
 #define TEST_STRING "<status>1</status><cmd>HELLOWORLD</cmd><data><value>123456</value></data>"
 
-int handle_bridge_uri(FCGX_Request *request);
-
-
+/*
+ * This function should be moved into BridgeController later
+ */
 int handle_bridge_uri(FCGX_Request *request)
 {
+    char *uri = FCGX_GetParam("REQUEST_URI", request->envp) + strlen("/bridge/");
+    qDebug("handle_bridge_uri: %s", uri);
+
     //QByteArray test = "<status>1</status><cmd>HELLOWORLD</cmd><data><value>123456</value></data>";
     //FCGX_PutStr(test.constData(), test.size(), request->out);
     FCGX_PutStr(TEST_STRING, strlen(TEST_STRING), request->out);
+
     return 0;
 }
 
@@ -85,7 +89,7 @@ request_thread(void *s_ptr)
 /*
  * Return true if there is another instance of this program already running
  */
-bool isNeTVServerRunning()
+bool isRunning()
 {
     QProcess *newProc = new QProcess();
     newProc->start("/bin/pidof", QStringList(APPNAME));
@@ -113,7 +117,7 @@ int main(int argc, char *argv[])
     instance.setApplicationName(APPNAME);
     instance.setOrganizationName(ORGANISATION);
 
-    if (isNeTVServerRunning()) {
+    if (isRunning()) {
         qDebug("Another NeTVServer is already running");
         return 1;
     }
@@ -156,11 +160,11 @@ int main(int argc, char *argv[])
         pthread_detach(threads[i]);
     }
 
+    //This will not return
     request_thread((void *)&listen_socket);
-
-    qDebug("FastCGI Server: %s", FCGI_SOCKET);
 
     //-----------------------------------------------------------
 
+    //This is normally unreachable
     return instance.exec();
 }
