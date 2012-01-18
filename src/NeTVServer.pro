@@ -30,9 +30,11 @@ SOURCES = main.cpp \
         controller/fileuploadcontroller.cpp \
         controller/sessioncontroller.cpp
 
-# DBus support
-message("DBus enabled")
-QT += dbus
+# Include DBus support only on bitbake environment
+!exists( /home/torin ) {
+    message("DBus enabled")
+    QT += dbus
+}
 
 # Shell script execution (cgi-like)
 HEADERS += $$PWD/controller/scriptcontroller.h
@@ -92,3 +94,10 @@ MOC_DIR = $$PWD/tmp/$$BUILD_NAME
 UI_DIR = $$PWD/tmp/$$BUILD_NAME
 RCC_DIR = $$PWD/tmp/$$BUILD_NAME
 DESTDIR = $$PWD/bin
+
+# Hacks for qmake compiling on Torin's development Ubuntu
+exists( /home/torin ) {
+    message("Cross compiling on Torin's Ubuntu development machine")
+    INCLUDEPATH += /mnt/storage/fcgi/include
+    LIBS += -L/mnt/storage/fcgi/lib
+}
