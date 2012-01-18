@@ -16,6 +16,7 @@
 #define FCGI_SOCKET "/tmp/bridge.socket"
 #define THREAD_COUNT 20
 
+#define NO_PARAM_STRING "<status>2</status><data><value>please provide some parameter(s)</value></data>"
 #define TEST_STRING "<status>1</status><cmd>HELLOWORLD</cmd><data><value>123456</value></data>"
 
 /*
@@ -23,12 +24,23 @@
  */
 int handle_bridge_uri(FCGX_Request *request)
 {
+    char *raw_uri = FCGX_GetParam("REQUEST_URI", request->envp);
+
+    //No parameters
+    if (strlen(raw_uri) <= strlen("/bridge/")) {
+        FCGX_PutStr(NO_PARAM_STRING, strlen(NO_PARAM_STRING), request->out);
+        return 0;
+    }
+
     char *uri = FCGX_GetParam("REQUEST_URI", request->envp) + strlen("/bridge/");
+
     qDebug("handle_bridge_uri: %s", uri);
 
     //QByteArray test = "<status>1</status><cmd>HELLOWORLD</cmd><data><value>123456</value></data>";
     //FCGX_PutStr(test.constData(), test.size(), request->out);
-    FCGX_PutStr(TEST_STRING, strlen(TEST_STRING), request->out);
+    int numWritten = FCGX_PutStr(TEST_STRING, strlen(TEST_STRING), request->out);
+
+    qDebug("written: %d bytes", numWritten);
 
     return 0;
 }
