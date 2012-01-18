@@ -16,13 +16,16 @@
 #define FCGI_SOCKET "/tmp/bridge.socket"
 #define THREAD_COUNT 20
 
+#define TEST_STRING "<status>1</status><cmd>HELLOWORLD</cmd><data><value>123456</value></data>"
+
 int handle_bridge_uri(FCGX_Request *request);
 
 
 int handle_bridge_uri(FCGX_Request *request)
 {
-    QByteArray test = "<status>1</status><cmd>HELLOWORLD</cmd><data><value>123456</value></data>";
-    FCGX_PutStr(test.constData(), test.length(), request->out);
+    //QByteArray test = "<status>1</status><cmd>HELLOWORLD</cmd><data><value>123456</value></data>";
+    //FCGX_PutStr(test.constData(), test.size(), request->out);
+    FCGX_PutStr(TEST_STRING, strlen(TEST_STRING), request->out);
     return 0;
 }
 
@@ -82,7 +85,7 @@ request_thread(void *s_ptr)
 /*
  * Return true if there is another instance of this program already running
  */
-bool isRunning()
+bool isNeTVServerRunning()
 {
     QProcess *newProc = new QProcess();
     newProc->start("/bin/pidof", QStringList(APPNAME));
@@ -110,7 +113,7 @@ int main(int argc, char *argv[])
     instance.setApplicationName(APPNAME);
     instance.setOrganizationName(ORGANISATION);
 
-    if (isRunning()) {
+    if (isNeTVServerRunning()) {
         qDebug("Another NeTVServer is already running");
         return 1;
     }
@@ -154,6 +157,8 @@ int main(int argc, char *argv[])
     }
 
     request_thread((void *)&listen_socket);
+
+    qDebug("FastCGI Server: %s", FCGI_SOCKET);
 
     //-----------------------------------------------------------
 
