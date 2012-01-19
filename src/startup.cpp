@@ -1,7 +1,8 @@
 #include <QDir>
+#include <QByteArray>
+#include <QStringList>
 #include "startup.h"
 #include "static.h"
-#include "httplistener.h"
 #include "flashpolicyserver.h"
 #include "tcpsocketserver.h"
 #include "udpsocketserver.h"
@@ -11,29 +12,11 @@
 
 Startup::Startup(QObject* parent) : QObject(parent)
 {
-    start();
-}
-
-void Startup::start()
-{
     //-------------------------------------------------------------------------
     // Handlers
 
     // Initialize the core application
     QString configFileName=Static::getConfigDir()+"/"+APPNAME+".ini";
-
-    // Configure session store
-    QSettings* sessionSettings=new QSettings(configFileName,QSettings::IniFormat);
-    sessionSettings->beginGroup("sessions");
-    Static::sessionStore=new HttpSessionStore(sessionSettings, this);
-
-    // Configure static file controller
-    QSettings* docrootSettings=new QSettings(configFileName,QSettings::IniFormat);
-    docrootSettings->beginGroup("docroot");
-    Static::staticFileController=new StaticFileController(docrootSettings);
-
-    // Configure script controller
-    Static::scriptController=new ScriptController(docrootSettings);
 
     // Configure bridge controller
     QSettings* bridgeSettings=new QSettings(configFileName,QSettings::IniFormat);
@@ -41,6 +24,7 @@ void Startup::start()
     Static::bridgeController=new BridgeController(bridgeSettings,this);
 
     RequestMapper *requestMapper = new RequestMapper();
+    Static::requestMapper = requestMapper;
 
     //-------------------------------------------------------------------------
     // Servers
@@ -49,15 +33,6 @@ void Startup::start()
     QSettings* flashpolicySettings=new QSettings(configFileName,QSettings::IniFormat);
     flashpolicySettings->beginGroup("flash-policy-server");
     new FlashPolicyServer(flashpolicySettings, this);
-
-    // Configure and start the TCP listener
-    QSettings* listenerSettings=new QSettings(configFileName,QSettings::IniFormat);
-    listenerSettings->beginGroup("listener");
-    HttpListener *httpListener = new HttpListener(listenerSettings, requestMapper, this);
-    if (!httpListener->isListening()) {
-        delete httpListener;
-        Static::httpListener = NULL;
-    }
 
     // Configure TCP socket server
     QSettings* tcpServerSettings=new QSettings(configFileName,QSettings::IniFormat);
@@ -83,44 +58,3 @@ void Startup::start()
 #endif
 }
 
-bool Startup::receiveArgs(const QString &argsString)
-{
-    QStringList argsList = argsString.split(ARGS_SPLIT_TOKEN);
-    int argCount = argsList.count();
-    if (argCount < 2)
-        return false;
-
-    QString execPath = argsList[0];
-    QString command = argsList[1];
-    argsList.removeFirst();
-    argsList.removeFirst();
-    argCount = argsList.count();
-
-    qDebug("Received argument: %s", qPrintable(command));
-
-    QByteArray string = processStatelessCommand(command.toLatin1(), argsList);
-    if (string != UNIMPLEMENTED)            printf("NeTVServer: %s", string.constData());
-    else                                    printf("NeTVServer: Invalid argument");
-    return false;
-}
-
-QByteArray Startup::processStatelessCommand(QByteArray command, QStringList argsList)
-{
-    //command name
-    if (command.length() < 0)
-        return UNIMPLEMENTED;
-    command = command.toUpper();
-
-    //arguments
-    int argCount = argsList.count();
-
-    if (command == "HELLO")
-    {
-        //Just a dummy command
-        qDebug("argCount %d", argCount);
-    }
-
-    //----------------------------------------------------
-
-    return UNIMPLEMENTED;
-}

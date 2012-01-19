@@ -1,10 +1,15 @@
-#include "startup.h"
-#include <unistd.h>
-#include <stdio.h>
 #include <QCoreApplication>
 #include <QDebug>
 #include <QProcess>
 #include <QStringList>
+#include <QDir>
+#include <QByteArray>
+#include <QStringList>
+#include "static.h"
+#include "flashpolicyserver.h"
+#include "tcpsocketserver.h"
+#include "udpsocketserver.h"
+#include "requestmapper.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,41 +18,16 @@
 #include <unistd.h>
 #include <string.h>
 
+/** Name of this application */
+#define APPNAME "NeTVServer"
+
 #define FCGI_SOCKET "/tmp/bridge.socket"
 #define THREAD_COUNT 20
 
-#define CONTENT_TYPE_STRING "Content-Type: text/plain\r\n\r\n"
-#define NO_PARAM_STRING "<status>2</status><data><value>please provide some parameter(s)</value></data>"
-#define TEST_STRING "<status>1</status><cmd>HELLOWORLD</cmd><data><value>123456</value></data>"
 
-/*
- * This function should be moved into BridgeController later
- */
-int handle_bridge_uri(FCGX_Request *request)
-{
-    char *raw_uri = FCGX_GetParam("REQUEST_URI", request->envp);
-
-    //No parameters
-    if (strlen(raw_uri) <= strlen("/bridge/")) {
-        FCGX_FPrintF(request->out, CONTENT_TYPE_STRING);
-        FCGX_FPrintF(request->out, NO_PARAM_STRING);
-        return 0;
-    }
-
-    char *uri = FCGX_GetParam("REQUEST_URI", request->envp) + strlen("/bridge/");
-
-    qDebug("handle_bridge_uri: %s", uri);
-
-    //QByteArray test = "<status>1</status><cmd>HELLOWORLD</cmd><data><value>123456</value></data>";
-    //FCGX_PutStr(test.constData(), test.size(), request->out);
-    FCGX_FPrintF(request->out, CONTENT_TYPE_STRING);
-    int numWritten = FCGX_PutStr(TEST_STRING, strlen(TEST_STRING), request->out);
-
-    qDebug("written: %d bytes", numWritten);
-
-    return 0;
-}
-
+//----------------------------------------------------------------------------------------------------------------
+// FastCGI stuffs
+//----------------------------------------------------------------------------------------------------------------
 
 /*
  * Initial parsing of the request path & redirect to actual handler function
@@ -59,7 +39,7 @@ handle_request(FCGX_Request *request)
     char *uri = FCGX_GetParam("REQUEST_URI", request->envp);
 
     if (!strncmp(uri, "/bridge", strlen("/bridge"))) {
-        ret = handle_bridge_uri(request);
+        ret = Static::bridgeController->handle_fastcgi_request(request);
     }
 
     else {
@@ -86,7 +66,6 @@ request_thread(void *s_ptr)
 
     while (1) {
         static pthread_mutex_t accept_mutex = PTHREAD_MUTEX_INITIALIZER;
-        //static pthread_mutex_t counts_mutex = PTHREAD_MUTEX_INITIALIZER;
 
         pthread_mutex_lock(&accept_mutex);
         rc = FCGX_Accept_r(&request);
@@ -96,10 +75,14 @@ request_thread(void *s_ptr)
         FCGX_Finish_r(&request);
     }
 
-
     return NULL;
 }
 
+
+
+//----------------------------------------------------------------------------------------------------------------
+// Qt stuffs
+//----------------------------------------------------------------------------------------------------------------
 
 /*
  * Return true if there is another instance of this program already running
@@ -124,13 +107,63 @@ bool isRunning()
 
 
 /*
- * This needs no comments :)
+ * Create handlers, listeners and assign them to global pointers in Static class
  */
+int initialize_modules()
+{
+    // Configuration file
+    QString configFileName=Static::getConfigDir()+"/"+APPNAME+".ini";
+
+    // Configure bridge controller
+    QSettings* bridgeSettings=new QSettings(configFileName,QSettings::IniFormat);
+    bridgeSettings->beginGroup("bridge-controller");
+    Static::bridgeController=new BridgeController(bridgeSettings);
+
+    RequestMapper *requestMapper = new RequestMapper();
+    Static::requestMapper = requestMapper;
+
+    // Configure Flash policy server
+    QSettings* flashpolicySettings=new QSettings(configFileName,QSettings::IniFormat);
+    flashpolicySettings->beginGroup("flash-policy-server");
+    new FlashPolicyServer(flashpolicySettings);
+
+    // Configure TCP socket server
+    QSettings* tcpServerSettings=new QSettings(configFileName,QSettings::IniFormat);
+    tcpServerSettings->beginGroup("tcp-socket-server");
+    Static::tcpSocketServer = new TcpSocketServer(tcpServerSettings, requestMapper);
+    if (!Static::tcpSocketServer->isListening()) {
+        delete Static::tcpSocketServer;
+        Static::tcpSocketServer = NULL;
+    }
+
+    // Configure UDP socket server
+    QSettings* udpServerSettings=new QSettings(configFileName,QSettings::IniFormat);
+    udpServerSettings->beginGroup("udp-socket-server");
+    Static::udpSocketServer = new UdpSocketServer(udpServerSettings, requestMapper);
+
+    // DBus monitor
+#ifdef ENABLE_DBUS_STUFF
+    Static::dbusMonitor = new DBusMonitor(this);
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_StateChanged(uint)), Static::bridgeController, SLOT(slot_StateChanged(uint)));
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_PropertiesChanged(QByteArray,QByteArray)), Static::bridgeController, SLOT(slot_PropertiesChanged(QByteArray,QByteArray)));
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceAdded(QByteArray)), Static::bridgeController, SLOT(slot_DeviceAdded(QByteArray)));
+    QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceRemoved(QByteArray)), Static::bridgeController, SLOT(slot_DeviceRemoved(QByteArray)));
+#endif
+
+    return 0;
+}
+
+
+
+//----------------------------------------------------------------------------------------------------------------
+// main
+//----------------------------------------------------------------------------------------------------------------
+
 int main(int argc, char *argv[])
 {
     QCoreApplication instance(argc, argv);
     instance.setApplicationName(APPNAME);
-    instance.setOrganizationName(ORGANISATION);
+    instance.setOrganizationName("");
 
     if (isRunning()) {
         qDebug("Another NeTVServer is already running");
@@ -138,7 +171,6 @@ int main(int argc, char *argv[])
     }
 
     QStringList argsList = instance.arguments();
-    QString argsString = argsList.join(ARGS_SPLIT_TOKEN);
 
     // If the args list contains "-d", then daemonize
     int temp = 0;
@@ -146,20 +178,15 @@ int main(int argc, char *argv[])
         temp = daemon(0, 0);
 
     // Print out console arguments (if any)
-    if (argsList.count() > 0) {
-        qDebug("Starting new NeTVServer with console args: ");
-        qDebug("%s", qPrintable(argsString));
-    }
+    if (argsList.count() > 0)
+        qDebug("Starting new NeTVServer");
 
-    Startup startup;
-    bool toBeReturn = startup.receiveArgs(argsString);
-    if (toBeReturn == true)
-        return 0;
+    // Initialize global pointers
+    initialize_modules();
 
     //-----------------------------------------------------------
     // FastCGI
 
-    /*
     int listen_socket;
     int i;
     pthread_t threads[THREAD_COUNT];
@@ -176,12 +203,8 @@ int main(int argc, char *argv[])
         pthread_detach(threads[i]);
     }
 
-    //This will not return
-    request_thread((void *)&listen_socket);
-    */
-
     //-----------------------------------------------------------
 
-    //This is normally unreachable
+    // Qt events loop
     return instance.exec();
 }

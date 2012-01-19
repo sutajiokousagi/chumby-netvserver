@@ -1,7 +1,6 @@
 #ifndef REQUESTMAPPER_H
 #define REQUESTMAPPER_H
 
-#include "httprequesthandler.h"
 #include "socketrequesthandler.h"
 
 /**
@@ -9,7 +8,7 @@
   depending on the requested path.
 */
 
-class RequestMapper : public HttpRequestHandler, public SocketRequestHandler
+class RequestMapper : public SocketRequestHandler
 {
 
 public:
@@ -18,13 +17,6 @@ public:
       Constructor.
     */
     RequestMapper();
-
-    /**
-      Dispatch a request to a controller.
-      @param request The received HTTP request
-      @param response Must be used to return the response
-    */
-    void service(HttpRequest& request, HttpResponse& response);
 
     /**
       Dispatch a request to a controller.

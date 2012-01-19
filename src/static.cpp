@@ -5,11 +5,7 @@
 #include <QString>
 
 QString Static::configDir = NULL;
-
-StaticFileController* Static::staticFileController = NULL;
-HttpSessionStore* Static::sessionStore = NULL;
-HttpListener* Static::httpListener = NULL;
-ScriptController* Static::scriptController = NULL;
+RequestMapper* Static::requestMapper = NULL;
 TcpSocketServer* Static::tcpSocketServer = NULL;
 UdpSocketServer* Static::udpSocketServer = NULL;
 BridgeController* Static::bridgeController = NULL;
@@ -17,6 +13,8 @@ BridgeController* Static::bridgeController = NULL;
 #ifdef ENABLE_DBUS_STUFF
     DBusMonitor* Static::dbusMonitor=0;
 #endif
+
+
 
 QString Static::getConfigFileName()
 {

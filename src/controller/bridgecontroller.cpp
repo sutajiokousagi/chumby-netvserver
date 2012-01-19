@@ -11,7 +11,13 @@
 #include <QXmlStreamWriter>
 #include <QTimer>
 
-BridgeController::BridgeController(QSettings* settings, QObject* parent) : QObject(parent), HttpRequestHandler(), SocketRequestHandler()
+#define CONTENT_TYPE_PLAIN     "Content-Type: text/plain\r\n\r\n"
+#define ERROR_400               "HTTP/1.1 400 bad request\r\nConnection: close\r\n\r\n"
+#define ERROR_403               "HTTP/1.1 413 entity too large\r\nConnection: close\r\n\r\n413 Entity too large\r\n"
+#define ERROR_NO_PARAM          "<status>2</status><data><value>please provide some parameter(s)</value></data>"
+
+
+BridgeController::BridgeController(QSettings* settings, QObject* parent) : QObject(parent), SocketRequestHandler()
 {
     //Settings from NeTVServer.ini
     docroot=settings->value("path",".").toString();
@@ -32,6 +38,34 @@ BridgeController::~BridgeController()
     delete parameters;
     parameters = NULL;
 }
+
+
+
+/*
+ * Convert FCGX_Request to HttpRequest and HttpResponse
+ * then pass to (old) service function
+ */
+int BridgeController::handle_fastcgi_request(FCGX_Request *request)
+{
+    HttpRequest httpRequest(request);
+    HttpResponse httpResponse(request);
+
+    //Error while parsing HTTP header
+    if (httpRequest.getStatus()==HttpRequest::abort)
+    {
+        FCGX_FPrintF(request->out, CONTENT_TYPE_PLAIN);
+        QByteArray lastError = httpRequest.getLastError();
+        if (lastError.size() > 0)
+            FCGX_FPrintF(request->out, QByteArray(ERROR_400 + lastError + "\r\n").constData());
+        else
+            FCGX_FPrintF(request->out, ERROR_403);
+        return 0;
+    }
+
+    service(httpRequest, httpResponse);
+    return 0;
+}
+
 
 void BridgeController::service(HttpRequest& request, HttpResponse& response)
 {
@@ -1070,12 +1104,15 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
 QString BridgeController::SetStaticDocroot(QString newPath)
 {
-    return Static::staticFileController->setDocroot(newPath);
+    return "";
+    Q_UNUSED(newPath);
+    //return Static::staticFileController->setDocroot(newPath);
 }
 
 QString BridgeController::GetStaticDocroot()
 {
-    return Static::staticFileController->getDocroot();
+    return "";
+    //return Static::staticFileController->getDocroot();
 }
 
 
@@ -1085,6 +1122,10 @@ QString BridgeController::GetStaticDocroot()
 
 bool BridgeController::IsAuthorizedCaller(QByteArray headerValue)
 {
+    Q_UNUSED(headerValue);
+    return true;
+
+    /*
     qint64 now = QDateTime::currentMSecsSinceEpoch();
     qint64 second1 = (now - 1000) / 1000;
     qint64 second2 = now / 1000;
@@ -1098,12 +1139,10 @@ bool BridgeController::IsAuthorizedCaller(QByteArray headerValue)
     qDebug() << "Calculated hash: " << hashResult1;
     qDebug() << "Calculated hash: " << hashResult2;
     qDebug() << "Calculated hash: " << hashResult3;
-
-    return true;
-
     if (headerValue == hashResult1 || headerValue == hashResult2 || headerValue == hashResult3)
         return true;
     return false;
+    */
 }
 
 bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)

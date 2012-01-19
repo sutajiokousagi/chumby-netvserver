@@ -1,7 +1,10 @@
 #ifndef BridgeController_H
 #define BridgeController_H
 
-#include "httprequesthandler.h"
+#include <QSettings>
+#include <fcgiapp.h>
+#include "httprequest.h"
+#include "httpresponse.h"
 #include "socketrequesthandler.h"
 
 #define TAG                                 "NeTVServer"
@@ -9,8 +12,6 @@
 #define BRIDGE_RETURN_STATUS_SUCCESS        "1"
 #define BRIDGE_RETURN_STATUS_ERROR          "2"
 #define BRIDGE_RETURN_STATUS_UNAUTHORIZED   "3"
-
-#define ARGS_SPLIT_TOKEN    "|~|"
 
 #define STRING_AUTHORIZED_CALLER            "Authorized-Caller"
 #define STRING_COMMAND                      "cmd"
@@ -23,7 +24,7 @@
 #define STRING_NO_CLIENT_RUNNING            "No client is running"
 
 
-class BridgeController : public QObject, public HttpRequestHandler, public SocketRequestHandler
+class BridgeController : public QObject, public SocketRequestHandler
 {
     Q_OBJECT
     //Q_DISABLE_COPY(BridgeController);
@@ -35,6 +36,7 @@ public:
     ~BridgeController();
 
     /** Receive & response to HTTP requests */
+    int handle_fastcgi_request(FCGX_Request *request);
     void service(HttpRequest& request, HttpResponse& response);
 
     /** Receive & response to socket requests */

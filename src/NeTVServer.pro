@@ -15,30 +15,25 @@ CONFIG(debug, debug|release) {
 }
 
 HEADERS = \
-    static.h \
-    startup.h \
-    requestmapper.h \
-    mot_ctl.h \
-    controller/fileuploadcontroller.h \
-    controller/sessioncontroller.h
+        static.h \
+        requestmapper.h \
+        mot_ctl.h
 
 SOURCES = main.cpp \
         static.cpp \
-        startup.cpp \
         requestmapper.cpp \
-        mot_ctl.cpp \
-        controller/fileuploadcontroller.cpp \
-        controller/sessioncontroller.cpp
+        mot_ctl.cpp
+
+HEADERS +=  httprequest.h \
+            httpresponse.h
+SOURCES +=  httprequest.cpp \
+            httpresponse.cpp
 
 # Include DBus support only on bitbake environment
 !exists( /home/torin ) {
     message("DBus enabled")
     QT += dbus
 }
-
-# Shell script execution (cgi-like)
-HEADERS += $$PWD/controller/scriptcontroller.h
-SOURCES += $$PWD/controller/scriptcontroller.cpp
 
 # Hardware bridge
 HEADERS += $$PWD/controller/bridgecontroller.h
@@ -59,7 +54,6 @@ OTHER_FILES += \
     ../etc/docroot/scripts/test_param.sh \
     ../etc/docroot/scripts/xmlbridge.sh
 
-include(../lib/bfHttpServer/src/bfHttpServer.pri)
 include(../lib/bfFlashPolicyServer/src/bfFlashpolicyserver.pri)
 include(../lib/bfSocketServer/src/bfSocketserver.pri)
 

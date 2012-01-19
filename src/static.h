@@ -2,12 +2,9 @@
 #define STATIC_H
 
 #include <QString>
-#include "httpsessionstore.h"
-#include "httplistener.h"
 #include "tcpsocketserver.h"
 #include "udpsocketserver.h"
-#include "controller/staticfilecontroller.h"
-#include "controller/scriptcontroller.h"
+#include "requestmapper.h"
 #include "controller/bridgecontroller.h"
 
 #ifdef ENABLE_DBUS_STUFF
@@ -16,7 +13,7 @@
 
 
 /**
-  This class contains some static resources that are used by the application.
+  This class contains static resources (global pointers) that are used by the application.
 */
 
 class Static
@@ -49,20 +46,14 @@ public:
      */
     static QString getConfigDir();
 
-    /** Storage for session cookies */
-    static HttpSessionStore* sessionStore;
-
-    /** HTTP Listener (the web server) */
-    static HttpListener* httpListener;
+    /** TCP/UDP request mapper */
+    static RequestMapper* requestMapper;
 
     /** TCP Socket server for Flash player */
     static TcpSocketServer* tcpSocketServer;
 
     /** UDP Socket server for mobile device */
     static UdpSocketServer* udpSocketServer;
-
-    /** Controller for script files */
-    static ScriptController* scriptController;
 
     /** Controller for hardware bridge */
     static BridgeController* bridgeController;
@@ -71,9 +62,6 @@ public:
 #ifdef ENABLE_DBUS_STUFF
     static DBusMonitor* dbusMonitor;
 #endif
-
-    /** Controller for static files */
-    static StaticFileController* staticFileController;
 
 private:
 
