@@ -1104,15 +1104,12 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
 
 QString BridgeController::SetStaticDocroot(QString newPath)
 {
-    return "";
-    Q_UNUSED(newPath);
-    //return Static::staticFileController->setDocroot(newPath);
+    return this->Execute(docroot + "/scripts/setdocroot.sh", QStringList(newPath), false);
 }
 
 QString BridgeController::GetStaticDocroot()
 {
-    return "";
-    //return Static::staticFileController->getDocroot();
+    return this->Execute(docroot + "/scripts/getdocroot.sh", false);
 }
 
 
