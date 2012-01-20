@@ -242,8 +242,6 @@ void HttpRequest::decodeRequestParams()
             rawParameters = pathRaw.mid(questionMark+1);
     }
 
-    qDebug("rawParameters: %s", rawParameters.constData());
-
     if (rawParameters.length() <= 0)
         return;
 
