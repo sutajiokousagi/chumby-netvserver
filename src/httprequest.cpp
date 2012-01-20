@@ -244,29 +244,32 @@ void HttpRequest::decodeRequestParams()
         }
     }
 
-    // Split the parameters into pairs of value and name
+    // Split the parameters into pairs of value   name
     QList<QByteArray> list=rawParameters.split('&');
     foreach (QByteArray part, list)
     {
-        int equalsChar=part.indexOf('=');
-        if (equalsChar>=0)
+        int equalsChar = part.indexOf('=');
+        if (equalsChar >= 0)
         {
             QByteArray name=part.left(equalsChar).trimmed();
             QByteArray value=part.mid(equalsChar+1).trimmed();
             if (name.startsWith("dataxml_"))
                 name = name.right(name.length()-8);
-            parameters.insert(urlDecode(name), urlDecode(value));
+            name = urlDecode(name);
+            value = urlDecode(value);
+            parameters.insert(name, value);
 
-            qDebug("decodeRequestParams: %s = %s", urlDecode(name).constData(), value.constData());
+            qDebug("GET/POST: %s = %s", name.constData(), value.constData());
         }
         else if (!part.isEmpty())
         {
             // Name without value
             if (part.startsWith("dataxml_"))
                 part = part.right(part.length()-8);
-            parameters.insert(urlDecode(part), "");
+            part = urlDecode(part);
+            parameters.insert(part, "");
 
-            qDebug("decodeRequestParams: %s = %s", urlDecode(part).constData(), "");
+            qDebug("GET/POST: %s = %s", part.constData(), "");
         }
     }
 }
@@ -314,7 +317,7 @@ void HttpRequest::decodeXMLParams()
             else if (currentTag != "data")
                 parameters.insert(urlDecode(currentTag.toLatin1()), urlDecode(xml->readElementText().toLatin1()));
 
-            qDebug("decodeXMLParams: %s = %s", qPrintable(currentTag), urlDecode(xml->readElementText().toLatin1()).constData() );
+            qDebug("GET/POST (XML-format): %s = %s", qPrintable(currentTag), urlDecode(xml->readElementText().toLatin1()).constData() );
         }
     }
     currentTag = "";
@@ -376,7 +379,8 @@ QByteArray HttpRequest::getBody() const {
     return bodyData;
 }
 
-QByteArray HttpRequest::urlDecode(const QByteArray source) {
+QByteArray HttpRequest::urlDecode(const QByteArray source)
+{
     QByteArray buffer(source);
     buffer.replace('+',' ');
     int percentChar=buffer.indexOf('%');
@@ -387,6 +391,7 @@ QByteArray HttpRequest::urlDecode(const QByteArray source) {
             buffer.replace(percentChar,3,(char*)&byte,1);
         percentChar=buffer.indexOf('%',percentChar+1);
     }
+
     return buffer;
 }
 
