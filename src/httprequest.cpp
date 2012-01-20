@@ -12,7 +12,10 @@ HttpRequest::HttpRequest(FCGX_Request *request)
     contentType="";
     maxSize = 16000;
     maxMultiPartSize = 1000000;
+    parameters.clear();
     bodyData.clear();
+    path.clear();
+    lastError.clear();
 
     // Requested URI or path
     QByteArray pathRaw = ( FCGX_GetParam("REQUEST_URI", request->envp) );
@@ -20,10 +23,10 @@ HttpRequest::HttpRequest(FCGX_Request *request)
     if (uri != NULL)
         this->path = QByteArray(uri);
 
-    // Check for POST, file upload requests
+    // Check for non-empty body, file upload type of requests
     readHeader();
 
-    qDebug("bridge: (Content-Length: %d) %s", pathRaw.constData(), this->contentLength);
+    qDebug("bridge: (Content-Length: %d) %s", this->contentLength, pathRaw.constData());
 
     // Parse the entire HTTP request
     while (this->getStatus() != HttpRequest::complete && this->getStatus() != HttpRequest::abort)
@@ -39,6 +42,53 @@ HttpRequest::HttpRequest(FCGX_Request *request)
         }
     }
 }
+
+HttpRequest::~HttpRequest()
+{
+    foreach(QByteArray key, uploadedFiles.keys())
+    {
+        QTemporaryFile* file = uploadedFiles.value(key);
+        if (file != NULL)
+            file->close();
+        delete file;
+        file = NULL;
+    }
+    uploadedFiles.clear();
+
+    path.clear();
+    lastError.clear();
+    contentLength = 0;
+    contentType.clear();
+    currentBodySize = 0;
+    bodyData.clear();
+    parameters.clear();
+    this->request = NULL;
+}
+
+void HttpRequest::readFromSocket()
+{
+    if (status == complete)
+        return;
+
+    if (status == waitForBody)
+        readBody();
+
+    if (currentBodySize > maxSize)
+    {
+        qWarning("HttpRequest: received too many bytes");
+        status=abort;
+    }
+
+    if (status == complete)
+    {
+        // Extract and decode request parameters from url and body
+        decodeRequestParams();
+
+        // Extract and decode request parameters from XML style message
+        decodeXMLParams();
+    }
+}
+
 
 
 
@@ -114,23 +164,23 @@ void HttpRequest::readHeader()
 
 void HttpRequest::readBody()
 {
-    Q_ASSERT(contentLength!=0);
-
     // normal body, no multipart
     if (boundary.isEmpty())
     {
-        int toRead=contentLength-bodyData.size();
+        int toRead=contentLength - bodyData.length();
         char buffer[toRead+1];
-        FCGX_GetStr(buffer, toRead, request->in);
-        QByteArray newData = QByteArray(buffer);
-        currentBodySize+=newData.size();
+        int numRead = FCGX_GetStr(buffer, toRead, request->in);
+        QByteArray newData = QByteArray(buffer, numRead);
+
+        currentBodySize += newData.length();
         bodyData.append(newData);
-        if (bodyData.size()>=contentLength)
+        if (bodyData.size() >= contentLength)
             status=complete;
+
         return;
     }
 
-    // receive multipart body & store into temp file
+    // receive multipart body (file upload) & store into temp file
     if (!tempFile.isOpen())
         tempFile.open();
 
@@ -205,14 +255,18 @@ void HttpRequest::decodeRequestParams()
             QByteArray value=part.mid(equalsChar+1).trimmed();
             if (name.startsWith("dataxml_"))
                 name = name.right(name.length()-8);
-            parameters.insert(urlDecode(name),urlDecode(value));
+            parameters.insert(urlDecode(name), urlDecode(value));
+
+            qDebug("decodeRequestParams: %s = %s", urlDecode(name).constData(), value.constData());
         }
         else if (!part.isEmpty())
         {
             // Name without value
             if (part.startsWith("dataxml_"))
                 part = part.right(part.length()-8);
-            parameters.insert(urlDecode(part),"");
+            parameters.insert(urlDecode(part), "");
+
+            qDebug("decodeRequestParams: %s = %s", urlDecode(part).constData(), "");
         }
     }
 }
@@ -259,36 +313,20 @@ void HttpRequest::decodeXMLParams()
                 parameters.insert(QByteArray("cmd"), urlDecode(xml->readElementText().toLatin1()));
             else if (currentTag != "data")
                 parameters.insert(urlDecode(currentTag.toLatin1()), urlDecode(xml->readElementText().toLatin1()));
+
+            qDebug("decodeXMLParams: %s = %s", qPrintable(currentTag), urlDecode(xml->readElementText().toLatin1()).constData() );
         }
     }
     currentTag = "";
     delete xml;
 }
 
-void HttpRequest::readFromSocket()
-{
-    Q_ASSERT(status!=complete);
 
-    if (status==waitForBody) {
-        readBody();
-    }
-    if (currentBodySize>maxSize) {
-        qWarning("HttpRequest: received too many bytes");
-        status=abort;
-    }
-    if (status==complete) {
-        // Extract and decode request parameters from url and body
-        decodeRequestParams();
-        // Extract and decode request parameters from XML style message
-        decodeXMLParams();
-    }
-}
 
 
 HttpRequest::RequestStatus HttpRequest::getStatus() const {
     return status;
 }
-
 
 QByteArray HttpRequest::getLastError() const {
     return lastError;
@@ -345,14 +383,12 @@ QByteArray HttpRequest::urlDecode(const QByteArray source) {
     while (percentChar>=0) {
         bool ok;
         char byte=buffer.mid(percentChar+1,2).toInt(&ok,16);
-        if (ok) {
+        if (ok)
             buffer.replace(percentChar,3,(char*)&byte,1);
-        }
         percentChar=buffer.indexOf('%',percentChar+1);
     }
     return buffer;
 }
-
 
 void HttpRequest::parseMultiPartFile()
 {
@@ -443,15 +479,6 @@ void HttpRequest::parseMultiPartFile()
 
     if (tempFile.error())
         qCritical("HttpRequest: cannot read temp file, %s",qPrintable(tempFile.errorString()));
-}
-
-HttpRequest::~HttpRequest()
-{
-    foreach(QByteArray key, uploadedFiles.keys()) {
-        QTemporaryFile* file=uploadedFiles.value(key);
-        file->close();
-        delete file;
-    }
 }
 
 QTemporaryFile* HttpRequest::getUploadedFile(const QByteArray fieldName) {
