@@ -29,13 +29,6 @@ public:
     */
     virtual ~HttpRequest();
 
-    /**
-      Read the request from a socket. This method must be called repeatedly
-      until the status is RequestStatus::complete or RequestStatus::abort.
-      @param socket Source of the data
-    */
-    void readFromSocket();
-
     /** Get the last error message (e.g. "invalid header") */
     QByteArray getLastError() const;
 

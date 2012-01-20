@@ -18,10 +18,13 @@ HttpRequest::HttpRequest(FCGX_Request *request)
     lastError.clear();
 
     // Requested URI or path
-    QByteArray pathRaw = ( FCGX_GetParam("REQUEST_URI", request->envp) );
+    QByteArray pathRaw = QByteArray( FCGX_GetParam("REQUEST_URI", request->envp) );
     char *uri = FCGX_GetParam("REQUEST_URI", request->envp) + strlen("/bridge");
     if (uri != NULL)
         this->path = QByteArray(uri);
+
+    //Parse GET parameters
+    decodeRequestParams();
 
     // Check for non-empty body, file upload type of requests
     readHeader();
@@ -31,7 +34,26 @@ HttpRequest::HttpRequest(FCGX_Request *request)
     // Parse the entire HTTP request
     while (this->getStatus() != HttpRequest::complete && this->getStatus() != HttpRequest::abort)
     {
-        this->readFromSocket();
+        if (status == complete)
+            break;
+
+        if (status == waitForBody)
+            readBody();
+
+        if (currentBodySize > maxSize)
+        {
+            qWarning("HttpRequest: received too many bytes");
+            status=abort;
+        }
+
+        if (status == complete)
+        {
+            // Extract and decode request parameters from url and body
+            decodeRequestParams();
+
+            // Extract and decode request parameters from XML style message
+            decodeXMLParams();
+        }
 
         if (this->getStatus()==HttpRequest::waitForBody)
         {
@@ -65,29 +87,6 @@ HttpRequest::~HttpRequest()
     this->request = NULL;
 }
 
-void HttpRequest::readFromSocket()
-{
-    if (status == complete)
-        return;
-
-    if (status == waitForBody)
-        readBody();
-
-    if (currentBodySize > maxSize)
-    {
-        qWarning("HttpRequest: received too many bytes");
-        status=abort;
-    }
-
-    if (status == complete)
-    {
-        // Extract and decode request parameters from url and body
-        decodeRequestParams();
-
-        // Extract and decode request parameters from XML style message
-        decodeXMLParams();
-    }
-}
 
 
 
@@ -237,15 +236,19 @@ void HttpRequest::decodeRequestParams()
     else
     {
         //GET
-        int questionMark=path.indexOf('?');
-        if (questionMark>=0) {
-            rawParameters=path.mid(questionMark+1);
-            path=path.left(questionMark);
-        }
+        QByteArray pathRaw = QByteArray( FCGX_GetParam("REQUEST_URI", request->envp) );
+        int questionMark = pathRaw.indexOf('?');
+        if (questionMark >= 0)
+            rawParameters = pathRaw.mid(questionMark+1);
     }
 
+    qDebug("rawParameters: %s", rawParameters.constData());
+
+    if (rawParameters.length() <= 0)
+        return;
+
     // Split the parameters into pairs of value   name
-    QList<QByteArray> list=rawParameters.split('&');
+    QList<QByteArray> list = rawParameters.split('&');
     foreach (QByteArray part, list)
     {
         int equalsChar = part.indexOf('=');
