@@ -143,7 +143,7 @@ int initialize_modules()
 
     // DBus monitor
 #ifdef ENABLE_DBUS_STUFF
-    Static::dbusMonitor = new DBusMonitor(this);
+    Static::dbusMonitor = new DBusMonitor();
     QObject::connect(Static::dbusMonitor, SIGNAL(signal_StateChanged(uint)), Static::bridgeController, SLOT(slot_StateChanged(uint)));
     QObject::connect(Static::dbusMonitor, SIGNAL(signal_PropertiesChanged(QByteArray,QByteArray)), Static::bridgeController, SLOT(slot_PropertiesChanged(QByteArray,QByteArray)));
     QObject::connect(Static::dbusMonitor, SIGNAL(signal_DeviceAdded(QByteArray)), Static::bridgeController, SLOT(slot_DeviceAdded(QByteArray)));
