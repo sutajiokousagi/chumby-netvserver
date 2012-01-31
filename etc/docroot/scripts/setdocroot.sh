@@ -74,6 +74,13 @@ fi
 if [ -e "$symlink/scripts" ]; then
 	rm "$symlink/scripts"
 fi
+if [ -e "$origin/scripts" ]; then
+	ln -s "$origin/scripts" "$symlink/scripts"
+fi
+
+if [ -e "$symlink/tests" ]; then
+	rm "$symlink/tests"
+fi
 if [ -e "$origin/tests" ]; then
 	ln -s "$origin/tests" "$symlink/tests"
 fi
