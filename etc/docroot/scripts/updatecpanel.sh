@@ -52,6 +52,8 @@ do_update()
 			rm -rf "${DOCROOT_PATH}/${DOCROOT}"
 		fi
 		echo "Error updating cpanel git repo"
+		echo `date`
+		echo "</gitoutput>"
 		return 1;
 	fi
 
@@ -69,6 +71,8 @@ do_update()
 	#rm -rf "${DOCROOT_PATH}/${DOCROOT}"
 
 	echo "Error updating cpanel git repo"
+	echo `date`
+	echo "</gitoutput>"
 	return 1;
 }
 
@@ -77,14 +81,18 @@ do_update()
 OUTPUT=$(do_update ${GITPATH1} "docroot")
 if [ "$?" -eq "0" ]; then
 	echo "<docroot>${DOCROOT_PATH}/docroot</docroot>"
-	echo "<gitoutput>${OUTPUT}</gitoutput>"
+	echo "<gitoutput>${OUTPUT}"
+	echo `date`
+	echo "</gitoutput>"
 	exit 0;
 fi
 
 OUTPUT=$(do_update ${GITPATH2} "docroot2")
 if [ "$?" -eq "0" ]; then
 	echo "<docroot>${DOCROOT_PATH}/docroot2</docroot>"
-	echo "<gitoutput>${OUTPUT}</gitoutput>"
+	echo "<gitoutput>${OUTPUT}"
+	echo `date`
+	echo "</gitoutput>"
 	exit 0;
 fi
 
