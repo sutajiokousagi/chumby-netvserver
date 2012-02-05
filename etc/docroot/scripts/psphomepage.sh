@@ -7,6 +7,8 @@ PSP_HOMEPAGE=/psp/homepage
 DOCROOT=/www/netvserver
 GIT_DOCROOT_PATH=/media/storage/docroot
 
+echo ''
+echo `date`
 
 # Function to switch symlink path to new path
 do_set_symlink()
@@ -38,7 +40,8 @@ do_set_symlink()
 	ln -s ${NEW_PATH} ${SYMLINK};
 	mount -o remount,ro /
 	
-	echo "${DOCROOT} -> ${NEW_PATH}"
+	echo "Info: Symlink switched to new path"
+	echo "${SYMLINK} -> ${NEW_PATH}"
 	return 0;
 }
 
@@ -60,6 +63,7 @@ fi
 # Check empty
 if [ ! -s "${PSP_HOMEPAGE}" ]; then
 	echo "Warning: Content of ${PSP_HOMEPAGE} is empty"
+	exit 0;
 fi
 
 PSP_HOMEPAGE_CONTENT=$(cat ${PSP_HOMEPAGE})
