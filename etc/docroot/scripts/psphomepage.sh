@@ -4,8 +4,8 @@
 # Returns the successful absolute path to docroot to caller
 
 PSP_HOMEPAGE=/psp/homepage
-DOCROOT=/www/netvserver
 GIT_DOCROOT_PATH=/media/storage/docroot
+SCRIPT_PATH=/usr/share/netvserver/docroot/scripts/setdocroot.sh
 
 echo ''
 echo `date`
@@ -13,35 +13,24 @@ echo `date`
 # Function to switch symlink path to new path
 do_set_symlink()
 {
-	SYMLINK=$1
-	NEW_PATH=$2
+	NEW_PATH=$1
 	
-	# Desired local path does not exist
-	if [ ! -e ${NEW_PATH} ]; then
+	SETDOCROOT=$(${SCRIPT_PATH} ${NEW_PATH})
+	LAST_ERROR=$?
+	
+	if [ "${LAST_ERROR}" -eq "1" ]; then
 		echo "Error: Local path ${NEW_PATH} does not exist. Do nothing"
 		return 1;
 	fi
 	
-	# Check that we already have this symlink in place
-	CURRENT_LOCAL_PATH=$(readlink -fn ${SYMLINK})
-	if [ "$(stat -c "%d:%i" ${CURRENT_LOCAL_PATH})" == "$(stat -c "%d:%i" ${NEW_PATH})" ]; then
+	if [ "${LAST_ERROR}" -eq "2" ]; then
 		echo "Warning: Symlink already exists and not changed. Do nothing"
-		echo "${SYMLINK} -> ${CURRENT_LOCAL_PATH}"
-		return 0;
+		echo "${NEW_PATH}"
+		return 2;
 	fi
 
-	# Remove current symlink if it exists
-	mount -o remount,rw /
-	if [ -e ${SYMLINK} ]; then
-		rm ${SYMLINK};
-	fi
-
-	# Create a new symlink pointing to new path
-	ln -s ${NEW_PATH} ${SYMLINK};
-	mount -o remount,ro /
-	
 	echo "Info: Symlink switched to new path"
-	echo "${SYMLINK} -> ${NEW_PATH}"
+	echo "${NEW_PATH}"
 	return 0;
 }
 
@@ -52,7 +41,7 @@ do_set_symlink()
 #	# else print out warning message, do nothing
 if [ ! -e ${PSP_HOMEPAGE} ]; then
 	if [ -e ${GIT_DOCROOT_PATH} ]; then
-		do_set_symlink ${DOCROOT} ${GIT_DOCROOT_PATH}
+		do_set_symlink ${GIT_DOCROOT_PATH}
 		exit 0;
 	fi
 	
@@ -67,7 +56,7 @@ if [ ! -s "${PSP_HOMEPAGE}" ]; then
 fi
 
 PSP_HOMEPAGE_CONTENT=$(cat ${PSP_HOMEPAGE})
-echo ${PSP_HOMEPAGE_CONTENT};
+echo "${PSP_HOMEPAGE} content: ${PSP_HOMEPAGE_CONTENT}"
 
 # Content too short
 if [ ${#PSP_HOMEPAGE_CONTENT} -lt 5 ]; then
@@ -98,8 +87,8 @@ if [[ ${PSP_HOMEPAGE_CONTENT} != /* ]]; then
 	exit 0;
 fi
 
-#
-# From here on, it must be local path
-#
 
-do_set_symlink ${DOCROOT} ${PSP_HOMEPAGE_CONTENT}
+#
+# Use SetDocroot command to set new path and relink life support stuff
+#
+do_set_symlink ${PSP_HOMEPAGE_CONTENT}
