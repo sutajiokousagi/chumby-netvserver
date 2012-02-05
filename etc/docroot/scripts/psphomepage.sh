@@ -69,9 +69,17 @@ fi
 #
 
 # Check if is remote HTTP path type
+#	# if /media/storage/docroot exists, set symlink to it
 if [[ ${PSP_HOMEPAGE_CONTENT} == http://* || ${PSP_HOMEPAGE_CONTENT} == https://* ]]; then
 	echo "Setting homepage as remote HTTP path: ${PSP_HOMEPAGE_CONTENT}"
 	NeTVBrowser -qws -nomouse SetUrl ${PSP_HOMEPAGE_CONTENT}
+	
+	# Although the homepage is a remote URL, we still need to keep localhost updated
+	if [ -e ${GIT_DOCROOT_PATH} ]; then
+		do_set_symlink ${GIT_DOCROOT_PATH}
+		exit 0;
+	fi
+	
 	exit 0;
 fi
 
