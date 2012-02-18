@@ -30,6 +30,13 @@ if [ -z "${fwver}" ]; then
 	fwver='1.0'
 fi
 
+# Docroot path
+symlink=/www/netvserver
+docroot=""
+if [ -e $symlink ]; then
+	docroot=$(readlink -f $symlink)
+fi
+
 # Network status
 network_status=$(network_status.sh)
 internet='connecting'
@@ -77,8 +84,7 @@ echo "<dcid>${DCID}</dcid>"
 echo "<hwver>${hwver}</hwver>"
 echo "<fwver>${fwver}</fwver>"
 echo "<minAndroid>0.6.3</minAndroid>"
-echo "<minIOS>0.0.0</minIOS>"
-echo "<flashver>${flashver}</flashver>"
+echo "<docroot>${docroot}</docroot>"
 echo "<internet>${internet}</internet>"
 echo "<mac>${MAC}</mac>"
 echo "<ip>${IP}</ip>"
