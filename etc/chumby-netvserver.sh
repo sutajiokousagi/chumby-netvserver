@@ -2,6 +2,21 @@
 
 case "$1" in
 	start)
+	        # sanity check symlink and reset if it's bad
+	        if [ ! -e /media/storage/docroot ]; then
+		    mount -o remount,rw /
+                    rm -f /www/netvserver
+		    ln -s /usr/share/netvserver/docroot /www/netvserver
+		    mount -o remount,ro /
+		else 
+		    if [ ! -e /media/storage/docroot/index.html ]; then
+			mount -o remount,rw /
+			rm -f /www/netvserver
+			ln -s /usr/share/netvserver/docroot /www/netvserver
+			mount -o remount,ro /
+		    fi
+	        fi
+
 		# Check /psp/homepage and set docroot accordingly
 		/usr/share/netvserver/docroot/scripts/psphomepage.sh >> /var/log/cron_psphomepage.log 2>&1
 
