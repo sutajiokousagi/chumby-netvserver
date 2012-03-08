@@ -52,7 +52,7 @@ if [ ! -e ${PSP_HOMEPAGE} ]; then
 fi
 
 # Check empty
-if [ ! -s "${PSP_HOMEPAGE}" ]; then
+if [ ! "$(ls -A ${PSP_HOMEPAGE})" ]; then
 	echo "Warning: Content of ${PSP_HOMEPAGE} is empty"
 	exit 0;
 fi
