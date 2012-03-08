@@ -41,8 +41,10 @@ do_set_symlink()
 #	# else print out warning message, do nothing
 if [ ! -e ${PSP_HOMEPAGE} ]; then
 	if [ -e ${GIT_DOCROOT_PATH} ]; then
+	    if [ -s ${GIT_DOCROOT_PATH} ]; then  # don't set to an empty git docroot
 		do_set_symlink ${GIT_DOCROOT_PATH}
 		exit 0;
+	    fi
 	fi
 	
 	echo "Warning: ${PSP_HOMEPAGE} does not exist. Do nothing"
