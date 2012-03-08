@@ -1223,20 +1223,20 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
 
 void BridgeController::StartAPwithDelay(int msec /* = 500 */)
 {
-    QTimer::singleShot(msec, this, SLOT(slot_StartAP()));
+    slot_StartAP();
 }
 
 void BridgeController::StartAPFactorywithDelay(int msec /* = 500 */)
 {
-    QTimer::singleShot(msec, this, SLOT(slot_StartAP_Factory()));
+    slot_StartAP_Factory();
 }
 
 void BridgeController::StopAPwithDelay(int msec /* = 500 */)
 {
-    QTimer::singleShot(msec, this, SLOT(slot_StopAP()));
+    slot_StopAP();
 }
 
 void BridgeController::RebootwithDelay(int msec /* = 500 */)
 {
-    QTimer::singleShot(msec, this, SLOT(slot_Reboot()));
+    slot_Reboot();
 }
