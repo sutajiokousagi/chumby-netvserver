@@ -42,8 +42,10 @@ do_set_symlink()
 if [ ! -e ${PSP_HOMEPAGE} ]; then
 	if [ -e ${GIT_DOCROOT_PATH} ]; then
 	    if [ "$(ls -A ${GIT_DOCROOT_PATH})" ]; then  # don't set to an empty git docroot
-		do_set_symlink ${GIT_DOCROOT_PATH}
-		exit 0;
+		if [ -e ${GIT_DOCROOT_PATH}/index.html ]; then #...and also check that index.html exists...
+		    do_set_symlink ${GIT_DOCROOT_PATH}
+		    exit 0;
+		fi
 	    fi
 	fi
 	
