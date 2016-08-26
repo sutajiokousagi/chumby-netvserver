@@ -1,11 +1,10 @@
 #ifndef BridgeController_H
 #define BridgeController_H
 
+#include <QObject>
 #include <QSettings>
-#include <fcgiapp.h>
-#include "httprequest.h"
-#include "httpresponse.h"
-#include "socketrequesthandler.h"
+#include "qhttpserverrequest.hpp"
+#include "qhttpserverresponse.hpp"
 
 #define TAG                                 "NeTVServer"
 #define BRIDGE_RETURN_STATUS_UNIMPLEMENTED  "0"
@@ -23,11 +22,11 @@
 #define STRING_COMMAND_FORWARDED_CLIENT     "Command forwarded to TCP clients"
 #define STRING_NO_CLIENT_RUNNING            "No client is running"
 
+using namespace qhttp::server;
 
-class BridgeController : public QObject, public SocketRequestHandler
+class BridgeController : public QObject
 {
     Q_OBJECT
-    //Q_DISABLE_COPY(BridgeController);
 public:
 
     /** Constructor */
@@ -36,14 +35,18 @@ public:
     ~BridgeController();
 
     /** Receive & response to HTTP requests */
-    int handle_fastcgi_request(FCGX_Request *request);
-    void service(HttpRequest& request, HttpResponse& response);
+    //int handle_fastcgi_request(FCGX_Request *request);
+    //void service(HttpRequest& request, HttpResponse& response);
+    void service(QHttpRequest* req, QHttpResponse* res);
 
     /** Receive & response to socket requests */
-    void service(SocketRequest& request, SocketResponse& response);
+    //void service(SocketRequest& request, SocketResponse& response);
+
+    void replyToHttpClient(QHttpResponse *response, int numClients, const QByteArray & cmdString);
 
 public slots:
 
+    /*
     // From dbusmonitor.h
     void slot_StateChanged(uint state);
     void slot_PropertiesChanged(QByteArray prop_name, QByteArray prop_value);
@@ -55,14 +58,13 @@ public slots:
     void slot_StartAP();
     void slot_StartAP_Factory();
     void slot_Reboot();
+    */
 
 signals:
-
     // To InputDevice module
     void signal_SendKeyEvent(QByteArray keyName, bool isPressed, bool autoRepeat);
 
 private:
-
     /** Variables from NeTVServer.ini */
     QString docroot;                //This docroot is for executing scripts, should not be changed
     QString paramsFile;
@@ -116,10 +118,10 @@ private:
     QByteArray XMLUnescape(QByteArray inputString);
 
     /** HTTP response */
-    void DumpStaticFile(QByteArray path, HttpResponse& response);
+    //void DumpStaticFile(QByteArray path, HttpResponse& response);
 
 public:
-    static void SetContentType(QString fileName, HttpResponse& response);
+    //static void SetContentType(QString fileName, HttpResponse& response);
 };
 
 #endif // BridgeController_H

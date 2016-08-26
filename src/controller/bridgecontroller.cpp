@@ -1,15 +1,14 @@
 #include "bridgecontroller.h"
-#include "../static.h"
-#include "../mot_ctl.h"
 #include <QFileInfo>
 #include <QDir>
 #include <QDebug>
 #include <QProcess>
 #include <QDateTime>
 #include <QCryptographicHash>
-#include <QUrl>
 #include <QXmlStreamWriter>
 #include <QTimer>
+
+#include <QUrlQuery>
 
 #define CONTENT_TYPE_PLAIN     "Content-Type: text/plain\r\n\r\n"
 #define ERROR_400               "HTTP/1.1 400 bad request\r\nConnection: close\r\n\r\n"
@@ -17,12 +16,16 @@
 #define ERROR_NO_PARAM          "<status>2</status><data><value>please provide some parameter(s)</value></data>"
 
 
-BridgeController::BridgeController(QSettings* settings, QObject* parent) : QObject(parent), SocketRequestHandler()
+BridgeController::BridgeController(QSettings* settings, QObject* parent) :
+    QObject(parent)
 {
-    //Settings from NeTVServer.ini
-    docroot=settings->value("path",".").toString();
-    paramsFile=settings->value("paramsFile",".").toString();
-    networkConfigFile=settings->value("networkConfigFile",".").toString();
+
+    if (settings) {
+        //Settings from NeTVServer.ini
+        docroot = settings->value("path",".").toString();
+        paramsFile = settings->value("paramsFile",".").toString();
+        networkConfigFile = settings->value("networkConfigFile",".").toString();
+    }
 
     //Load non-volatile parameters
     parameters = NULL;
@@ -39,41 +42,39 @@ BridgeController::~BridgeController()
     parameters = NULL;
 }
 
-
-
-/*
- * Convert FCGX_Request to HttpRequest and HttpResponse
- * then pass to (old) service function
- */
-int BridgeController::handle_fastcgi_request(FCGX_Request *request)
+void BridgeController::replyToHttpClient(QHttpResponse *response, int success, const QByteArray & cmdString)
 {
-    HttpRequest httpRequest(request);
-    HttpResponse httpResponse(request);
-
-    //Error while parsing HTTP header
-    if (httpRequest.getStatus()==HttpRequest::abort)
-    {
-        FCGX_FPrintF(request->out, CONTENT_TYPE_PLAIN);
-        QByteArray lastError = httpRequest.getLastError();
-        if (lastError.size() > 0)
-            FCGX_FPrintF(request->out, QByteArray(ERROR_400 + lastError + "\r\n").constData());
-        else
-            FCGX_FPrintF(request->out, ERROR_403);
-        return 0;
-    }
-
-    service(httpRequest, httpResponse);
-    return 0;
+    //Reply to HTTP client
+    if (success)
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>OK</value></data></xml>");
+    else
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>");
 }
 
-
-void BridgeController::service(HttpRequest& request, HttpResponse& response)
+void BridgeController::service(QHttpRequest *request, QHttpResponse *response)
 {
     //Documentation
     //http://wiki.chumby.com/index.php/NeTV_web_services
 
+    const auto & headers = request->headers();
+    const QByteArray & body = request->collectedData();
+
+    QHash<QString, QString> parameters;
+    QUrlQuery query(request->url());
+
+    // Copy over the querystring values
+    QList<QPair<QString, QString>>items = query.queryItems();
+    QPair<QString, QString> pair;
+    foreach (pair, items)
+        parameters[pair.first] = pair.second;
+
+    // Copy over the POST values
+
+    QByteArray authorizedCaller;
+
+    /*
     //Allow Authorized-Caller to be passed through HTTP Header or regular POST parameters, or through XML style passing
-    QByteArray authorizedCaller = request.getHeader(STRING_AUTHORIZED_CALLER).toUpper();
+    QByteArray authorizedCaller = headers[STRING_AUTHORIZED_CALLER].toUpper();
     if (authorizedCaller.length() < 1)
         authorizedCaller = request.getParameter(STRING_AUTHORIZED_CALLER).toUpper();
     request.removeParameter(STRING_AUTHORIZED_CALLER);
@@ -89,17 +90,24 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     //This happens when we POST 'value=something' (and not 'data=<value>something</value>' in XML format)
     if (dataString.length() != 0 && dataXmlString.length() == 0)
         dataXmlString = "<value>" + dataString + "</value>";
+    */
+
+    QByteArray cmdString = parameters[STRING_COMMAND].toUpper().toUtf8();
+    QByteArray dataString = parameters[STRING_DATA].toUpper().toUtf8();
 
     //Some commands requires XML escape. This would be an option.
-    QByteArray xmlEscapeString = request.getParameter(STRING_XML_ESCAPE).toUpper();
-    bool xmlEscape = (xmlEscapeString == "1" || xmlEscapeString == "TRUE" || xmlEscapeString == "YES" || xmlEscapeString == "ON") ? true : false;
-    request.removeParameter(STRING_XML_ESCAPE);
+    QByteArray xmlEscapeString = parameters[STRING_XML_ESCAPE].toUpper().toUtf8();
+    bool xmlEscape = (xmlEscapeString == "1"
+                   || xmlEscapeString == "TRUE"
+                   || xmlEscapeString == "YES"
+                   || xmlEscapeString == "ON") ? true : false;
 
     //-----------------------------------------------------------
 
+    /*
     if (cmdString == "MOTOR")
     {
-        QList<QByteArray> newArgsList = dataString.split(' ');
+        QStringList newArgsList = dataString.split(' ');
         QStringList newArgs;
         newArgs.append("mot_ctl");
         for (int i=0; i<newArgsList.length(); i++)
@@ -128,24 +136,33 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         if (result == 0)        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>OK</value></data></xml>", true);
         else                    response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>invalid arguements</value></data></xml>", true);
     }
-
+    */
     //-----------------------------------------------------------
 
-    else if (cmdString == "GETURL")
+    if (cmdString == "GETURL")
     {
-        QByteArray urlString = request.getParameter("url");
-        QByteArray postString = request.getParameter("post");
+        QString urlString = parameters["url"];
+        QString postString = parameters["post"];
         QStringList argsList;
-        if (urlString.length() > 0)     argsList.append(QString(urlString));
-        if (postString.length() > 0)    argsList.append(QString(postString));
+
+        if (urlString.length() > 0)
+            argsList.append(QString(urlString));
+
+        if (postString.length() > 0)
+            argsList.append(QString(postString));
+
         if (argsList.length() < 1)
         {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>no arguments received</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>")
+                            + BRIDGE_RETURN_STATUS_ERROR
+                            + "</status><cmd>"
+                            + cmdString
+                            + "</cmd><data><value>no arguments received</value></data></xml>");
         }
         else
         {
             QByteArray buffer = this->Execute(docroot + "/scripts/geturl.sh", argsList, xmlEscape);
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>");
             buffer = QByteArray();
         }
     }
@@ -153,7 +170,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "GETJPG" || cmdString == "GETJPEG")
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/tmp_download.sh", QStringList(dataString), xmlEscape);
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>");
     }
 
     //-----------
@@ -170,12 +187,12 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         //Execute the script
         if (argList.size() <= 0)
         {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>Invalid arguments</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>Invalid arguments</value></data></xml>");
         }
         else
         {
             QByteArray buffer = this->Execute(docroot + "/scripts/chromakey.sh", argList, xmlEscape);
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>");
             buffer = QByteArray();
         }
     }
@@ -186,7 +203,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             dataString = "start-chumby";
         QByteArray buffer = this->Execute("/etc/init.d/sshd", QStringList(QString(dataString)), xmlEscape);
 
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>");
         buffer = QByteArray();
     }
 
@@ -195,8 +212,10 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         QByteArray current_docroot = SetStaticDocroot(dataString).toLatin1();
         if (xmlEscape)
             current_docroot = XMLEscape(current_docroot);
-        if (current_docroot.length() < 1)       response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>path not found</value></data></xml>", true);
-        else                                    response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + current_docroot.trimmed() + "</value></data></xml>", true);
+        if (current_docroot.length() < 1)
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>path not found</value></data></xml>");
+        else
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + current_docroot.trimmed() + "</value></data></xml>");
     }
 
     else if (cmdString == "GETDOCROOT")
@@ -204,7 +223,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         QByteArray current_docroot = GetStaticDocroot().toLatin1();
         if (xmlEscape)
             current_docroot = XMLEscape(current_docroot);
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + current_docroot.trimmed() + "</value></data></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + current_docroot.trimmed() + "</value></data></xml>");
     }
 
     //-----------
@@ -212,22 +231,18 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "REMOTECONTROL" || cmdString == "REMOTE" || cmdString == "KEY" || cmdString == "KEYBOARD")
     {
         //Forward to all TCP clients
-        int numClient = Static::tcpSocketServer->broadcast(rawXmlString, "all");
+        //int numClient = Static::tcpSocketServer->broadcast(rawXmlString, "all");
 
-        //Reply to HTTP client
-        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + STRING_COMMAND_FORWARDED_CLIENT + "</value></data></xml>", true);
-        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + STRING_NO_CLIENT_RUNNING + "</value></data></xml>", true);
+        replyToHttpClient(response, 1, cmdString);
     }
 
     else if (cmdString == "SETURL" || cmdString == "MULTITAB" || cmdString == "TAB" || cmdString == "KEEPALIVE" || cmdString == "JAVASCRIPT" || cmdString == "JS"
              || cmdString == "UPDATEREADY" || cmdString == "UPDATEDONE" || cmdString == "UPGRADEDONE")
     {
         //Forward to NeTVBrowser
-        int numClient = Static::tcpSocketServer->broadcast(rawXmlString, "netvbrowser");
+        //int numClient = Static::tcpSocketServer->broadcast(rawXmlString, "netvbrowser");
 
-        //Reply to HTTP client
-        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + STRING_COMMAND_FORWARDED_BROWSER + "</value></data></xml>", true);
-        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + STRING_NO_BROWSER_RUNNING + "</value></data></xml>", true);
+        replyToHttpClient(response, 1, cmdString);
     }
 
     //-----------
@@ -235,20 +250,18 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "ANDROID" || cmdString == "IOS")
     {
         //Allow user to use both normal POST style API as well as XML style passing
-        QByteArray eventName = request.getParameter("eventname").trimmed();
-        QByteArray eventData = request.getParameter("eventdata").trimmed();
+        QByteArray eventName = parameters["eventname"].trimmed().toUtf8();
+        QByteArray eventData = parameters["eventdata"].trimmed().toUtf8();
         if (eventName.length() <= 0 || eventData.length() <= 0) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>invalid arguements</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>invalid arguements</value></data></xml>");
             return;
         }
 
         //Convert to a JavaScript command & forward to NeTVBrowser
         QByteArray javaScriptString = "fAndroidEvents(\"" + eventName + "\",\"" + eventData + "\");";
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>JavaScript</cmd><value>") + javaScriptString + "</value></xml>", "netvbrowser");
+        //int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>JavaScript</cmd><value>") + javaScriptString + "</value></xml>", "netvbrowser");
 
-        //Reply to HTTP client
-        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + dataString + "</value></data></xml>", true);
-        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>no client running</value></data></xml>", true);
+        replyToHttpClient(response, 1, cmdString);
     }
 
     //-----------
@@ -256,14 +269,14 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     else if (cmdString == "CONTROLPANEL")
     {
         if (!IsAuthorizedCaller(authorizedCaller)) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>");
             return;
         }
 
         //This is simply passed directly to NeTVBrowser
         QByteArray buffer = this->Execute(docroot + "/scripts/control_panel.sh", QStringList(dataString), xmlEscape);
 
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>");
         buffer = QByteArray();
     }
 
@@ -271,19 +284,17 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     {
         //All these variables should be URI encoded (%) before passing to JavaScript
         QByteArray title, message, image, type, level;
-        title = request.getParameter("title").toPercentEncoding();
-        message = request.getParameter("message").toPercentEncoding();
-        image = request.getParameter("image").toPercentEncoding();
-        type = request.getParameter("type").toPercentEncoding();
-        level = request.getParameter("level").toPercentEncoding();
+        title = parameters["title"].toUtf8().toPercentEncoding();
+        message = parameters["message"].toUtf8().toPercentEncoding();
+        image = parameters["image"].toUtf8().toPercentEncoding();
+        type = parameters["type"].toUtf8().toPercentEncoding();
+        level = parameters["level"].toUtf8().toPercentEncoding();
 
         //Convert to a JavaScript command & forward to NeTVBrowser
         QByteArray javaScriptString = "fTickerEvents(\"" + message + "\",\"" + title + "\",\"" + image + "\",\"" + type + "\",\"" + level + "\");";
-        int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>JavaScript</cmd><value>") + javaScriptString + "</value></xml>", "netvbrowser");
+        //int numClient = Static::tcpSocketServer->broadcast(QByteArray("<xml><cmd>JavaScript</cmd><value>") + javaScriptString + "</value></xml>", "netvbrowser");
 
-        //Reply to HTTP client
-        if (numClient > 0)          response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>OK</value></data></xml>", true);
-        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>No browser running</value></data></xml>", true);
+        replyToHttpClient(response, 1, cmdString);
     }
 
     //-----------
@@ -293,33 +304,31 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         // <time> is time formatted in GMT time as "yyyy.mm.dd-hh:mm:ss"
         // <timezone> is standard timezone ID string formated as "Asia/Singapore"
         // see http://developer.android.com/reference/java/util/TimeZone.html#getID()
-        QString time = request.getParameter("time");
-        QString timezone = request.getParameter("timezone");
+        QString time = parameters["time"];
+        QString timezone = parameters["timezone"];
 
         QStringList argsList;
         argsList.append(time);
         argsList.append(timezone);
         QByteArray buffer = this->Execute(docroot + "/scripts/set_time.sh", argsList, xmlEscape);
 
-        //Reply to HTTP client
-        if (time == "")    response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>time parameter is required</value></data></xml>", true);
-        else               response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+        replyToHttpClient(response, 1, cmdString);
     }
 
     else if (cmdString == "SETNETWORK")
     {
         QHash<QString,QString> temp_params;
-        temp_params.insert("allocation", request.getParameter("wifi_allocation"));
-        temp_params.insert("ssid", request.getParameter("wifi_ssid"));
-        temp_params.insert("auth", request.getParameter("wifi_authentication"));
-        temp_params.insert("encryption", request.getParameter("wifi_encryption"));
-        temp_params.insert("key", request.getParameter("wifi_password"));
-        temp_params.insert("encoding", request.getParameter("wifi_encoding"));
-        temp_params.insert("type", request.getParameter("type"));
-        temp_params.insert("test", request.getParameter("test"));
+        temp_params.insert("allocation", parameters["wifi_allocation"]);
+        temp_params.insert("ssid", parameters["wifi_ssid"]);
+        temp_params.insert("auth", parameters["wifi_authentication"]);
+        temp_params.insert("encryption", parameters["wifi_encryption"]);
+        temp_params.insert("key", parameters["wifi_password"]);
+        temp_params.insert("encoding", parameters["wifi_encoding"]);
+        temp_params.insert("type", parameters["type"]);
+        temp_params.insert("test", parameters["test"]);
 
         //Write configuration to /psp/network_config or /psp/network_config_test
-        bool isTest = request.getParameter("test").length() > 1;
+        bool isTest = parameters["test"].length() > 1;
         bool fileOK = SetNetworkConfig(temp_params);
         temp_params.clear();
 
@@ -330,8 +339,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         if (xmlEscape)              buffer = XMLEscape(buffer);
 
         //Reply to HTTP client
-        if (!fileOK)                response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
-        else                        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+        replyToHttpClient(response, fileOK, cmdString);
 
         //Allow time for HTTP response to complete before we bring down the network
         if (!isTest)
@@ -342,22 +350,22 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "STOPAP")
     {
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd></xml>");
         StopAPwithDelay();
     }
     else if (cmdString == "STARTAP")
     {
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd></xml>");
         StartAPwithDelay();
     }
     else if (cmdString == "STARTAPFACTORY")
     {
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd></xml>");
         StartAPFactorywithDelay();
     }
     else if (cmdString == "RESTART" || cmdString == "REBOOT")
     {
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd></xml>");
         RebootwithDelay();
     }
 
@@ -365,7 +373,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else if (cmdString == "GETALLPARAMS")
     {
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data>" +  GetAllParameters() + "</data></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data>" +  GetAllParameters() + "</data></xml>");
     }
 
     else if (cmdString == "GETPARAM")
@@ -373,7 +381,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         QByteArray value = GetParameter(dataString);
         if (xmlEscape)
             value = XMLEscape(value);
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + value + "</value></data></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + value + "</value></data></xml>");
     }
 
     else if (cmdString == "GETPARAMS")
@@ -389,13 +397,15 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             buffer += "<" + key + ">" + value + "</" + key + ">";
         }
         if (params.size() < 1)
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>no parameters received</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>no parameters received</value></data></xml>");
         else
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data>" + buffer + "</data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data>" + buffer + "</data></xml>");
     }
 
     else if (cmdString == "SETPARAM")
     {
+        replyToHttpClient(response, 0, cmdString);
+#if 0
         if (request.getParameterMap().count() > 0)
         {
             QMapIterator<QByteArray, QByteArray> i(request.getParameterMap());
@@ -411,6 +421,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         {
             response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>no parameters received</value></data></xml>", true);
         }
+#endif
     }
 
     //-----------
@@ -421,94 +432,96 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         if (xmlEscape)
             filedata = XMLEscape(filedata);
 
-        if (filedata == "file not found" || filedata == "no permission")
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>" + filedata + "</value></data></xml>", true);
-        else
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + filedata + "</value></data></xml>", true);
+        replyToHttpClient(response, (filedata != "file not found" && filedata != "no permission"), cmdString);
     }
 
+    /*
     else if (cmdString == "SETFILECONTENTS")
     {
         //<path>full path to a file</path><content>........</content>
         QByteArray path = dataXmlString.mid(6, dataXmlString.indexOf("</path>") - 6);
         QByteArray content = dataXmlString.mid(dataXmlString.indexOf("<content>") + 9, dataXmlString.length()-dataXmlString.indexOf("<content>")-9);
         if (!SetFileContents(path,content))
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>0</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>0</value></data></xml>");
         else
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + QByteArray().setNum(GetFileSize(path)) + "</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + QByteArray().setNum(GetFileSize(path)) + "</value></data></xml>");
     }
+    */
 
     else if (cmdString == "FILEEXISTS")
     {
         QByteArray existStr = "false";
         if (FileExists(dataString))
             existStr = "true";
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + existStr + "</value></data></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + existStr + "</value></data></xml>");
     }
 
     else if (cmdString == "GETFILESIZE")
     {
         QByteArray sizeStr = QByteArray().setNum(GetFileSize(dataString));
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + sizeStr + "</value></data></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + sizeStr + "</value></data></xml>");
     }
 
     else if (cmdString == "UNLINKFILE")
     {
         if (!IsAuthorizedCaller(authorizedCaller)) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>");
             return;
         }
 
         bool success = UnlinkFile(dataString);
         if (!success)
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>false</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><value>false</value></data></xml>");
         else
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>true</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>true</value></data></xml>");
     }
 
     else if (cmdString == "MD5FILE")
     {
         if (!FileExists(dataString)) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>file not found</message><path>" + dataString + "</path></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>file not found</message><path>" + dataString + "</path></data></xml>");
             return;
         }
         QByteArray md5sum = GetFileMD5(dataString);
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><path>" + dataString + "</path><md5sum>" + md5sum + "</md5sum></data></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><path>" + dataString + "</path><md5sum>" + md5sum + "</md5sum></data></xml>");
     }
 
     //-----------
 
+    /*
     else if (cmdString == "DOWNLOADFILE")
     {
         if (!IsAuthorizedCaller(authorizedCaller)) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>");
             return;
         }
 
         DumpStaticFile(dataString, response);
     }
+    */
 
+    /*
     else if (cmdString == "UPLOADFILE" || cmdString == "FILEUPLOAD" || cmdString == "UPLOAD")
     {
         if (!IsAuthorizedCaller(authorizedCaller)) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>");
             return;
         }
 
-        QString pathString = QString(request.getParameter("path"));
+        QString pathString = QString(parameters["path"]);
 
         //Clear existing file (if any)
         bool cleanFile = true;
         if (FileExists(pathString))
             cleanFile = UnlinkFile(pathString);
         if (!cleanFile) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>unable to clean existing file</message><path>" + pathString.toLatin1() + "</path></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>unable to clean existing file</message><path>" + pathString.toLatin1() + "</path></data></xml>");
             return;
         }
 
         QTemporaryFile* file = request.getUploadedFile("filedata");
         if (!file) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>uploaded file data not found</message><path>" + pathString.toLatin1() + "</path></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>uploaded file data not found</message><path>" + pathString.toLatin1() + "</path></data></xml>");
             return;
         }
 
@@ -516,25 +529,26 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
         bool success = file->copy( pathString );
 
         if (!success) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>error writing to disk (read-only partition?)</message><path>" + pathString.toLatin1() + "</path></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>error writing to disk (read-only partition?)</message><path>" + pathString.toLatin1() + "</path></data></xml>");
             return;
         }
 
         quint64 filesize = GetFileSize(pathString);
         if (filesize <= 0) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>invalid filesize</message><path>" + pathString.toLatin1() + "</path></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data><message>invalid filesize</message><path>" + pathString.toLatin1() + "</path></data></xml>");
             return;
         }
         QByteArray sizeStr = QByteArray().setNum(filesize);
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><path>" + pathString.toLatin1() + "</path><filesize>" + sizeStr + "</filesize></data></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><path>" + pathString.toLatin1() + "</path><filesize>" + sizeStr + "</filesize></data></xml>");
     }
+    */
 
     //-----------
 
     else if (cmdString == "NECOMMAND")
     {
         if (!IsAuthorizedCaller(authorizedCaller)) {
-            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>", true);
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNAUTHORIZED + "</status><cmd>" + cmdString + "</cmd><data><value>Unauthorized</value></data></xml>");
             return;
         }
 
@@ -547,7 +561,7 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
             newArgs << newArgsList.at(i);
         QByteArray buffer = this->Execute(command, newArgs, xmlEscape);
 
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>");
         buffer = QByteArray();
     }
 
@@ -556,8 +570,10 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
     {
         QByteArray buffer = this->Execute(docroot + "/scripts/" + cmdString.toLower() + ".sh", QStringList(dataString), xmlEscape);
 
-        if (buffer.length() > 1)        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data>" + buffer.trimmed() + "</data></xml>", true);
-        else                            response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data>" + buffer.trimmed() + "</data></xml>", true);
+        if (buffer.length() > 1)
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data>" + buffer.trimmed() + "</data></xml>");
+        else
+            response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_ERROR + "</status><cmd>" + cmdString + "</cmd><data>" + buffer.trimmed() + "</data></xml>");
         buffer = QByteArray();
     }
 
@@ -565,11 +581,11 @@ void BridgeController::service(HttpRequest& request, HttpResponse& response)
 
     else
     {
-        response.write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNIMPLEMENTED + "</status><cmd>" + cmdString + "</cmd><data><value>Check for valid 'cmd' variable</value></data></xml>", true);
+        response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_UNIMPLEMENTED + "</status><cmd>" + cmdString + "</cmd><data><value>Check for valid 'cmd' variable</value></data></xml>");
     }
 }
 
-
+#if 0
 void BridgeController::service(SocketRequest& request, SocketResponse& response)
 {
     //Extract the command name & most commonly used 'value' parameter (if any)
@@ -1096,7 +1112,7 @@ void BridgeController::service(SocketRequest& request, SocketResponse& response)
         response.write();
     }
 }
-
+#endif
 
 //-----------------------------------------------------------------------------------------------------------
 // Interaction with StaticFileController
@@ -1223,20 +1239,357 @@ bool BridgeController::SetNetworkConfig(QHash<QString, QString> parameters)
 
 void BridgeController::StartAPwithDelay(int msec /* = 500 */)
 {
-    slot_StartAP();
+    //slot_StartAP();
 }
 
 void BridgeController::StartAPFactorywithDelay(int msec /* = 500 */)
 {
-    slot_StartAP_Factory();
+    //slot_StartAP_Factory();
 }
 
 void BridgeController::StopAPwithDelay(int msec /* = 500 */)
 {
-    slot_StopAP();
+    //slot_StopAP();
 }
 
 void BridgeController::RebootwithDelay(int msec /* = 500 */)
 {
-    slot_Reboot();
+    //slot_Reboot();
 }
+
+
+//----------------------------------------------------------------------------------------------------
+// Non-volatile parameters
+//----------------------------------------------------------------------------------------------------
+
+QByteArray BridgeController::GetParameter(QString name)
+{
+    //Refresh param
+    LoadParameters();
+
+    return parameters->value(name, "").toByteArray();
+}
+
+QByteArray BridgeController::GetAllParameters()
+{
+    //Refresh param
+    LoadParameters();
+
+    QByteArray paramsString = "";
+    QStringList allkeys = parameters->allKeys();
+    for (int i = 0; i < allkeys.size(); ++i)
+    {
+        QByteArray name = allkeys.at(i).toLatin1();
+        QByteArray value = GetParameter(name);
+        paramsString.append("<" + name + ">" + value + "</" + name + ">");
+    }
+    return paramsString;
+}
+
+void BridgeController::SetParameter(QString name, QString value)
+{
+    parameters->setValue(name, value);
+    SaveParameters();
+    LoadParameters();
+}
+
+void BridgeController::LoadParameters(QString * filename /* = NULL */)
+{
+    if (parameters != NULL)        parameters->sync();
+    else if (filename == NULL)     parameters = new QSettings(paramsFile, QSettings::IniFormat);
+    else                           parameters = new QSettings(*filename, QSettings::IniFormat);
+}
+
+void BridgeController::SaveParameters(QString * filename /* = NULL */)
+{
+    if (parameters != NULL)        parameters->sync();
+    else if (filename == NULL)     parameters = new QSettings(paramsFile, QSettings::IniFormat);
+    else                           parameters = new QSettings(*filename, QSettings::IniFormat);
+}
+
+
+//-----------------------------------------------------------------------------------------------------------
+// Process Utilities
+//-----------------------------------------------------------------------------------------------------------
+
+QByteArray BridgeController::Execute(const QString &fullPath, bool xmlEscape /* = false */)
+{
+    return this->Execute(fullPath, QStringList(), xmlEscape);
+}
+
+QByteArray BridgeController::Execute(const QString &fullPath, QStringList args, bool xmlEscape /* = false */)
+{
+    if (!SetFileExecutable(fullPath))
+        return QByteArray("no permission to execute");
+
+    QProcess *newProc = new QProcess();
+    newProc->start(fullPath, args);
+    newProc->waitForFinished();
+
+    // Print the output to HTML response & Clean up
+    QByteArray buffer = newProc->readAllStandardOutput();
+    newProc->close();
+    delete newProc;
+    newProc = NULL;
+
+    if (xmlEscape)
+        return XMLEscape(buffer);
+    return buffer;
+}
+
+
+//-----------------------------------------------------------------------------------------------------------
+// File Utilities
+//-----------------------------------------------------------------------------------------------------------
+
+void BridgeController::Sync(void)
+{
+    this->Execute("/bin/sync");
+}
+
+bool BridgeController::DirExists(const QString &fullPath)
+{
+    QDir dir(fullPath);
+    return dir.exists(fullPath);
+}
+
+bool BridgeController::FileExists(const QString &fullPath)
+{
+    QFile file(fullPath);
+    return file.exists();
+}
+
+bool BridgeController::FileExecutable(const QString &fullPath)
+{
+    QFile file(fullPath);
+    if (!file.exists())
+        return false;
+    return ((file.permissions() & QFile::ExeOwner) || (file.permissions() & QFile::ExeOther) || (file.permissions() & QFile::ExeUser));
+}
+
+qint64 BridgeController::GetFileSize(const QString &fullPath)
+{
+    QFile file(fullPath);
+    if (!file.exists())
+        return -1;
+    return file.size();
+}
+
+QByteArray BridgeController::GetFileContents(const QString &fullPath)
+{
+    QFile file(fullPath);
+    if (!file.exists())                         //doesn't exist
+        return "file not found";
+    if (!file.open(QIODevice::ReadOnly))        //permission error?
+        return "no permission";
+    QByteArray buffer = file.readAll();
+    file.close();
+    return buffer;
+}
+
+bool BridgeController::SetFileContents(const QString &fullPath, QByteArray data)
+{
+    QFile file(fullPath);
+    if (!file.open(QIODevice::WriteOnly))       //permission error?
+        return false;
+    qint64 actual = file.write(data, data.length());
+    if (actual != data.length()) {
+        file.close();
+        return false;
+    }
+    file.close();
+
+    //Make sure the file is written to disk
+    Sync();
+    return true;
+}
+
+bool BridgeController::SetFileExecutable(const QString &fullPath)
+{
+    QFile file(fullPath);
+    if (!file.exists())                         //doesn't exist
+        return false;
+    if (FileExecutable(fullPath))
+        return true;
+    //return true;
+    return file.setPermissions(file.permissions() | QFile::ExeUser | QFile::ExeOther | QFile::ExeOwner);
+}
+
+bool BridgeController::UnlinkFile(const QString &fullPath)
+{
+    QFile file(fullPath);
+    if (!file.exists())                         //doesn't exist
+        return true;
+    return file.remove();
+}
+
+QByteArray BridgeController::GetFileMD5(const QString &fullPath)
+{
+    QByteArray output = Execute(QString("/usr/bin/md5sum"), QStringList(fullPath));
+    return output.split(' ')[0];
+}
+
+
+//-----------------------------------------------------------------------------------------------------------
+// Mount/Unmount utility
+//-----------------------------------------------------------------------------------------------------------
+
+bool BridgeController::MountRW()
+{
+    Execute("/bin/mount", QStringList() << "-o" << "remount,rw" << "/");
+    return true;
+}
+
+bool BridgeController::MountRO()
+{
+    QByteArray output = Execute("/bin/mount", QStringList() << "-o" << "remount,ro" << "/");
+    if (output.contains("error"))
+        return false;
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------------------------------------
+// Other Utilities
+//-----------------------------------------------------------------------------------------------------------
+
+bool BridgeController::IsHexString(QString testString)
+{
+    static QString hexCharacters = "0123456789ABCDEF";
+    bool isHex = true;
+    for (int i=0; i<testString.length(); i++)
+    {
+        if ( hexCharacters.contains(testString.at(i), Qt::CaseInsensitive) )
+            continue;
+        isHex = false;
+        break;
+    }
+    return isHex;
+}
+
+QString BridgeController::XMLEscape(QString inputString)
+{
+    return inputString.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");     //.replace("'", "&apos;");
+}
+
+QString BridgeController::XMLUnescape(QString inputString)
+{
+    return inputString.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&apos;", "'");
+}
+
+QByteArray BridgeController::XMLEscape(QByteArray inputString)
+{
+    return inputString.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");     //.replace("'", "&apos;");
+}
+
+QByteArray BridgeController::XMLUnescape(QByteArray inputString)
+{
+    return inputString.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&apos;", "'");
+}
+
+
+//----------------------------------------------------------------------------------------------------
+// Copied from StaticFileController
+//-----------------------------------------------------------------------------------------------------
+
+/*
+void BridgeController::DumpStaticFile(QByteArray path, HttpResponse& response)
+{
+    // If the filename is a directory, append index.html.
+    if (QFileInfo(path).isDir())
+        path+="/index.html";
+
+    // IF file not exists
+    QFile file(path);
+    if (!file.exists())
+    {
+        response.setStatus(404,"not found");
+        response.write("404 not found",true);
+        return;
+    }
+
+    // Error opening the file
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        response.setStatus(403,"forbidden");
+        response.write("403 forbidden",true);
+        return;
+    }
+
+    SetContentType(path,response);
+
+    // Return the file content
+    while (!file.atEnd() && !file.error())
+        response.write(file.read(65536));
+    file.close();
+}
+    */
+
+// Static function
+/*
+void BridgeController::SetContentType(QString fileName, HttpResponse& response)
+{
+    if (fileName.endsWith(".png")) {
+        response.setHeader("Content-Type", "image/png");
+    }
+    else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".jpe")) {
+        response.setHeader("Content-Type", "image/jpeg");
+    }
+    else if (fileName.endsWith(".gif")) {
+        response.setHeader("Content-Type", "image/gif");
+    }
+    else if (fileName.endsWith(".bmp")) {
+        response.setHeader("Content-Type", "image/bmp");
+    }
+    else if (fileName.endsWith(".ico")) {
+        response.setHeader("Content-Type", "image/x-icon");
+    }
+
+    else if (fileName.endsWith(".wav")) {
+        response.setHeader("Content-Type", "audio/x-wav");
+    }
+    else if (fileName.endsWith(".mid") || fileName.endsWith(".rmi")) {
+        response.setHeader("Content-Type", "audio/mid");
+    }
+    else if (fileName.endsWith(".mp3")) {
+        response.setHeader("Content-Type", "audio/mpeg");
+    }
+    else if (fileName.endsWith(".avi")) {
+        response.setHeader("Content-Type", "video/x-msvideo");
+    }
+
+    else if (fileName.endsWith(".txt")) {
+        response.setHeader("Content-Type", "text/plain; charset=UTF-8");
+    }
+    else if (fileName.endsWith(".html") || fileName.endsWith(".htm")) {
+        response.setHeader("Content-Type", "text/html; charset=UTF-8");
+    }
+    else if (fileName.endsWith(".css")) {
+        response.setHeader("Content-Type", "text/css");
+    }
+
+    else if (fileName.endsWith(".js")) {
+        response.setHeader("Content-Type", "application/x-javascript; charset=UTF-8");
+    }
+    else if (fileName.endsWith(".xml")) {
+        response.setHeader("Content-Type", "application/xml");
+    }
+    else if (fileName.endsWith(".gz")) {
+        response.setHeader("Content-Type", "application/x-gzip");
+    }
+    else if (fileName.endsWith(".tar")) {
+        response.setHeader("Content-Type", "application/x-tar");
+    }
+    else if (fileName.endsWith(".tgz")) {
+        response.setHeader("Content-Type", "application/x-compressed");
+    }
+    else if (fileName.endsWith(".zip")) {
+        response.setHeader("Content-Type", "application/zip");
+    }
+
+    else
+    {
+        response.setHeader("Content-Type", "text/plain; charset=UTF-8");
+    }
+}
+*/
