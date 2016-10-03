@@ -2,6 +2,10 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
+#include <QNetworkReply>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+
 #include "netvhandlers.h"
 #include "netvserverapplication.h"
 #include "nhttprequest.h"
@@ -10,13 +14,36 @@
 #include "qhttpclient.hpp"
 #include "qhttpclientresponse.hpp"
 
+class GetUrlFinisher : public QObject {
+    Q_OBJECT
+
+public:
+    GetUrlFinisher(NHttpResponse *response, QObject *parent) : QObject(parent) {
+        this->response = response;
+    }
+
+private:
+    NHttpResponse *response;
+
+public slots:
+    void responseFinished(QNetworkReply *reply) {
+        response->end(reply->readAll());
+        reply->deleteLater();
+    }
+
+    void responseFailed(QNetworkReply *reply) {
+        response->end(reply->readAll());
+        reply->deleteLater();
+    }
+};
+
+#include "netvhandlers.moc"
+
 BEGIN_NETV_HANDLER(handleDefault, cmd, app, request, response)
 {
     response->standardResponse(cmd, NETV_STATUS_UNIMPLEMENTED, "Unhandled command received");
 }
 END_NETV_HANDLER()
-
-#include <QDebug>
 
 BEGIN_NETV_HANDLER(handleGetUrl, cmd, app, request, response)
 {
@@ -43,12 +70,31 @@ BEGIN_NETV_HANDLER(handleGetUrl, cmd, app, request, response)
         return 0;
     }
 
-    if (url.port() == -1)
-        url.setPort(80);
+    if ((url.scheme() != "http") && (url.scheme() != "https")) {
+        response->standardResponse(cmd, NETV_STATUS_ERROR, QString("Only http and https are supported"));
+        return 0;
+    }
 
-    qhttp::client::QHttpClient *client = new qhttp::client::QHttpClient(response);
+    if (url.port() == -1) {
+        if (url.scheme() == "https")
+            url.setPort(443);
+        else
+            url.setPort(80);
+    }
 
     qDebug() << "Getting URL:" << url << "Path:" << url.path() << "Host:" << url.host() << " Port:" << url.port() << " Scheme:" << url.scheme();
+
+    QNetworkAccessManager *accessManager = new QNetworkAccessManager(response);
+    GetUrlFinisher *urlFinisher = new GetUrlFinisher(response, response);
+    QNetworkRequest request(url);
+
+    QObject::connect(accessManager, SIGNAL(finished(QNetworkReply*)),
+                     urlFinisher, SLOT(responseFinished(QNetworkReply*)));
+    accessManager->get(request);
+
+#if 0
+    qhttp::client::QHttpClient *client = new qhttp::client::QHttpClient(response);
+
 
     client->setConnectingTimeOut(1000, [cmd, response]() {
         qDebug() << "Timed out";
@@ -67,7 +113,7 @@ BEGIN_NETV_HANDLER(handleGetUrl, cmd, app, request, response)
             response->end(res->collectedData().constData());
         });
     });
-
+#endif
     qDebug() << "URL request" << url << "is in-flight";
 
     // Return 1, to indicate to the caller that response->end() shouldn't be called.
