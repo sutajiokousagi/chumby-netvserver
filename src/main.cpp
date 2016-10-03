@@ -61,7 +61,6 @@ static int loadConfiguration(void)
     return 0;
 }
 
-
 int main(int argc, char ** argv) {
     NeTVServerApplication app(argc, argv);
 #if defined(Q_OS_UNIX)
