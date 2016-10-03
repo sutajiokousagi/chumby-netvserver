@@ -14,6 +14,7 @@ class NHttpRequest : public QObject
     Q_OBJECT
 public:
     explicit NHttpRequest(const qhttp::server::QHttpRequest * request, QObject *parent = 0);
+    ~NHttpRequest();
     const QString parameter(const QString & key) const;
     const QUrl url(void) const;
     const QUrlQuery urlQuery(void) const;

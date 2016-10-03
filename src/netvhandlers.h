@@ -11,4 +11,7 @@ DECLARE_NETV_HANDLER(handleEnableSsh);
 DECLARE_NETV_HANDLER(handleInitialHello);
 DECLARE_NETV_HANDLER(handleGetParam);
 
+DECLARE_NETV_HANDLER(handleGetLocalWidgets);
+DECLARE_NETV_HANDLER(handleGetLocalWidgetConfig);
+
 #endif // NETVHANDLERS_H

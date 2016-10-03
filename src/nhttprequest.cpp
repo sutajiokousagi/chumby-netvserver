@@ -26,6 +26,10 @@ NHttpRequest::NHttpRequest(const qhttp::server::QHttpRequest * qRequest, QObject
     }
 }
 
+NHttpRequest::~NHttpRequest() {
+    QHTTP_LINE_LOG
+}
+
 const QUrl NHttpRequest::url(void) const
 {
     return _url;

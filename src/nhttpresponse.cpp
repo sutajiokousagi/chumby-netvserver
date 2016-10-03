@@ -8,6 +8,10 @@ NHttpResponse::NHttpResponse(qhttp::server::QHttpResponse *response, QObject *pa
     response->addHeader("Access-Control-Allow-Origin", "*");
 }
 
+NHttpResponse::~NHttpResponse() {
+    QHTTP_LINE_LOG
+}
+
 void NHttpResponse::setStatusCode(qhttp::TStatusCode code)
 {
     response->setStatusCode(code);

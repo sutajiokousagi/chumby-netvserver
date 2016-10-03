@@ -9,6 +9,7 @@ class NHttpResponse : public QObject
     Q_OBJECT
 public:
     NHttpResponse(qhttp::server::QHttpResponse *response, QObject *parent = 0);
+    ~NHttpResponse();
 
     /** set the response HTTP status code. @sa TStatusCode.
       * default value is ESTATUS_BAD_REQUEST.

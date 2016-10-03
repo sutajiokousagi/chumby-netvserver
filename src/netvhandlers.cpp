@@ -1,49 +1,91 @@
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonDocument>
+
 #include "netvhandlers.h"
 #include "netvserverapplication.h"
 #include "nhttprequest.h"
 #include "nhttpresponse.h"
 
+#include "qhttpclient.hpp"
+#include "qhttpclientresponse.hpp"
+
 BEGIN_NETV_HANDLER(handleDefault, cmd, app, request, response)
 {
-    response.standardResponse(cmd, NETV_STATUS_UNIMPLEMENTED, "Unhandled command received");
+    response->standardResponse(cmd, NETV_STATUS_UNIMPLEMENTED, "Unhandled command received");
 }
 END_NETV_HANDLER()
 
+#include <QDebug>
+
 BEGIN_NETV_HANDLER(handleGetUrl, cmd, app, request, response)
 {
-    Q_UNUSED(app);
-    QString urlString = request.parameter("url");
-    QString postString = request.parameter("post");
-    QStringList argsList;
+    QString postData = request->parameter("post");
+    QString urlString = request->parameter("url");
 
-    if (urlString.length() > 0)
-        argsList.append(QString(urlString));
-
-    if (postString.length() > 0)
-        argsList.append(QString(postString));
-
-    if (argsList.length() < 1) {
-        response.standardResponse(cmd, NETV_STATUS_ERROR, "no arguments received");
+    if (urlString.isEmpty()) {
+        response->standardResponse(cmd, NETV_STATUS_ERROR, QString("No \"url\" specified"));
+        return 0;
     }
-    else {
-        //QByteArray buffer = this->Execute(docroot + "/scripts/geturl.sh", argsList, xmlEscape);
-        response.standardResponse(cmd, NETV_STATUS_SUCCESS, "script execution disabled");
+
+    if (urlString.indexOf("://") < 0)
+        urlString.prepend("http://");
+
+    QUrl url(urlString);
+
+    if (!url.isValid()) {
+        response->standardResponse(cmd, NETV_STATUS_ERROR, QString("Invalid URL: %1").arg(url.errorString()));
+        return 0;
     }
-    return 0;
+
+    if (url.host().isEmpty()) {
+        response->standardResponse(cmd, NETV_STATUS_ERROR, QString("No host specified"));
+        return 0;
+    }
+
+    if (url.port() == -1)
+        url.setPort(80);
+
+    qhttp::client::QHttpClient *client = new qhttp::client::QHttpClient(response);
+
+    qDebug() << "Getting URL:" << url << "Path:" << url.path() << "Host:" << url.host() << " Port:" << url.port() << " Scheme:" << url.scheme();
+
+    client->setConnectingTimeOut(1000, [cmd, response]() {
+        qDebug() << "Timed out";
+        response->standardResponse(cmd, NETV_STATUS_ERROR, QString("Connection timed out"));
+        response->end();
+    });
+    client->setTimeOut(1000);
+
+    client->request(qhttp::EHTTP_GET, url, [response](qhttp::client::QHttpResponse* res) {
+        qDebug() << "URL responded.  Collecting data...";
+        // response handler, called when the HTTP headers of the response are ready
+        res->collectData();
+        // called when all data in HTTP response have been read.
+        res->onEnd([res, response]() {
+            qDebug() << "Response received (" << res->collectedData().size() << ") bytes";
+            response->end(res->collectedData().constData());
+        });
+    });
+
+    qDebug() << "URL request" << url << "is in-flight";
+
+    // Return 1, to indicate to the caller that response->end() shouldn't be called.
+    return 1;
 }
 END_NETV_HANDLER()
 
 BEGIN_NETV_HANDLER(handleGetJpeg, cmd, app, request, response)
 {
     //QByteArray buffer = this->Execute(docroot + "/scripts/tmp_download.sh", QStringList(dataString), xmlEscape);
-    response.standardResponse(cmd, NETV_STATUS_SUCCESS, "get jpeg unimplemented");
+    response->standardResponse(cmd, NETV_STATUS_SUCCESS, "get jpeg unimplemented");
 }
 END_NETV_HANDLER()
 
 BEGIN_NETV_HANDLER(handleChromaKey, cmd, app, request, response)
 {
     //Contruct arguments
-    QVariant dataString(request.parameter("value"));
+    QVariant dataString(request->parameter("value"));
     QStringList argList;
 
     if (dataString == "on" || dataString == "true" || dataString == "yes")
@@ -54,13 +96,13 @@ BEGIN_NETV_HANDLER(handleChromaKey, cmd, app, request, response)
     //Execute the script
     if (argList.size() <= 0)
     {
-        response.standardResponse(cmd, NETV_STATUS_ERROR, "Invalid arguments");
+        response->standardResponse(cmd, NETV_STATUS_ERROR, "Invalid arguments");
     }
     else
     {
         //QByteArray buffer = this->Execute(docroot + "/scripts/chromakey.sh", argList, xmlEscape);
         QByteArray buffer;
-        response.standardResponse(cmd, NETV_STATUS_SUCCESS, buffer.trimmed());
+        response->standardResponse(cmd, NETV_STATUS_SUCCESS, buffer.trimmed());
     }
     return 0;
 }
@@ -77,13 +119,13 @@ BEGIN_NETV_HANDLER(handleEnableSsh, cmd, app, request, response)
     response->write(QByteArray("<xml><status>") + BRIDGE_RETURN_STATUS_SUCCESS + "</status><cmd>" + cmdString + "</cmd><data><value>" + buffer.trimmed() + "</value></data></xml>");
     buffer = QByteArray();
     */
-    response.standardResponse(cmd, NETV_STATUS_UNIMPLEMENTED, "ssh enable not yet implemented");
+    response->standardResponse(cmd, NETV_STATUS_UNIMPLEMENTED, "ssh enable not yet implemented");
 }
 END_NETV_HANDLER()
 
 BEGIN_NETV_HANDLER(handleSetDocRoot, cmd, app, request, response)
 {
-    QString current_docroot = app.setStaticDocRoot(request.parameter("data")).canonicalPath();
+    QString current_docroot = app->setStaticDocRoot(request->parameter("data")).canonicalPath();
 
     /*
     if (xmlEscape)
@@ -91,15 +133,15 @@ BEGIN_NETV_HANDLER(handleSetDocRoot, cmd, app, request, response)
     */
 
     if (current_docroot.length() < 1)
-        response.standardResponse(cmd, NETV_STATUS_ERROR, "path not found");
+        response->standardResponse(cmd, NETV_STATUS_ERROR, "path not found");
     else
-        response.standardResponse(cmd, NETV_STATUS_SUCCESS, current_docroot.trimmed());
+        response->standardResponse(cmd, NETV_STATUS_SUCCESS, current_docroot.trimmed());
 }
 END_NETV_HANDLER()
 
 BEGIN_NETV_HANDLER(handleInitialHello, cmd, app, request, response)
 {
-    response.write(QString("<xml>\n"
+    response->write(QString("<xml>\n"
                            "    <status>%1</status>\n"
                            "    <cmd>%2</cmd>\n"
                            "    <data>\n"
@@ -143,7 +185,34 @@ END_NETV_HANDLER()
 
 BEGIN_NETV_HANDLER(handleGetParam, cmd, app, request, response)
 {
-    response.standardResponse(cmd, NETV_STATUS_SUCCESS, app.setting(request.parameter("data")).toString().toHtmlEscaped());
+    response->standardResponse(cmd, NETV_STATUS_SUCCESS, app->setting(request->parameter("data")).toString().toHtmlEscaped());
 }
+END_NETV_HANDLER()
 
+BEGIN_NETV_HANDLER(handleGetLocalWidgets, cmd, app, request, response)
+{
+    QJsonArray widgets;
+
+    foreach (QString filename, app->widgetRoot().entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        QString url = QString("/widgets/%1/").arg(filename);
+        QJsonObject widget
+        {
+            {"top", "100px"},
+            {"left", "50px"},
+            {"width", "300px"},
+            {"height", "200px"},
+            {"name", filename},
+            {"url", url}
+        };
+        widgets.append(widget);
+    }
+    QJsonDocument json(widgets);
+    response->standardResponse(cmd, NETV_STATUS_SUCCESS, json.toJson());
+}
+END_NETV_HANDLER()
+
+BEGIN_NETV_HANDLER(handleGetLocalWidgetConfig, cmd, app, request, response)
+{
+    response->standardResponse(cmd, NETV_STATUS_SUCCESS, "{\"top\": \"100px\", \"left\": \"50px\", \"width\": \"300px\", \"height\": \"200px\"}");
+}
 END_NETV_HANDLER()

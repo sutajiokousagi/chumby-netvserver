@@ -73,6 +73,10 @@ int main(int argc, char ** argv) {
     app.registerBridgeFunction("getjpg", handleGetJpeg);
     app.registerBridgeFunction("initialhello", handleInitialHello);
     app.registerBridgeFunction("getparam", handleGetParam);
+
+    app.registerBridgeFunction("getlocalwidgets", handleGetLocalWidgets);
+    app.registerBridgeFunction("getlocalwidgetconfig", handleGetLocalWidgetConfig);
+
     app.registerBridgeFunction("", handleDefault);
     app.setStaticDocRoot("D:\\Code\\netv-controlpanel");
     app.exec();

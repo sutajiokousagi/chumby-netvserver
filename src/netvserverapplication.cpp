@@ -12,20 +12,21 @@
 #include "nhttprequest.h"
 #include "nhttpresponse.h"
 
-static int defaultCommandHandler(const QString & cmd, NeTVServerApplication & app,
-                                 const NHttpRequest & request, NHttpResponse & response)
+static int defaultCommandHandler(const QString & cmd, NeTVServerApplication * app,
+                                 const NHttpRequest * request, NHttpResponse * response)
 {
     Q_UNUSED(app);
     Q_UNUSED(cmd);
     Q_UNUSED(request);
-    response.standardResponse(cmd, NETV_STATUS_UNIMPLEMENTED, "Check for valid 'cmd' variable");
+    response->standardResponse(cmd, NETV_STATUS_UNIMPLEMENTED, "Check for valid 'cmd' variable");
 
     return 0;
 }
 
+
 namespace {
+
     ///////////////////////////////////////////////////////////////////////////////
-    using namespace qhttp::server;
 
     /** connection class for gathering incoming chunks of data from HTTP client.
      * @warning please note that the incoming request instance is the parent of
@@ -34,7 +35,7 @@ namespace {
     class ClientHandler : public QObject
     {
     public:
-        explicit ClientHandler(NeTVServerApplication * newApp, QHttpRequest* req, QHttpResponse* res)
+        explicit ClientHandler(NeTVServerApplication * newApp, qhttp::server::QHttpRequest* req, qhttp::server::QHttpResponse* res)
             : QObject(req /* as parent*/), app(newApp) {
 
             // automatically collect http body(data)
@@ -44,25 +45,26 @@ namespace {
             req->onEnd([this, req, res]() {
                 res->setStatusCode(qhttp::ESTATUS_OK);
 
-                NHttpRequest request(req, this);
-                NHttpResponse response(res, this);
+                NHttpRequest *request = new NHttpRequest(req, this);
+                NHttpResponse *response = new NHttpResponse(res, this);
 
-                if (request.url().path() == "/bridge") {
-                    const QString cmdString = request.parameter("cmd").toUpper();
+                if (request->url().path() == "/bridge") {
+                    const QString cmdString = request->parameter("cmd").toUpper();
                     qInfo(QString("Bridge: %1").arg(cmdString).toUtf8());
 
                     handleBridgeCallbackType cb = app->callback(cmdString);
 
-                    if (!cb(cmdString, *app, request, response))
+                    if (!cb(cmdString, app, request, response)) {
                         res->end();
+                    }
                     return;
                 }
 
                 // Convert the URL part to a local part, relative to docRoot.
-                QFileInfo targetInfo(QFileInfo(app->staticDocRoot().canonicalPath() + QDir::separator() + request.url().path()).canonicalFilePath());
+                QFileInfo targetInfo(QFileInfo(app->staticDocRoot().canonicalPath() + QDir::separator() + request->url().path()).canonicalFilePath());
                 if (!targetInfo.canonicalFilePath().startsWith(app->staticDocRoot().canonicalPath(), Qt::CaseInsensitive)) {
-                    response.setStatusCode(qhttp::ESTATUS_FORBIDDEN);
-                    response.write(QString("Invalid path: %1").arg(targetInfo.canonicalFilePath()));
+                    response->setStatusCode(qhttp::ESTATUS_FORBIDDEN);
+                    response->write(QString("Invalid path: %1").arg(targetInfo.canonicalFilePath()));
                     res->end();
                     return;
                 }
@@ -72,16 +74,16 @@ namespace {
                 }
 
                 if (!targetInfo.exists()) {
-                    response.setStatusCode(qhttp::ESTATUS_NOT_FOUND);
-                    response.write(QString("File not found"));
+                    response->setStatusCode(qhttp::ESTATUS_NOT_FOUND);
+                    response->write(QString("File not found"));
                     res->end();
                     return;
                 }
 
                 QFile targetFile(targetInfo.canonicalFilePath());
                 if (!targetFile.open(QIODevice::ReadOnly)) {
-                    response.setStatusCode(qhttp::ESTATUS_FORBIDDEN);
-                    response.write(QString("Unable to open file: %1").arg(targetFile.errorString()));
+                    response->setStatusCode(qhttp::ESTATUS_FORBIDDEN);
+                    response->write(QString("Unable to open file: %1").arg(targetFile.errorString()));
                     res->end();
                     return;
                 }
@@ -94,17 +96,13 @@ namespace {
 
                 while (!targetFile.atEnd()) {
                     QByteArray data = targetFile.read(2048);
-                    response.write(data);
+                    response->write(data);
                 }
 
                 targetFile.close();
 
                 res->end();
             });
-        }
-
-        virtual ~ClientHandler() {
-            qInfo("Destroying ClientHandler");
         }
 
     protected:
@@ -124,8 +122,6 @@ NeTVServerApplication::NeTVServerApplication(int & argc, char **argv)
     QString portOrUnixSocket("10022"); // default: TCP port 10022
     if (argc > 1)
         portOrUnixSocket = argv[1];
-
-//    bridge = new BridgeController(NULL, this);
 
     server = new qhttp::server::QHttpServer(this);
     server->listen(portOrUnixSocket, [&](qhttp::server::QHttpRequest* req, qhttp::server::QHttpResponse* res) {
@@ -165,6 +161,11 @@ const QDir & NeTVServerApplication::setStaticDocRoot(const QString & newRoot)
 const QDir & NeTVServerApplication::staticDocRoot(void)
 {
     return docRoot;
+}
+
+const QDir NeTVServerApplication::widgetRoot(void)
+{
+    return QDir(docRoot.absoluteFilePath("widgets"));
 }
 
 const QVariant NeTVServerApplication::setting(const QString &key,
