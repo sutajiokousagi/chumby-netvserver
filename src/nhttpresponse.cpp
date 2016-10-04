@@ -2,7 +2,7 @@
 #include "qhttpserverresponse.hpp"
 
 NHttpResponse::NHttpResponse(qhttp::server::QHttpResponse *response, QObject *parent)
-    : QObject(parent)
+    : isAlive(true), QObject(parent)
 {
     this->response = response;
     response->addHeader("Access-Control-Allow-Origin", "*");
@@ -45,6 +45,13 @@ void NHttpResponse::write(const QString &data)
 void NHttpResponse::end(const QByteArray &data)
 {
     response->end(data);
+    isAlive = false;
+}
+
+void NHttpResponse::end(const QString &data)
+{
+    response->end(data.toUtf8());
+    isAlive = false;
 }
 
 void NHttpResponse::standardResponse(const QString &command, int result, QString data)
@@ -66,6 +73,22 @@ void NHttpResponse::standardResponse(const QString &command, int result, QString
                   "<value>%3</value>"
                   "</data>"
                   "</xml>\n").arg(result).arg(command).arg(data));
+}
+
+void NHttpResponse::standardResponseHeader(const QString &command, int result)
+{
+    write(QString("<xml>"
+                  "<status>%1</status>"
+                  "<cmd>%2</cmd>"
+                  "<data>"
+                  "<value>").arg(result).arg(command));
+}
+
+void NHttpResponse::standardResponseFooter(void)
+{
+    write(QString("</value>"
+          "</data>"
+          "</xml>\n"));
 }
 
 /** returns the parent QHttpConnection object. */

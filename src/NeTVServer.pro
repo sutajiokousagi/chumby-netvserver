@@ -16,7 +16,6 @@ HEADERS     += \
     netvserverapplication.h \
     nhttprequest.h \
     nhttpresponse.h \
-    static.h \
     controller/bridgecontroller.h \
     geturlfinisher.h
 
@@ -41,9 +40,9 @@ SOURCES  += \
     $$PWD/../qhttp/src/qhttpserverrequest.cpp \
     $$PWD/../qhttp/src/qhttpserverresponse.cpp \
     $$PWD/../qhttp/src/qhttpserver.cpp \
-    $$PWD/../qhttp/src/qhttpclient.hpp \
-    $$PWD/../qhttp/src/qhttpclientresponse.hpp \
-    $$PWD/../qhttp/src/qhttpclientrequest.hpp
+    $$PWD/../qhttp/src/qhttpclientrequest.cpp \
+    $$PWD/../qhttp/src/qhttpclientresponse.cpp \
+    $$PWD/../qhttp/src/qhttpclient.cpp
 
 HEADERS  += \
     $$PWD/../qhttp/src/qhttpfwd.hpp \
@@ -52,9 +51,9 @@ HEADERS  += \
     $$PWD/../qhttp/src/qhttpserverrequest.hpp \
     $$PWD/../qhttp/src/qhttpserverresponse.hpp \
     $$PWD/../qhttp/src/qhttpserver.hpp \
-    $$PWD/../qhttp/src/qhttpclientrequest.cpp \
-    $$PWD/../qhttp/src/qhttpclientresponse.cpp \
-    $$PWD/../qhttp/src/qhttpclient.cpp
+    $$PWD/../qhttp/src/qhttpclient.hpp \
+    $$PWD/../qhttp/src/qhttpclientresponse.hpp \
+    $$PWD/../qhttp/src/qhttpclientrequest.hpp
 
 INCLUDEPATH += $$PWD/../qhttp/src \
                $$PWD/../qhttp/3rdparty

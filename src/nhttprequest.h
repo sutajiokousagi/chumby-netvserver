@@ -24,8 +24,8 @@ public slots:
 
 private:
     QHash<QString, QString> _parameters;
-    const QUrl _url;
-    const QUrlQuery _query;
+    QUrl _url;
+    QUrlQuery _query;
     const QByteArray _postData;
     const QHash<QByteArray, QByteArray> _headers;
 };

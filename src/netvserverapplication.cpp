@@ -60,6 +60,11 @@ namespace {
                     return;
                 }
 
+                if (request->url().path() == "/getrpc") {
+                    app->handleBroadcast(response);
+                    return;
+                }
+
                 // Convert the URL part to a local part, relative to docRoot.
                 QFileInfo targetInfo(QFileInfo(app->staticDocRoot().canonicalPath() + QDir::separator() + request->url().path()).canonicalFilePath());
                 if (!targetInfo.canonicalFilePath().startsWith(app->staticDocRoot().canonicalPath(), Qt::CaseInsensitive)) {
@@ -117,7 +122,7 @@ namespace {
 ///
 
 NeTVServerApplication::NeTVServerApplication(int & argc, char **argv)
-    : QCoreApplication(argc, argv)
+    : waitingResponse(NULL), QCoreApplication(argc, argv)
 {
     QString portOrUnixSocket("10022"); // default: TCP port 10022
     if (argc > 1)
@@ -133,6 +138,9 @@ NeTVServerApplication::NeTVServerApplication(int & argc, char **argv)
         quit();
     }
     qInfo(QString("Listening on port %1").arg(portOrUnixSocket).toUtf8());
+
+    connect(&broadcastTimeout, SIGNAL(timeout()),
+            this, SLOT(broadcastTimedOut()));
 }
 
 handleBridgeCallbackType NeTVServerApplication::callback(const QString &cmd)
@@ -177,4 +185,42 @@ const QVariant NeTVServerApplication::setting(const QString &key,
 void NeTVServerApplication::setSetting(const QString &key, const QVariant &value)
 {
     settings.setValue(key, value);
+}
+
+void NeTVServerApplication::sendBroadcast(const QString &str)
+{
+    // If there's a broadcast object waiting, cancel the timer and feed it.
+    if (waitingResponse) {
+        broadcastTimeout.stop();
+        waitingResponse->addHeader("Content-Type", "application/javascript");
+        waitingResponse->end(str.toUtf8());
+        waitingResponse = NULL;
+        return;
+    }
+
+    // Otherwise, append to the broadcast queue to be picked up later on.
+    broadcastQueue.append(str);
+}
+
+void NeTVServerApplication::handleBroadcast(NHttpResponse *response)
+{
+    // If there is a message waiting in the queue, peel it off and return it.
+    if (!broadcastQueue.isEmpty()) {
+        broadcastTimeout.stop();
+        response->addHeader("Content-Type", "application/javascript");
+        response->end(broadcastQueue.takeFirst().toUtf8());
+        return;
+    }
+
+    // Have the timer timeout in 5 seconds.
+    waitingResponse = response;
+    broadcastTimeout.setSingleShot(true);
+    broadcastTimeout.start(5000);
+}
+
+void NeTVServerApplication::broadcastTimedOut()
+{
+    waitingResponse->addHeader("Content-Type", "application/javascript");
+    waitingResponse->end(QByteArray("\n"));
+    waitingResponse = NULL;
 }

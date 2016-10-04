@@ -6,6 +6,8 @@
 #include <QString>
 #include <QDir>
 #include <QSettings>
+#include <QList>
+#include <QTimer>
 
 #include "qhttpserver.hpp"
 #include "qhttpserverresponse.hpp"
@@ -55,11 +57,20 @@ public:
     void setSetting(const QString &key, const QVariant &value);
     handleBridgeCallbackType callback(const QString &cmd);
 
+    void sendBroadcast(const QString &str);
+    void handleBroadcast(NHttpResponse *response);
+
 private:
     qhttp::server::QHttpServer                  *server;
     QHash<QString, handleBridgeCallbackType>    callbacks;
     QDir                                        docRoot;
     QSettings                                   settings;
+    QList<QString>                              broadcastQueue;
+    NHttpResponse                              *waitingResponse;
+    QTimer                                      broadcastTimeout;
+
+public slots:
+    void broadcastTimedOut(void);
 };
 
 #endif // NETVSERVERAPPLICATION_H

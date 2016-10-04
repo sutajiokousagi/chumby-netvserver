@@ -36,7 +36,12 @@ public: // QHttpAbstractOutput methods:
    /** @see QHttpAbstractOutput::end(). */
    void            end(const QByteArray &data = QByteArray());
 
+   /** @see QHttpAbstractOutput::end(). */
+   void            end(const QString &data);
+
    void standardResponse(const QString &command, int result, QString data = QString());
+   void standardResponseHeader(const QString &command, int result);
+   void standardResponseFooter(void);
 
 public:
    /** returns the parent QHttpConnection object. */
@@ -44,6 +49,7 @@ public:
 
 private:
     qhttp::server::QHttpResponse *response;
+    bool isAlive;
 };
 
 #endif // NHTTPRESPONSE_H

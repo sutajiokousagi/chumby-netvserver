@@ -1,19 +1,22 @@
 #include "geturlfinisher.h"
+#include "netvserverapplication.h"
 
-GetUrlFinisher::GetUrlFinisher(NHttpResponse *response, QObject *parent)
-    : QObject(parent)
+GetUrlFinisher::GetUrlFinisher(const QString &cmd, NHttpResponse *response, QObject *parent)
+    : cmd(cmd), QObject(parent)
 {
     this->response = response;
 }
 
 void GetUrlFinisher::responseFinished(QNetworkReply *reply)
 {
-    response->end(reply->readAll());
+    response->standardResponse(cmd, NETV_STATUS_SUCCESS, reply->readAll());
+    response->end();
     reply->deleteLater();
 }
 
 void GetUrlFinisher::responseFailed(QNetworkReply *reply)
 {
-    response->end(reply->readAll());
+    response->standardResponse(cmd, NETV_STATUS_ERROR, reply->readAll());
+    response->end();
     reply->deleteLater();
 }

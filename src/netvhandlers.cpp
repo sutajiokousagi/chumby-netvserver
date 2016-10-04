@@ -6,6 +6,10 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 
+#include <QMimeDatabase>
+
+#include <QXmlStreamReader>
+
 #include "netvhandlers.h"
 #include "netvserverapplication.h"
 #include "nhttprequest.h"
@@ -31,12 +35,10 @@ BEGIN_NETV_HANDLER(handleGetUrl, cmd, app, request, response)
         return 0;
     }
 
-    if (urlString.indexOf("://") < 0)
-        urlString.prepend("http://");
-
-    QUrl url(urlString);
+    QUrl url = QUrl::fromPercentEncoding(urlString.toUtf8());
 
     if (!url.isValid()) {
+        qDebug() << "Invalid URL:" << urlString;
         response->standardResponse(cmd, NETV_STATUS_ERROR, QString("Invalid URL: %1").arg(url.errorString()));
         return 0;
     }
@@ -45,6 +47,9 @@ BEGIN_NETV_HANDLER(handleGetUrl, cmd, app, request, response)
         response->standardResponse(cmd, NETV_STATUS_ERROR, QString("No host specified"));
         return 0;
     }
+
+    if (url.scheme() == "")
+        url.setScheme("http");
 
     if ((url.scheme() != "http") && (url.scheme() != "https")) {
         response->standardResponse(cmd, NETV_STATUS_ERROR, QString("Only http and https are supported"));
@@ -61,36 +66,12 @@ BEGIN_NETV_HANDLER(handleGetUrl, cmd, app, request, response)
     qDebug() << "Getting URL:" << url << "Path:" << url.path() << "Host:" << url.host() << " Port:" << url.port() << " Scheme:" << url.scheme();
 
     QNetworkAccessManager *accessManager = new QNetworkAccessManager(response);
-    GetUrlFinisher *urlFinisher = new GetUrlFinisher(response, response);
+    GetUrlFinisher *urlFinisher = new GetUrlFinisher(cmd, response, response);
     QNetworkRequest request(url);
 
     QObject::connect(accessManager, SIGNAL(finished(QNetworkReply*)),
                      urlFinisher, SLOT(responseFinished(QNetworkReply*)));
     accessManager->get(request);
-
-#if 0
-    qhttp::client::QHttpClient *client = new qhttp::client::QHttpClient(response);
-
-
-    client->setConnectingTimeOut(1000, [cmd, response]() {
-        qDebug() << "Timed out";
-        response->standardResponse(cmd, NETV_STATUS_ERROR, QString("Connection timed out"));
-        response->end();
-    });
-    client->setTimeOut(1000);
-
-    client->request(qhttp::EHTTP_GET, url, [response](qhttp::client::QHttpResponse* res) {
-        qDebug() << "URL responded.  Collecting data...";
-        // response handler, called when the HTTP headers of the response are ready
-        res->collectData();
-        // called when all data in HTTP response have been read.
-        res->onEnd([res, response]() {
-            qDebug() << "Response received (" << res->collectedData().size() << ") bytes";
-            response->end(res->collectedData().constData());
-        });
-    });
-#endif
-    qDebug() << "URL request" << url << "is in-flight";
 
     // Return 1, to indicate to the caller that response->end() shouldn't be called.
     return 1;
@@ -101,6 +82,45 @@ BEGIN_NETV_HANDLER(handleGetJpeg, cmd, app, request, response)
 {
     //QByteArray buffer = this->Execute(docroot + "/scripts/tmp_download.sh", QStringList(dataString), xmlEscape);
     response->standardResponse(cmd, NETV_STATUS_SUCCESS, "get jpeg unimplemented");
+}
+END_NETV_HANDLER()
+
+BEGIN_NETV_HANDLER(handleGetLocalFileContents, cmd, app, request, response)
+{
+    response->standardResponse(cmd, NETV_STATUS_ERROR, "command no longer implemented");
+    return 0;
+}
+END_NETV_HANDLER()
+
+BEGIN_NETV_HANDLER(handleGetChannelInfo, cmd, app, request, response)
+{
+    QFileInfo targetInfo(QFileInfo(app->staticDocRoot().canonicalPath() + QDir::separator() + "widgets" + QDir::separator() + "channelinfo.xml"));
+
+    if (!targetInfo.exists() || targetInfo.isDir()) {
+        response->setStatusCode(qhttp::ESTATUS_NOT_FOUND);
+        response->standardResponse(cmd, NETV_STATUS_ERROR, "File not found");
+        return 0;
+    }
+
+    QFile targetFile(targetInfo.canonicalFilePath());
+    if (!targetFile.open(QIODevice::ReadOnly)) {
+        response->setStatusCode(qhttp::ESTATUS_FORBIDDEN);
+        response->standardResponse(cmd, NETV_STATUS_ERROR, QString("Unable to open file: %1").arg(targetFile.errorString()));
+        return 0;
+    }
+
+    QMimeDatabase db;
+    response->addHeader("Content-Type", db.mimeTypeForFile(targetInfo).name().toUtf8());
+
+    response->standardResponseHeader(cmd, NETV_STATUS_SUCCESS);
+    while (!targetFile.atEnd()) {
+        QByteArray data = targetFile.read(2048);
+        response->write(data);
+    }
+    targetFile.close();
+    response->standardResponseFooter();
+
+    return 0;
 }
 END_NETV_HANDLER()
 
@@ -148,11 +168,6 @@ END_NETV_HANDLER()
 BEGIN_NETV_HANDLER(handleSetDocRoot, cmd, app, request, response)
 {
     QString current_docroot = app->setStaticDocRoot(request->parameter("data")).canonicalPath();
-
-    /*
-    if (xmlEscape)
-        current_docroot = XMLEscape(current_docroot);
-    */
 
     if (current_docroot.length() < 1)
         response->standardResponse(cmd, NETV_STATUS_ERROR, "path not found");
@@ -236,5 +251,53 @@ END_NETV_HANDLER()
 BEGIN_NETV_HANDLER(handleGetLocalWidgetConfig, cmd, app, request, response)
 {
     response->standardResponse(cmd, NETV_STATUS_SUCCESS, "{\"top\": \"100px\", \"left\": \"50px\", \"width\": \"300px\", \"height\": \"200px\"}");
+}
+END_NETV_HANDLER()
+
+BEGIN_NETV_HANDLER(handleTickerEvent, cmd, app, request, response)
+{
+    QString postData = "<xml>";
+    postData += request->parameter("data");
+    postData += "</xml>";
+    postData.replace("%2F", "/");
+    qDebug() << "Attempting to decode" << postData;
+
+    QXmlStreamReader xmlStream(postData);
+    QHash<QString, QString> tickerParams;
+
+    QString key, value;
+
+    while (!xmlStream.atEnd()) {
+        xmlStream.readNext();
+
+        if (xmlStream.isStartElement()) {
+            qDebug() << "New element:" << xmlStream.name();
+            key = xmlStream.name().toString();
+            value = "";
+        }
+        else if (xmlStream.isCharacters()) {
+            qDebug() << "New value:" << xmlStream.text();
+            value = xmlStream.text().toString();
+        }
+        else if (xmlStream.isEndElement()) {
+            qDebug() << "End element:" << xmlStream.name();
+            tickerParams.insert(key, value);
+        }
+    }
+
+    if (xmlStream.hasError()) {
+        qDebug() << "XML stream had an error";
+        qDebug() << "XML error:" << xmlStream.errorString();
+    }
+
+    //Convert to a JavaScript command & forward to NeTVBrowser
+    QByteArray javaScriptString = "fTickerEvents(\"" + tickerParams.value("message").toUtf8().toPercentEncoding()
+                                                     + "\",\"" + tickerParams.value("title").toUtf8().toPercentEncoding()
+                                                     + "\",\"" + tickerParams.value("image").toUtf8().toPercentEncoding()
+                                                     + "\",\"" + tickerParams.value("type").toUtf8().toPercentEncoding()
+                                                     + "\",\"" + tickerParams.value("level").toUtf8().toPercentEncoding()
+                                                     + "\");";
+    app->sendBroadcast(javaScriptString);
+    response->standardResponse(cmd, NETV_STATUS_SUCCESS, javaScriptString);
 }
 END_NETV_HANDLER()
