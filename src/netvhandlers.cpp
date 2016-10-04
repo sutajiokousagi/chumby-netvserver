@@ -10,34 +10,10 @@
 #include "netvserverapplication.h"
 #include "nhttprequest.h"
 #include "nhttpresponse.h"
+#include "geturlfinisher.h"
 
 #include "qhttpclient.hpp"
 #include "qhttpclientresponse.hpp"
-
-class GetUrlFinisher : public QObject {
-    Q_OBJECT
-
-public:
-    GetUrlFinisher(NHttpResponse *response, QObject *parent) : QObject(parent) {
-        this->response = response;
-    }
-
-private:
-    NHttpResponse *response;
-
-public slots:
-    void responseFinished(QNetworkReply *reply) {
-        response->end(reply->readAll());
-        reply->deleteLater();
-    }
-
-    void responseFailed(QNetworkReply *reply) {
-        response->end(reply->readAll());
-        reply->deleteLater();
-    }
-};
-
-#include "netvhandlers.moc"
 
 BEGIN_NETV_HANDLER(handleDefault, cmd, app, request, response)
 {
